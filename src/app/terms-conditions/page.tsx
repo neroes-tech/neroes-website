@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { PageHero } from "@/components/ui/PageHero";
+
 export const metadata: Metadata = {
   title: "Terms and Conditions",
   description: "Neroes Terms and Conditions.",
@@ -7,11 +9,12 @@ export const metadata: Metadata = {
 
 export default function TermsConditionsPage() {
   return (
-    <section className="bg-background py-20">
-      <div className="container mx-auto max-w-3xl px-4 md:px-6">
-        <article className="prose prose-slate max-w-none prose-headings:font-exo prose-headings:text-primary prose-a:text-secondary">
-          <h1>Terms and Conditions</h1>
+    <>
+      <PageHero title="Terms and Conditions" size="compact" maxWidth="3xl" />
 
+      <section className="bg-background pb-20 md:pb-24">
+        <div className="container mx-auto max-w-3xl px-4 md:px-6">
+          <article className="prose max-w-none prose-headings:font-exo prose-headings:text-primary prose-p:text-foreground/90 prose-li:text-foreground/90 prose-strong:text-foreground prose-a:text-secondary">
           <p>
             These Terms and Conditions regulate the use of the digital platforms (website and App) owned by
             Neroes.
@@ -169,8 +172,9 @@ export default function TermsConditionsPage() {
             In addition to the Terms and Conditions present herein, Users are protected via the{" "}
             <a href="/privacy-policy">Privacy and Security Policy</a>.
           </p>
-        </article>
-      </div>
-    </section>
+          </article>
+        </div>
+      </section>
+    </>
   );
 }

@@ -1,101 +1,181 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-import { Activity, Brain, Heart, Moon, Shield, Target, TrendingUp, Users, Zap } from "lucide-react";
+import Link from "next/link";
+import {
+  Activity,
+  ArrowRight,
+  BarChart3,
+  Brain,
+  Heart,
+  Moon,
+  Shield,
+  ShieldCheck,
+  SlidersHorizontal,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 
+import { Hero } from "@/components/home/Hero";
+import { Reveal } from "@/components/home/Reveal";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { TESTIMONIALS } from "@/lib/constants";
+import { PARTNERS, TESTIMONIALS } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Neroes — Mental Training Platform",
+  title: "Neroes — Treino mental com neurofeedback",
   description:
-    "Would you like to keep the best people in your company? Give them the tools to be the best version of themselves.",
+    "Treino mental baseado em neurociência: um headset EEG e um jogo de neurofeedback treinam foco, controlo emocional e resiliência.",
 };
+
+const PLATFORM_FEATURES = [
+  {
+    icon: Brain,
+    title: "Sessões neurocientíficas",
+    desc: "Protocolos de treino desenhados com base em neurociência, organizados em sessões progressivas que constroem resultados ao longo do tempo.",
+  },
+  {
+    icon: Activity,
+    title: "Biofeedback por EEG",
+    desc: "Um headset EEG lê as ondas cerebrais em tempo real e transforma-as em feedback imediato dentro do jogo — só ganhas se mantiveres a calma e o foco.",
+  },
+  {
+    icon: BarChart3,
+    title: "Analytics de performance",
+    desc: "Métricas objetivas de evolução, sessão a sessão: foco, controlo emocional e resiliência tornam-se dados que podes acompanhar.",
+  },
+  {
+    icon: SlidersHorizontal,
+    title: "Personalização",
+    desc: "Cada programa adapta-se ao ponto de partida e aos objetivos de cada pessoa — o treino evolui contigo.",
+  },
+  {
+    icon: Users,
+    title: "Multi-equipa",
+    desc: "Pensado para organizações e clubes: acompanha várias equipas e perfis na mesma plataforma, com visão agregada e individual.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Privacidade clínica",
+    desc: "Os dados cerebrais são tratados com o rigor e a confidencialidade de dados clínicos, em conformidade com o RGPD.",
+  },
+] as const;
+
+const BENEFITS = [
+  {
+    icon: Users,
+    title: "Saúde organizacional",
+    desc: "Equipas mais coesas e melhores dinâmicas de colaboração.",
+  },
+  {
+    icon: TrendingUp,
+    title: "Mais produtividade",
+    desc: "Rendimento mais alto com redução significativa de erros.",
+  },
+  {
+    icon: Heart,
+    title: "Desenvolvimento pessoal",
+    desc: "Pessoas mais felizes e mais realizadas.",
+  },
+] as const;
+
+const FEATURES = [
+  {
+    icon: Shield,
+    title: "Melhor comunicação",
+    desc: "Reforço da liderança e das competências interpessoais.",
+  },
+  {
+    icon: Activity,
+    title: "Melhor desempenho",
+    desc: "Execução de alto nível sustentada sob pressão.",
+  },
+  {
+    icon: Moon,
+    title: "Qualidade do sono",
+    desc: "Melhoria do bem-estar geral e da recuperação.",
+  },
+] as const;
+
+const STATS = [
+  { prefix: "+", end: 111, suffix: "%", label: "Controlo emocional", color: "text-primary" },
+  { prefix: "+", end: 21, suffix: ".7%", label: "Velocidade de decisão", color: "text-primary" },
+  { prefix: "+", end: 9, suffix: ".4%", label: "Autoconfiança", color: "text-primary" },
+  { prefix: "-", end: 14, suffix: ".2%", label: "Ansiedade", color: "text-secondary" },
+] as const;
 
 export default function Home() {
   return (
-    <>
-      <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden bg-background">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-background to-background" />
-        </div>
-        <div className="container relative z-10 px-4 py-20 text-center md:px-6">
-          <div className="mx-auto max-w-4xl space-y-8">
-            <h1 className="font-exo text-5xl font-bold leading-tight tracking-tight text-foreground md:text-7xl">
-              Would you like to keep the <span className="text-secondary">best people</span> in your company?
-            </h1>
-            <p className="mx-auto max-w-3xl text-xl leading-relaxed text-muted-foreground md:text-2xl">
-              Make them happier while making them better. Give them the tools to be the best version of themselves.
+    <div lang="pt-PT">
+      <Hero />
+
+      {/* Trust bar — real, confirmed partners only */}
+      <section className="border-y border-border bg-card py-12" aria-label="Parceiros">
+        <div className="container mx-auto px-4 md:px-6">
+          <Reveal>
+            <p className="text-center text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
+              Com o apoio de
             </p>
-            <div className="flex flex-col justify-center gap-4 pt-8 sm:flex-row">
-              <Button asChild size="lg" className="h-14 bg-secondary px-8 text-lg font-semibold text-white hover:bg-secondary/90">
-                <Link href="/contact">Know more</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="h-14 border-primary px-8 text-lg text-primary hover:bg-primary/5">
-                <Link href="/science">Science</Link>
-              </Button>
-            </div>
+            <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-5">
+              {PARTNERS.map((partner) => (
+                <li key={partner.name}>
+                  <a
+                    href={partner.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block py-1 font-exo text-xl font-semibold tracking-wide text-muted-foreground transition-colors hover:text-primary"
+                  >
+                    {partner.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* The platform */}
+      <section className="relative overflow-hidden bg-muted py-24 md:py-32">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-24 top-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute right-0 top-20 h-64 w-64 rounded-full bg-secondary/10 blur-3xl" />
+          <div className="absolute bottom-0 left-1/3 h-56 w-56 rounded-full bg-decorative-violet-soft blur-3xl" />
+          <div className="bg-neural-grid absolute inset-0 text-primary/[0.05]" />
+        </div>
+        <div className="container relative mx-auto px-4 md:px-6">
+          <Reveal className="mb-16 text-center">
+            <h2 className="mb-4 font-exo text-3xl font-bold text-primary md:text-5xl">A plataforma</h2>
+            <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+              Um instrumento de precisão para a mente humana.
+            </p>
+          </Reveal>
+          <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {PLATFORM_FEATURES.map(({ icon: Icon, title, desc }, i) => (
+              <Reveal key={title} delay={i * 0.08} className="h-full">
+                <Card className="h-full border-border bg-card transition-all hover:-translate-y-1 hover:shadow-glow-primary">
+                  <CardContent className="space-y-4 pt-8">
+                    <div className="inline-flex rounded-xl bg-secondary/10 p-3">
+                      <Icon className="h-7 w-7 text-secondary" aria-hidden="true" />
+                    </div>
+                    <h3 className="font-exo text-xl font-bold text-foreground">{title}</h3>
+                    <p className="leading-relaxed text-muted-foreground">{desc}</p>
+                  </CardContent>
+                </Card>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-primary py-24 text-primary-foreground">
-        <div className="container px-4 md:px-6">
-          <div className="mb-16 text-center">
-            <h2 className="mb-4 font-exo text-3xl font-bold md:text-5xl">The Mental Training Platform&trade;</h2>
-            <p className="mx-auto max-w-2xl text-lg text-primary-foreground/80">
-              A precision instrument for the human mind.
-            </p>
-          </div>
-          <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-3">
-            <Card className="border-primary-foreground/10 bg-primary-foreground/5 text-primary-foreground">
-              <CardContent className="space-y-4 pt-8">
-                <Brain className="h-12 w-12 text-accent" aria-hidden="true" />
-                <h3 className="font-exo text-2xl font-bold">How it works</h3>
-                <p className="leading-relaxed text-primary-foreground/80">
-                  Using an advanced EEG headset, we monitor brain waves in real-time to provide immediate,
-                  actionable feedback on cognitive states.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="border-primary-foreground/10 bg-primary-foreground/5 text-primary-foreground">
-              <CardContent className="space-y-4 pt-8">
-                <Target className="h-12 w-12 text-accent" aria-hidden="true" />
-                <h3 className="font-exo text-2xl font-bold">The goal of the game</h3>
-                <p className="leading-relaxed text-primary-foreground/80">
-                  Focus and focus better. By eliminating anxiety through gamified neurofeedback, users learn to
-                  enter a state of flow on command.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="border-primary-foreground/10 bg-primary-foreground/5 text-primary-foreground">
-              <CardContent className="space-y-4 pt-8">
-                <Zap className="h-12 w-12 text-accent" aria-hidden="true" />
-                <h3 className="font-exo text-2xl font-bold">Why it&apos;s challenging</h3>
-                <p className="leading-relaxed text-primary-foreground/80">
-                  It&apos;s a game controlled entirely by brain waves. You cannot cheat the system; you must
-                  genuinely achieve emotional regulation to win.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-background py-24">
-        <div className="container px-4 md:px-6">
+      {/* Benefits / Features */}
+      <section className="bg-background py-24 md:py-32">
+        <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto grid max-w-6xl gap-16 lg:grid-cols-2">
-            <div className="space-y-8">
-              <h2 className="font-exo text-4xl font-bold text-primary">Benefits</h2>
+            <Reveal className="space-y-8">
+              <h2 className="font-exo text-4xl font-bold text-primary">Benefícios</h2>
               <div className="space-y-6">
-                {[
-                  { icon: Users, title: "Organizational health", desc: "Fostering better team workers and cohesive dynamics." },
-                  { icon: TrendingUp, title: "Increased Productivity", desc: "Driving output higher while significantly reducing mistakes." },
-                  { icon: Heart, title: "Personal development", desc: "Cultivating happier, more fulfilled individuals." },
-                ].map(({ icon: Icon, title, desc }) => (
+                {BENEFITS.map(({ icon: Icon, title, desc }) => (
                   <div key={title} className="flex items-start gap-4">
-                    <div className="rounded-lg bg-secondary/10 p-3">
+                    <div className="rounded-xl bg-secondary/10 p-3">
                       <Icon className="h-6 w-6 text-secondary" aria-hidden="true" />
                     </div>
                     <div>
@@ -105,17 +185,13 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-            </div>
-            <div className="space-y-8">
-              <h2 className="font-exo text-4xl font-bold text-primary">Features</h2>
+            </Reveal>
+            <Reveal className="space-y-8" delay={0.1}>
+              <h2 className="font-exo text-4xl font-bold text-primary">Funcionalidades</h2>
               <div className="space-y-6">
-                {[
-                  { icon: Shield, title: "Better Communication", desc: "Enhancing leadership and interpersonal skills." },
-                  { icon: Activity, title: "Better Performance", desc: "Sustained high-level execution under pressure." },
-                  { icon: Moon, title: "Sleep quality", desc: "Improving general wellbeing and recovery." },
-                ].map(({ icon: Icon, title, desc }) => (
+                {FEATURES.map(({ icon: Icon, title, desc }) => (
                   <div key={title} className="flex items-start gap-4">
-                    <div className="rounded-lg bg-accent/10 p-3">
+                    <div className="rounded-xl bg-accent/10 p-3">
                       <Icon className="h-6 w-6 text-accent" aria-hidden="true" />
                     </div>
                     <div>
@@ -125,51 +201,94 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
+      {/* Verified stats */}
       <section className="border-y border-border bg-muted py-24">
-        <div className="container px-4 md:px-6">
+        <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 text-center md:grid-cols-4">
-            {[
-              { prefix: "+", end: 111, suffix: "%", label: "Emotional Control", color: "text-primary" },
-              { prefix: "+", end: 21, suffix: ".7%", label: "Decision Making Velocity", color: "text-primary" },
-              { prefix: "+", end: 9, suffix: ".4%", label: "Self-confidence", color: "text-primary" },
-              { prefix: "-", end: 14, suffix: ".2%", label: "Anxiety", color: "text-secondary" },
-            ].map(({ prefix, end, suffix, label, color }) => (
-              <div key={label} className="space-y-2">
+            {STATS.map(({ prefix, end, suffix, label, color }, i) => (
+              <Reveal key={label} delay={i * 0.08} className="space-y-2">
                 <div className={`font-exo text-5xl font-bold md:text-6xl ${color}`}>
                   <AnimatedCounter prefix={prefix} end={end} suffix={suffix} />
                 </div>
                 <p className="text-lg font-medium text-muted-foreground">{label}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-background py-24">
-        <div className="container px-4 md:px-6">
-          <div className="mb-16 text-center">
-            <h2 className="font-exo text-4xl font-bold text-primary">What they say</h2>
-          </div>
+      {/* Testimonials — quotes kept verbatim in English (real, attributed quotes) */}
+      <section className="bg-background py-24 md:py-32">
+        <div className="container mx-auto px-4 md:px-6">
+          <Reveal className="mb-16 text-center">
+            <h2 className="font-exo text-4xl font-bold text-primary">O que dizem</h2>
+          </Reveal>
           <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {TESTIMONIALS.map((t) => (
-              <Card key={t.name} className="border-border bg-card shadow-sm">
-                <CardContent className="flex h-full flex-col justify-between space-y-6 pt-8">
-                  <p className="italic text-muted-foreground">&ldquo;{t.content}&rdquo;</p>
-                  <div>
-                    <p className="font-bold text-foreground">{t.name}</p>
-                    <p className="text-sm text-secondary">{t.role}</p>
-                  </div>
-                </CardContent>
-              </Card>
+            {TESTIMONIALS.map((t, i) => (
+              <Reveal key={t.name} delay={i * 0.08} className="h-full">
+                <Card className="h-full border-border bg-card shadow-sm transition-shadow duration-300 hover:shadow-glow-primary">
+                  <CardContent className="flex h-full flex-col justify-between space-y-6 pt-8">
+                    <p lang="en" className="italic text-muted-foreground">
+                      &ldquo;{t.content}&rdquo;
+                    </p>
+                    <div>
+                      <p className="font-bold text-foreground">{t.name}</p>
+                      <p className="text-sm text-secondary">{t.role}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
-    </>
+
+      {/* Final CTA */}
+      <section className="relative overflow-hidden border-t border-border bg-card py-24 md:py-32">
+        <div
+          aria-hidden="true"
+          className="bg-neural-grid pointer-events-none absolute inset-0 text-primary/10"
+        />
+        <div className="container relative mx-auto px-4 md:px-6">
+          <Reveal className="mx-auto max-w-3xl text-center">
+            <h2 className="font-exo text-4xl font-bold tracking-tight text-foreground md:text-5xl">
+              Pronto para treinar a tua mente?
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+              Marca uma demonstração e experimenta o biofeedback por EEG ao vivo —
+              vê em tempo real o que acontece quando aprendes a manter a calma e o foco.
+            </p>
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Button
+                asChild
+                size="lg"
+                className="group h-14 rounded-full bg-secondary px-8 text-lg font-semibold text-secondary-foreground transition-shadow hover:bg-secondary/90 hover:shadow-glow-secondary"
+              >
+                <Link href="/contact">
+                  Marcar uma demonstração
+                  <ArrowRight
+                    className="h-5 w-5 transition-transform group-hover:translate-x-1"
+                    aria-hidden="true"
+                  />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="h-14 rounded-full border-primary px-8 text-lg text-primary hover:bg-primary/5"
+              >
+                <Link href="/science">Ver a ciência</Link>
+              </Button>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Exo:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@300;400;500;700&display=swap');
 
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -48,30 +48,37 @@
      Navy   #2F465E -> 211 33% 28%
      Teal   #007785 -> 186 100% 26% (darkened from #008393/29% L to clear WCAG AA 4.5:1 on white)
      Blue   #2575FC -> 218 97% 57%
-     White  #FFFFFF -> 0 0% 100%
+
+     Editorial neutrals
+     Page   #FAFAF7 -> 45 30% 97% (warm off-white; cards stay pure white for subtle depth)
+     Ink    #0B0B12 -> 240 24% 6% (near-black, slightly cool — ~19:1 on the cream page)
+
+     Decorative-only accent (blur orbs / glows, never text or solid UI fills)
+     Neural violet #6D3BEB -> 262 83% 58%
   */
-  --background: 0 0% 100%;
-  --foreground: 211 33% 15%;
-  --border: 211 33% 90%;
+  --background: 45 30% 97%;
+  --decorative-violet: 262 83% 58%;
+  --foreground: 240 24% 6%;
+  --border: 240 12% 88%;
   --card: 0 0% 100%;
-  --card-foreground: 211 33% 15%;
+  --card-foreground: 240 24% 6%;
   --popover: 0 0% 100%;
-  --popover-foreground: 211 33% 15%;
+  --popover-foreground: 240 24% 6%;
   --primary: 211 33% 28%;
   --primary-foreground: 0 0% 100%;
   --secondary: 186 100% 26%;
   --secondary-foreground: 0 0% 100%;
-  --muted: 211 33% 96%;
-  --muted-foreground: 211 33% 40%;
+  --muted: 45 18% 93%;
+  --muted-foreground: 240 12% 34%;
   --accent: 218 97% 57%;
   --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 40%;
   --destructive-foreground: 0 0% 100%;
-  --input: 211 33% 90%;
+  --input: 240 12% 88%;
   --ring: 211 33% 28%;
-  --app-font-sans: 'Roboto', sans-serif;
-  --app-font-heading: 'Exo', sans-serif;
-  --radius: 0.5rem;
+  --app-font-sans: 'DM Sans', sans-serif;
+  --app-font-heading: 'Space Grotesk', sans-serif;
+  --radius: 0.85rem;
 }
 
 @layer base {
@@ -88,4 +95,24 @@
     outline: 2px solid hsl(var(--ring));
     outline-offset: 2px;
   }
+}
+
+/* Soft colored glows — discreet, not neon. (@utility so hover:/focus: variants work in v4) */
+@utility shadow-glow-primary {
+  box-shadow: 0 0 32px -6px hsl(var(--primary) / 0.25);
+}
+@utility shadow-glow-secondary {
+  box-shadow: 0 0 32px -6px hsl(var(--secondary) / 0.25);
+}
+@utility shadow-glow-violet {
+  box-shadow: 0 0 32px -6px hsl(var(--decorative-violet) / 0.25);
+}
+/* Decorative-only blur orb fill — never used for text or solid UI. */
+@utility bg-decorative-violet-soft {
+  background-color: hsl(var(--decorative-violet) / 0.12);
+}
+/* Subtle dot-grid texture; pair with a low-alpha text color, e.g. text-primary/10. */
+@utility bg-neural-grid {
+  background-image: radial-gradient(currentColor 1px, transparent 1px);
+  background-size: 24px 24px;
 }

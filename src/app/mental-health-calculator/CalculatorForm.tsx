@@ -48,7 +48,7 @@ export function CalculatorForm() {
 
   return (
     <div className="grid items-start gap-12 lg:grid-cols-2">
-      <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
+      <div className="rounded-3xl border border-border bg-card p-8 shadow-sm md:p-10">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
           <div className="space-y-2">
             <label htmlFor="industry" className="text-sm font-medium text-foreground">
@@ -57,7 +57,7 @@ export function CalculatorForm() {
             <select
               id="industry"
               {...form.register("industry")}
-              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-11 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring"
             >
               {INDUSTRIES.map((industry) => (
                 <option key={industry} value={industry}>
@@ -78,7 +78,7 @@ export function CalculatorForm() {
               aria-invalid={!!form.formState.errors.employees}
               aria-describedby={form.formState.errors.employees ? "employees-error" : undefined}
               {...form.register("employees")}
-              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-11 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring"
             />
             {form.formState.errors.employees && (
               <p id="employees-error" className="text-sm text-destructive">
@@ -95,13 +95,16 @@ export function CalculatorForm() {
               id="salary"
               type="number"
               placeholder="35000"
+              aria-describedby="salary-hint"
               {...form.register("salary")}
-              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-11 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring"
             />
-            <p className="text-xs text-muted-foreground">Defaults to &euro;35,000 if left empty</p>
+            <p id="salary-hint" className="text-xs text-muted-foreground">
+              Defaults to &euro;35,000 if left empty
+            </p>
           </div>
 
-          <Button type="submit" className="h-12 w-full bg-primary text-lg hover:bg-primary/90">
+          <Button type="submit" className="h-12 w-full rounded-full text-lg">
             Calculate Cost
           </Button>
         </form>
@@ -109,8 +112,8 @@ export function CalculatorForm() {
 
       <div className="space-y-6" aria-live="polite">
         {results ? (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-            <div className="rounded-2xl bg-primary p-6 text-primary-foreground">
+          <div className="space-y-6 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500">
+            <div className="rounded-3xl bg-primary p-8 text-primary-foreground shadow-sm">
               <h2 className="mb-2 text-lg font-medium opacity-80">Total Estimated Annual Cost</h2>
               <div className="font-exo text-5xl font-bold">
                 <AnimatedCounter prefix="€" end={results.total} />
@@ -121,7 +124,7 @@ export function CalculatorForm() {
                 { label: "Presenteeism", value: results.presenteeism, desc: "20% productivity loss", color: "text-primary" },
                 { label: "Absenteeism", value: results.absenteeism, desc: "17.5% sick leaves", color: "text-primary" },
               ].map(({ label, value, desc, color }) => (
-                <div key={label} className="rounded-xl border border-border bg-card p-6 shadow-sm">
+                <div key={label} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
                   <h3 className="mb-1 text-sm font-bold uppercase tracking-wide text-foreground">{label}</h3>
                   <div className={`font-exo text-2xl font-bold ${color}`}>
                     <AnimatedCounter prefix="€" end={value} />
@@ -129,7 +132,7 @@ export function CalculatorForm() {
                   <p className="mt-2 text-xs text-muted-foreground">{desc}</p>
                 </div>
               ))}
-              <div className="rounded-xl border border-border bg-card p-6 shadow-sm sm:col-span-2">
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:col-span-2">
                 <h3 className="mb-1 text-sm font-bold uppercase tracking-wide text-foreground">Turnover</h3>
                 <div className="font-exo text-2xl font-bold text-secondary">
                   <AnimatedCounter prefix="€" end={results.turnover} />
@@ -139,7 +142,7 @@ export function CalculatorForm() {
             </div>
           </div>
         ) : (
-          <div className="flex h-full min-h-[300px] items-center justify-center rounded-2xl border-2 border-dashed border-border bg-muted/30 p-8 text-center text-muted-foreground">
+          <div className="flex h-full min-h-[300px] items-center justify-center rounded-3xl border-2 border-dashed border-border bg-muted/30 p-8 text-center text-muted-foreground">
             Enter your company details to see the hidden financial impact of poor mental health.
           </div>
         )}

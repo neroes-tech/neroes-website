@@ -17,6 +17,9 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+const inputClasses =
+  "w-full rounded-xl border border-input bg-background px-4 outline-none transition-shadow focus:border-ring focus:ring-2 focus:ring-ring/30";
+
 export function ContactForm() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [statusMessage, setStatusMessage] = useState("");
@@ -58,15 +61,21 @@ export function ContactForm() {
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm md:p-10">
       <div aria-live="polite" className="mb-6">
         {status === "success" && (
-          <div role="status" className="rounded-md border border-green-200 bg-green-50 p-4 font-medium text-green-900">
+          <div
+            role="status"
+            className="rounded-xl border border-secondary/40 bg-secondary/10 p-4 font-medium text-secondary"
+          >
             {statusMessage}
           </div>
         )}
         {status === "error" && (
-          <div role="alert" className="rounded-md border border-red-200 bg-red-50 p-4 font-medium text-red-900">
+          <div
+            role="alert"
+            className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 font-medium text-destructive"
+          >
             {statusMessage}
           </div>
         )}
@@ -83,7 +92,7 @@ export function ContactForm() {
             aria-invalid={!!form.formState.errors.name}
             aria-describedby={form.formState.errors.name ? "name-error" : undefined}
             {...form.register("name")}
-            className="h-12 w-full rounded-md border border-input bg-background px-3 outline-none transition-shadow focus:ring-2 focus:ring-primary"
+            className={`h-12 ${inputClasses}`}
           />
           {form.formState.errors.name && (
             <p id="name-error" className="text-sm text-destructive">
@@ -103,7 +112,7 @@ export function ContactForm() {
             aria-invalid={!!form.formState.errors.email}
             aria-describedby={form.formState.errors.email ? "email-error" : undefined}
             {...form.register("email")}
-            className="h-12 w-full rounded-md border border-input bg-background px-3 outline-none transition-shadow focus:ring-2 focus:ring-primary"
+            className={`h-12 ${inputClasses}`}
           />
           {form.formState.errors.email && (
             <p id="email-error" className="text-sm text-destructive">
@@ -120,7 +129,7 @@ export function ContactForm() {
             id="phone"
             type="tel"
             {...form.register("phone")}
-            className="h-12 w-full rounded-md border border-input bg-background px-3 outline-none transition-shadow focus:ring-2 focus:ring-primary"
+            className={`h-12 ${inputClasses}`}
           />
         </div>
 
@@ -132,7 +141,7 @@ export function ContactForm() {
             id="message"
             rows={4}
             {...form.register("message")}
-            className="w-full resize-y rounded-md border border-input bg-background p-3 outline-none transition-shadow focus:ring-2 focus:ring-primary"
+            className={`resize-y py-3 ${inputClasses}`}
           />
         </div>
 
@@ -146,7 +155,7 @@ export function ContactForm() {
               aria-invalid={!!form.formState.errors.gdpr}
               aria-describedby={form.formState.errors.gdpr ? "gdpr-error" : undefined}
               {...form.register("gdpr")}
-              className="mt-1 h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
+              className="mt-0.5 h-6 w-6 shrink-0 rounded-md border-input accent-primary"
             />
             <label htmlFor="gdpr" className="text-sm leading-relaxed text-muted-foreground">
               I agree to the processing of my personal data as described in the{" "}
@@ -166,7 +175,7 @@ export function ContactForm() {
         <Button
           type="submit"
           disabled={status === "submitting"}
-          className="h-12 w-full bg-primary text-lg transition-colors hover:bg-primary/90"
+          className="h-12 w-full rounded-full bg-secondary text-base font-semibold text-secondary-foreground transition-shadow hover:bg-secondary/90 hover:shadow-glow-secondary"
         >
           {status === "submitting" ? "Sending..." : "Send Message"}
         </Button>

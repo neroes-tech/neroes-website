@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { PageHero } from "@/components/ui/PageHero";
 import { CONTACT_INFO } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -19,11 +20,12 @@ const COOKIES = [
 
 export default function PrivacyPolicyPage() {
   return (
-    <section className="bg-background py-20">
-      <div className="container mx-auto max-w-3xl px-4 md:px-6">
-        <article className="prose prose-slate max-w-none prose-headings:font-exo prose-headings:text-primary prose-a:text-secondary">
-          <h1>Privacy and Security Policy</h1>
+    <>
+      <PageHero title="Privacy and Security Policy" size="compact" maxWidth="3xl" />
 
+      <section className="bg-background pb-20 md:pb-24">
+        <div className="container mx-auto max-w-3xl px-4 md:px-6">
+          <article className="prose max-w-none prose-headings:font-exo prose-headings:text-primary prose-p:text-foreground/90 prose-li:text-foreground/90 prose-strong:text-foreground prose-a:text-secondary">
           <p>
             This Privacy and Security Policy regulates the use of digital platforms (website and App) owned
             by NEROES.
@@ -487,8 +489,9 @@ export default function PrivacyPolicyPage() {
             reference to the date of update.
           </p>
           <p>Date of the last update of the Privacy and Security Policy: November 11, 2023.</p>
-        </article>
-      </div>
-    </section>
+          </article>
+        </div>
+      </section>
+    </>
   );
 }

@@ -11,99 +11,130 @@ function LinkedInIcon({ className }: { className?: string }) {
   );
 }
 
+const SOCIAL_LINKS = [
+  { label: "LinkedIn", href: CONTACT_INFO.social.linkedin, Icon: LinkedInIcon },
+  { label: "Instagram", href: CONTACT_INFO.social.instagram, Icon: InstagramIcon },
+  { label: "Facebook", href: CONTACT_INFO.social.facebook, Icon: FacebookIcon },
+] as const;
+
+const NAV_ITEMS = [
+  { href: "/", label: "Home" },
+  { href: "/brain-experience", label: "Brain Experience" },
+  { href: "/science", label: "Science" },
+  { href: "/sport", label: "Sport" },
+  { href: "/team", label: "Team" },
+  { href: "/about", label: "About Us" },
+  { href: "/contact", label: "Contact" },
+] as const;
+
+const LEGAL_ITEMS = [
+  { href: "/privacy-policy", label: "Privacy Policy" },
+  { href: "/terms-conditions", label: "Terms and Conditions" },
+] as const;
+
+const footerLinkClass =
+  "inline-block py-0.5 transition-colors hover:text-primary-foreground";
+
 export function Footer() {
   return (
-    <footer className="bg-primary py-12 text-primary-foreground md:py-16">
-      <div className="container mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-4 md:gap-12">
-          <div className="flex flex-col space-y-4">
+    <footer className="relative bg-primary text-primary-foreground">
+      {/* Subtle gradient hairline separating the footer from the page */}
+      <div
+        aria-hidden="true"
+        className="h-px w-full bg-gradient-to-r from-transparent via-primary-foreground/25 to-transparent"
+      />
+
+      <div className="container mx-auto px-4 py-16 md:px-6 md:py-24">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:gap-12">
+          <div className="flex flex-col">
             <Image
               src="/neroes-logo.png"
               alt="Neroes"
               width={2648}
               height={3212}
-              className="h-10 w-auto object-contain brightness-0 invert"
+              className="h-10 w-auto self-start object-contain brightness-0 invert"
             />
-            <p className="mt-4 max-w-xs text-sm text-primary-foreground/80">
-              A precision instrument for the human mind. Improve mental performance in
-              corporations and sports.
+            <p className="mt-6 max-w-xs font-exo text-lg font-medium leading-snug">
+              A precision instrument for the human mind.
             </p>
-            <div className="-ml-1.5 mt-4 flex space-x-2">
-              <a
-                href={CONTACT_INFO.social.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-                className="inline-flex items-center justify-center p-1.5 transition-colors hover:text-accent"
-              >
-                <LinkedInIcon className="h-5 w-5" />
-              </a>
-              <a
-                href={CONTACT_INFO.social.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="inline-flex items-center justify-center p-1.5 transition-colors hover:text-accent"
-              >
-                <InstagramIcon className="h-5 w-5" />
-              </a>
-              <a
-                href={CONTACT_INFO.social.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-                className="inline-flex items-center justify-center p-1.5 transition-colors hover:text-accent"
-              >
-                <FacebookIcon className="h-5 w-5" />
-              </a>
+            <p className="mt-3 max-w-xs text-sm leading-relaxed text-primary-foreground/70">
+              Improve mental performance in corporations and sports.
+            </p>
+            <div className="mt-8 flex gap-3">
+              {SOCIAL_LINKS.map(({ label, href, Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-primary-foreground/15 bg-primary-foreground/5 text-primary-foreground/80 transition-all duration-300 hover:border-primary-foreground/40 hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                >
+                  <Icon className="h-4.5 w-4.5" />
+                </a>
+              ))}
             </div>
           </div>
 
           <nav aria-label="Footer navigation">
-            <h2 className="mb-4 font-exo text-lg font-bold">Navigation</h2>
-            <ul className="space-y-2 text-sm text-primary-foreground/80">
-              <li><Link href="/" className="transition-colors hover:text-white">Home</Link></li>
-              <li><Link href="/brain-experience" className="transition-colors hover:text-white">Brain Experience</Link></li>
-              <li><Link href="/science" className="transition-colors hover:text-white">Science</Link></li>
-              <li><Link href="/sport" className="transition-colors hover:text-white">Sport</Link></li>
-              <li><Link href="/team" className="transition-colors hover:text-white">Team</Link></li>
-              <li><Link href="/about" className="transition-colors hover:text-white">About Us</Link></li>
-              <li><Link href="/contact" className="transition-colors hover:text-white">Contact</Link></li>
+            <h2 className="mb-6 font-exo text-sm font-semibold uppercase tracking-[0.2em] text-primary-foreground/60">
+              Navigation
+            </h2>
+            <ul className="space-y-3 text-sm text-primary-foreground/75">
+              {NAV_ITEMS.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} className={footerLinkClass}>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </nav>
 
           <nav aria-label="Legal navigation">
-            <h2 className="mb-4 font-exo text-lg font-bold">Legal</h2>
-            <ul className="space-y-2 text-sm text-primary-foreground/80">
-              <li><Link href="/privacy-policy" className="transition-colors hover:text-white">Privacy Policy</Link></li>
-              <li><Link href="/terms-conditions" className="transition-colors hover:text-white">Terms and Conditions</Link></li>
+            <h2 className="mb-6 font-exo text-sm font-semibold uppercase tracking-[0.2em] text-primary-foreground/60">
+              Legal
+            </h2>
+            <ul className="space-y-3 text-sm text-primary-foreground/75">
+              {LEGAL_ITEMS.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} className={footerLinkClass}>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </nav>
 
           <div>
-            <h2 className="mb-4 font-exo text-lg font-bold">Contact Us</h2>
-            <ul className="space-y-3 text-sm text-primary-foreground/80">
-              <li className="flex flex-col">
-                <span className="font-medium text-white">Email</span>
-                <a href={`mailto:${CONTACT_INFO.email}`} className="transition-colors hover:text-accent">
+            <h2 className="mb-6 font-exo text-sm font-semibold uppercase tracking-[0.2em] text-primary-foreground/60">
+              Contact Us
+            </h2>
+            <ul className="space-y-5 text-sm text-primary-foreground/75">
+              <li className="flex flex-col gap-1">
+                <span className="font-exo font-medium text-primary-foreground">Email</span>
+                <a href={`mailto:${CONTACT_INFO.email}`} className={footerLinkClass}>
                   {CONTACT_INFO.email}
                 </a>
               </li>
-              <li className="flex flex-col">
-                <span className="font-medium text-white">Phone</span>
-                <a href={`tel:${CONTACT_INFO.phone.replace(/\s+/g, "")}`} className="transition-colors hover:text-accent">
+              <li className="flex flex-col gap-1">
+                <span className="font-exo font-medium text-primary-foreground">Phone</span>
+                <a
+                  href={`tel:${CONTACT_INFO.phone.replace(/\s+/g, "")}`}
+                  className={footerLinkClass}
+                >
                   {CONTACT_INFO.phone}
                 </a>
               </li>
-              <li className="flex flex-col">
-                <span className="font-medium text-white">Address</span>
-                <span>{CONTACT_INFO.address}</span>
+              <li className="flex flex-col gap-1">
+                <span className="font-exo font-medium text-primary-foreground">Address</span>
+                <span className="leading-relaxed">{CONTACT_INFO.address}</span>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between border-t border-white/10 pt-8 text-sm text-primary-foreground/70 md:flex-row">
+        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-primary-foreground/10 pt-8 text-sm text-primary-foreground/60 md:flex-row">
           <p>&copy; {new Date().getFullYear()} Neroes Technologies. All rights reserved.</p>
         </div>
       </div>

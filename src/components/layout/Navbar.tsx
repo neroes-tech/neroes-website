@@ -4,7 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { Brain, ChevronDown, Menu, X } from "lucide-react";
+import {
+  motion,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+} from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -38,8 +44,16 @@ const SPORT_LINKS = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const prefersReducedMotion = useReducedMotion();
+  const reduced = prefersReducedMotion ?? false;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const closeMenu = () => setIsMobileMenuOpen(false);
+
+  const { scrollY } = useScroll();
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setIsScrolled(latest > 12);
+  });
 
   const linkClass = (href: string) =>
     cn(
@@ -48,9 +62,32 @@ export function Navbar() {
     );
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full border-b transition-all duration-300",
+        isScrolled || isMobileMenuOpen
+          ? "border-border bg-background/90 shadow-md shadow-primary/5 backdrop-blur-xl supports-[backdrop-filter]:bg-background/85"
+          : "border-transparent bg-background/70 backdrop-blur-sm supports-[backdrop-filter]:bg-background/40",
+      )}
+    >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2" onClick={closeMenu}>
+        <Link href="/" className="flex items-center gap-2.5" onClick={closeMenu}>
+          <span
+            className="relative flex h-9 w-9 items-center justify-center rounded-full bg-secondary/10 text-secondary"
+            aria-hidden="true"
+          >
+            <Brain className="h-5 w-5" />
+            <span className="absolute right-0 top-0 flex h-1.5 w-1.5">
+              {!reduced && (
+                <motion.span
+                  className="absolute inline-flex h-full w-full rounded-full bg-secondary"
+                  animate={{ scale: [1, 2.4], opacity: [0.6, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                />
+              )}
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-secondary" />
+            </span>
+          </span>
           <Image
             src="/neroes-logo.png"
             alt="Neroes"
@@ -96,7 +133,10 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-4 md:flex">
-          <Button asChild className="bg-secondary font-semibold text-white hover:bg-secondary/90">
+          <Button
+            asChild
+            className="rounded-full bg-secondary px-6 font-semibold text-secondary-foreground transition-shadow hover:bg-secondary/90 hover:shadow-glow-secondary"
+          >
             <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">
               Schedule Brain Experience
             </a>
@@ -104,6 +144,7 @@ export function Navbar() {
         </div>
 
         <button
+          type="button"
           className="p-2 text-primary md:hidden"
           onClick={() => setIsMobileMenuOpen((open) => !open)}
           aria-expanded={isMobileMenuOpen}
@@ -137,7 +178,10 @@ export function Navbar() {
             </Link>
           ))}
           <div className="mt-4 flex flex-col gap-4 border-t border-border pt-4">
-            <Button asChild className="w-full bg-secondary font-semibold text-white hover:bg-secondary/90">
+            <Button
+              asChild
+              className="w-full rounded-full bg-secondary font-semibold text-secondary-foreground hover:bg-secondary/90"
+            >
               <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">
                 Schedule Brain Experience
               </a>
