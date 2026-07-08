@@ -5,6 +5,7 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
+import { VirtualBrain } from "@/components/home/VirtualBrain";
 
 /* ------------------------------------------------------------------ */
 /* Neural network background data                                      */
@@ -241,9 +242,9 @@ export function Hero() {
     <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden bg-background">
       <NeuralBackground animate={!reduced} />
 
-      <div className="container relative z-10 px-4 py-20 text-center md:px-6">
+      <div className="container relative z-10 grid grid-cols-1 items-center gap-10 px-4 py-20 md:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:py-16 lg:text-left">
         <motion.div
-          className="mx-auto max-w-4xl"
+          className="mx-auto max-w-4xl text-center lg:mx-0 lg:max-w-none lg:text-left"
           variants={container}
           initial="hidden"
           animate="visible"
@@ -251,7 +252,7 @@ export function Hero() {
           {/* Eyebrow badge */}
           <motion.p
             variants={item}
-            className="mx-auto inline-flex items-center gap-2.5 rounded-full border border-secondary/30 bg-secondary/5 px-4 py-1.5 text-sm font-medium text-secondary"
+            className="mx-auto inline-flex items-center gap-2.5 rounded-full border border-secondary/30 bg-secondary/5 px-4 py-1.5 text-sm font-medium text-secondary lg:mx-0"
           >
             <span className="relative flex h-2 w-2" aria-hidden="true">
               {!reduced && (
@@ -278,7 +279,7 @@ export function Hero() {
           {/* Subtitle */}
           <motion.p
             variants={item}
-            className="mx-auto mt-6 max-w-3xl text-xl leading-relaxed text-muted-foreground md:text-2xl"
+            className="mx-auto mt-6 max-w-3xl text-xl leading-relaxed text-muted-foreground md:text-2xl lg:mx-0"
           >
             Um headset EEG lê as tuas ondas cerebrais enquanto jogas um jogo
             que só se ganha mantendo a calma e a concentração — treinando foco,
@@ -288,7 +289,7 @@ export function Hero() {
           {/* CTAs */}
           <motion.div
             variants={item}
-            className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row"
+            className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start"
           >
             <motion.div
               whileHover={reduced ? undefined : { scale: 1.04, y: -2 }}
@@ -335,6 +336,19 @@ export function Hero() {
             <span aria-hidden="true"> &middot; </span>
             <span className="text-secondary">&minus;14.2% ansiedade</span>
           </motion.p>
+        </motion.div>
+
+        <motion.div
+          className="relative mx-auto aspect-square w-full max-w-[280px] sm:max-w-sm lg:mx-0 lg:max-w-none"
+          initial={{ opacity: 0, scale: reduced ? 1 : 0.94 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{
+            duration: reduced ? 0.2 : 1,
+            delay: reduced ? 0 : 0.3,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+        >
+          <VirtualBrain />
         </motion.div>
       </div>
 
