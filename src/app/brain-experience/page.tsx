@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { StarRating } from "@/components/ui/StarRating";
 import { CALENDLY_URL, TESTIMONIALS } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -125,7 +126,10 @@ export default function BrainExperience() {
               <Reveal key={t.name} delay={i * 0.08} className="h-full">
                 <Card className="h-full border-border bg-card shadow-sm">
                   <CardContent className="flex h-full flex-col justify-between space-y-6 pt-8">
-                    <p className="italic text-muted-foreground">&ldquo;{t.content}&rdquo;</p>
+                    <div className="space-y-3">
+                      <StarRating />
+                      <p className="italic text-muted-foreground">&ldquo;{t.content}&rdquo;</p>
+                    </div>
                     <div>
                       <p className="font-bold text-foreground">{t.name}</p>
                       <p className="text-sm text-secondary">{t.role}</p>

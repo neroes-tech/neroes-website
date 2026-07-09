@@ -10,7 +10,6 @@ const ROUTES = [
   "/sport/science",
   "/sport/services",
   "/sport/about",
-  "/team",
   "/about",
   "/contact",
   "/mental-health-calculator",

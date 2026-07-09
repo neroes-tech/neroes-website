@@ -22,7 +22,6 @@ const NAV_ITEMS = [
   { href: "/brain-experience", label: "Brain Experience" },
   { href: "/science", label: "Science" },
   { href: "/sport", label: "Sport" },
-  { href: "/team", label: "Team" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
 ] as const;

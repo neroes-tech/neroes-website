@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { PARTNERS, TEAM_MEMBERS } from "@/lib/constants";
+import { StarRating } from "@/components/ui/StarRating";
+import { PARTNERS, TEAM_BIOS, TEAM_MEMBERS } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "Neroes started as an idea developed by Pedro Pestana and Hugo Ferreira at the Faculty of Sciences of the University of Lisbon.",
+    "Neroes started as an idea developed by Pedro Pestana and Hugo Ferreira at the Faculty of Sciences of the University of Lisbon. Meet the team behind the Neroes Mental Training Platform.",
 };
 
 export default function AboutPage() {
@@ -44,30 +45,48 @@ export default function AboutPage() {
       <section className="border-y border-border bg-muted py-24 md:py-32">
         <div className="container mx-auto max-w-6xl px-4 md:px-6">
           <Reveal>
-            <SectionHeading eyebrow="The people" title="Our Team" />
+            <SectionHeading
+              eyebrow="The people"
+              title="Our Team"
+              intro="We are driven to explore human potential, in a perfect harmony between emotion and logic since our team skills match perfectly the needs of the project: neuroscience, psychology, videogame and software development, data analytics, and translation of academic knowledge into business."
+            />
           </Reveal>
-          <ul className="grid list-none gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {TEAM_MEMBERS.map((member, i) => (
-              <li key={member.name} className="h-full">
-                <Reveal delay={i * 0.06} className="h-full">
-                  <Card className="h-full text-center shadow-sm transition-shadow duration-300 hover:shadow-glow-primary">
-                    <CardContent className="space-y-4 pt-8">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {TEAM_MEMBERS.map((member, i) => {
+              const bios = TEAM_BIOS[member.name];
+              return (
+                <Reveal key={member.name} delay={i * 0.06} className="h-full">
+                  <Card className="h-full shadow-sm transition-shadow duration-300 hover:shadow-glow-primary">
+                    <CardContent className="p-8">
                       <div
                         aria-hidden="true"
-                        className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 font-exo text-xl font-bold text-primary"
+                        className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-secondary/10 font-exo text-lg font-bold text-secondary"
                       >
                         {member.name.charAt(0)}
                       </div>
-                      <div>
-                        <p className="font-exo text-lg font-bold text-foreground">{member.name}</p>
-                        <p className="mt-1 text-sm text-secondary">{member.role}</p>
-                      </div>
+                      <p className="font-exo text-lg font-bold tracking-tight text-foreground">
+                        {member.name}
+                      </p>
+                      <p className="text-sm font-medium text-secondary">{member.role}</p>
+                      {bios && (
+                        <ul className="mt-4 space-y-2 border-t border-border pt-4 text-sm leading-relaxed text-muted-foreground">
+                          {bios.map((line) => (
+                            <li key={line} className="flex items-start gap-2.5">
+                              <span
+                                aria-hidden="true"
+                                className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-secondary/60"
+                              />
+                              {line}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </CardContent>
                   </Card>
                 </Reveal>
-              </li>
-            ))}
-          </ul>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -90,6 +109,25 @@ export default function AboutPage() {
                 </li>
               ))}
             </ul>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Testimonial */}
+      <section className="border-t border-border bg-muted py-24 md:py-32">
+        <div className="container mx-auto max-w-3xl px-4 md:px-6">
+          <SectionHeading title="What people say about us" />
+          <Reveal>
+            <blockquote className="space-y-6 text-center">
+              <StarRating className="justify-center" />
+              <p className="font-exo text-2xl font-medium italic leading-relaxed text-foreground md:text-3xl">
+                &ldquo;The goal of the game is simple and clear: focus and focus better, eliminating
+                anxiety. And the game hits that goal.&rdquo;
+              </p>
+              <footer className="font-medium text-muted-foreground">
+                &mdash; In&ecirc;s, 21 years old
+              </footer>
+            </blockquote>
           </Reveal>
         </div>
       </section>
