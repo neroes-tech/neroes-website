@@ -96,11 +96,20 @@ export const TEAM_BIOS: Record<string, string[]> = {
   ],
 };
 
+// Logo width is scaled to a shared height of 40 at each file's real aspect
+// ratio, so next/image doesn't distort them (object-contain also guards
+// against this, but matching the intrinsic ratio avoids a layout-shift
+// warning).
 export const PARTNERS = [
-  { name: "KPMG", url: "https://home.kpmg/pt/pt/home.html" },
-  { name: "BGI", url: "http://bgi.pt/" },
-  { name: "IPN", url: "https://www.ipn.pt/" },
-  { name: "IBEB", url: "https://ibeb.ciencias.ulisboa.pt/" },
-  { name: "FCUL", url: "https://ciencias.ulisboa.pt/" },
-  { name: "Portugal Ventures", url: "https://www.portugalventures.pt/en/" },
+  { name: "KPMG", url: "https://home.kpmg/pt/pt/home.html", logo: "/partners/kpmg.png", logoWidth: 40 },
+  { name: "BGI", url: "http://bgi.pt/", logo: "/partners/bgi.png", logoWidth: 80 },
+  { name: "IPN", url: "https://www.ipn.pt/", logo: "/partners/ipn.png", logoWidth: 75 },
+  { name: "IBEB", url: "https://ibeb.ciencias.ulisboa.pt/", logo: "/partners/ibeb.jpg", logoWidth: 45 },
+  { name: "FCUL", url: "https://ciencias.ulisboa.pt/", logo: "/partners/fcul.png", logoWidth: 77 },
+  {
+    name: "Portugal Ventures",
+    url: "https://www.portugalventures.pt/en/",
+    logo: "/partners/portugal-ventures.png",
+    logoWidth: 56,
+  },
 ];

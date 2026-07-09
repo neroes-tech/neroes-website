@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Activity,
@@ -115,16 +116,23 @@ export default function Home() {
             <p className="text-center text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
               Com o apoio de
             </p>
-            <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-5">
+            <ul className="mt-8 flex flex-wrap items-center justify-center gap-12 md:gap-16">
               {PARTNERS.map((partner) => (
                 <li key={partner.name}>
                   <a
                     href={partner.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block py-1 font-exo text-xl font-semibold tracking-wide text-muted-foreground transition-colors hover:text-primary"
+                    aria-label={partner.name}
+                    className="inline-block grayscale opacity-60 transition-all duration-300 hover:opacity-100 hover:grayscale-0"
                   >
-                    {partner.name}
+                    <Image
+                      src={partner.logo}
+                      alt={partner.name}
+                      width={partner.logoWidth}
+                      height={40}
+                      className="h-8 w-auto object-contain md:h-10"
+                    />
                   </a>
                 </li>
               ))}
