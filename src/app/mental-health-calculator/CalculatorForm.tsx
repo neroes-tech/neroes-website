@@ -132,7 +132,7 @@ export function CalculatorForm() {
                   <p className="mt-2 text-xs text-muted-foreground">{desc}</p>
                 </div>
               ))}
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:col-span-2">
+              <div className="rounded-2xl border border-border bg-card p-6 text-center shadow-sm sm:col-span-2 sm:mx-auto sm:w-1/2 sm:min-w-[220px]">
                 <h3 className="mb-1 text-sm font-bold uppercase tracking-wide text-foreground">Turnover</h3>
                 <div className="font-exo text-2xl font-bold text-secondary">
                   <AnimatedCounter prefix="€" end={results.turnover} />
