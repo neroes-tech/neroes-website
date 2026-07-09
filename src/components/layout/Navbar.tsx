@@ -4,13 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Brain, ChevronDown, Menu, X } from "lucide-react";
-import {
-  motion,
-  useMotionValueEvent,
-  useReducedMotion,
-  useScroll,
-} from "framer-motion";
+import { ChevronDown, Menu, X } from "lucide-react";
+import { useMotionValueEvent, useScroll } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,12 +19,11 @@ import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/brain-experience", label: "Brain Experience" },
   { href: "/science", label: "Science" },
+  { href: "/brain-experience", label: "Brain Experience" },
 ];
 
 const SECONDARY_LINKS = [
-  { href: "/team", label: "Team" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
   { href: "/mental-health-calculator", label: "Calculator" },
@@ -44,8 +38,6 @@ const SPORT_LINKS = [
 
 export function Navbar() {
   const pathname = usePathname();
-  const prefersReducedMotion = useReducedMotion();
-  const reduced = prefersReducedMotion ?? false;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const closeMenu = () => setIsMobileMenuOpen(false);
@@ -72,22 +64,6 @@ export function Navbar() {
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2.5" onClick={closeMenu}>
-          <span
-            className="relative flex h-9 w-9 items-center justify-center rounded-full bg-secondary/10 text-secondary"
-            aria-hidden="true"
-          >
-            <Brain className="h-5 w-5" />
-            <span className="absolute right-0 top-0 flex h-1.5 w-1.5">
-              {!reduced && (
-                <motion.span
-                  className="absolute inline-flex h-full w-full rounded-full bg-secondary"
-                  animate={{ scale: [1, 2.4], opacity: [0.6, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-                />
-              )}
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-secondary" />
-            </span>
-          </span>
           <Image
             src="/neroes-logo.png"
             alt="Neroes"
