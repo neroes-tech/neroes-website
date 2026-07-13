@@ -1,7 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
+import { useReducedMotion } from "framer-motion";
 import * as THREE from "three";
+
+import { DISPLACEMENT_GLSL, SIMPLEX_NOISE_GLSL } from "@/components/hero/displacementShader";
+import { createSynapseGraph, type SynapseGraph } from "@/components/hero/SynapseGraph";
+import { useMouseParallax } from "@/components/hero/useMouseParallax";
 
 type BrainData = {
   positions: Float32Array;
@@ -15,6 +20,18 @@ type BrainData = {
 const C_BLUE = new THREE.Color("#1E5BFF");
 const C_TEAL = new THREE.Color("#12C7C0");
 const C_VIOLET = new THREE.Color("#8B5CF6");
+
+// ── Act boundaries (scroll progress 0..1) ──────────────────────────────
+const ACT2_START = 0.22;
+const ACT3_START = 0.55;
+const ACT4_START = 0.85;
+const MOBILE_BREAKPOINT = 768;
+const RESIZE_DEBOUNCE_MS = 150;
+
+function smoothstep(edge0: number, edge1: number, x: number) {
+  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
 
 function fold(x: number, y: number, z: number): number {
   return (
@@ -144,6 +161,24 @@ function buildBrain(count: number): BrainData {
   return { positions, colors, sizes, glow, phase, glowIndices };
 }
 
+/** A faint rotating polar grid (concentric rings + spokes) revealed behind the brain in Ato II. */
+function buildPolarGrid(rings: number, segments: number, spokes: number, maxRadius: number) {
+  const verts: number[] = [];
+  for (let r = 1; r <= rings; r++) {
+    const radius = (r / rings) * maxRadius;
+    for (let s = 0; s < segments; s++) {
+      const a0 = (s / segments) * Math.PI * 2;
+      const a1 = ((s + 1) / segments) * Math.PI * 2;
+      verts.push(Math.cos(a0) * radius, Math.sin(a0) * radius, 0, Math.cos(a1) * radius, Math.sin(a1) * radius, 0);
+    }
+  }
+  for (let s = 0; s < spokes; s++) {
+    const a = (s / spokes) * Math.PI * 2;
+    verts.push(0, 0, 0, Math.cos(a) * maxRadius, Math.sin(a) * maxRadius, 0);
+  }
+  return new Float32Array(verts);
+}
+
 const DISPERSE_GLSL = `
   vec3 disperse(vec3 p, float f) {
     float len = length(p.xy);
@@ -154,19 +189,35 @@ const DISPERSE_GLSL = `
   }
 `;
 
+// ── ATO III/IV: fly-through disperses points outward; uDissolve stochastically
+// discards points per-particle (via their phase as a stable random seed) for
+// the Ato IV "dot-matrix dissolve" instead of a uniform fade. uBloom brightens
+// the core toward white, approximating a bloom pass without a postprocess cost.
+// uDisplace (Ato III only, desktop only — see CAMADA 3) folds in simplex-noise
+// vertex displacement for an organic "boiling" surface during the fly-through.
+// uCursorNDC/uCursorActive give hub ("glow") particles a brightness boost when
+// the pointer is near their projected screen position.
 const POINT_VERT = `
   uniform float uTime;
   uniform float uFly;
   uniform float uPixelRatio;
+  uniform float uDisplace;
+  uniform vec2 uCursorNDC;
+  uniform float uCursorActive;
   attribute vec3 aColor;
   attribute float aSize;
   attribute float aGlow;
   attribute float aPhase;
   varying vec3 vColor;
   varying float vGlow;
+  varying float vPhase;
+  varying float vCursorBoost;
   ${DISPERSE_GLSL}
+  ${SIMPLEX_NOISE_GLSL}
+  ${DISPLACEMENT_GLSL}
   void main() {
     vec3 p = disperse(position, uFly);
+    p = displace(p, uDisplace, uTime);
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     float pulse = 0.5 + 0.5 * sin(uTime * 2.2 + aPhase);
     float size = aSize * (1.0 + aGlow * pulse * 1.4);
@@ -174,50 +225,89 @@ const POINT_VERT = `
     gl_Position = projectionMatrix * mv;
     vColor = aColor;
     vGlow = aGlow * pulse;
+    vPhase = fract(aPhase / 6.2831853);
+
+    vCursorBoost = 0.0;
+    if (uCursorActive > 0.5 && aGlow > 0.5) {
+      vec2 ndc = gl_Position.xy / gl_Position.w;
+      float d = distance(ndc, uCursorNDC);
+      vCursorBoost = (1.0 - smoothstep(0.0, 0.35, d)) * 0.15;
+    }
   }
 `;
 
 const POINT_FRAG = `
   precision mediump float;
+  uniform float uBloom;
+  uniform float uDissolve;
   varying vec3 vColor;
   varying float vGlow;
+  varying float vPhase;
+  varying float vCursorBoost;
   void main() {
+    if (vPhase < uDissolve) discard;
     vec2 uv = gl_PointCoord - 0.5;
     float d = length(uv);
     if (d > 0.5) discard;
     float alpha = 1.0 - smoothstep(0.40, 0.5, d);
     vec3 col = mix(vColor, vec3(0.55, 0.25, 0.95), vGlow * 0.6);
+    col = mix(col, vec3(1.0), uBloom * 0.35 * (1.0 - d * 1.6));
+    col += vCursorBoost;
     gl_FragColor = vec4(col, alpha * (0.9 + vGlow * 0.1));
   }
 `;
 
-const LINE_VERT = `
-  uniform float uFly;
-  attribute vec3 aColor;
-  varying vec3 vColor;
-  ${DISPERSE_GLSL}
+const GRID_VERT = `
   void main() {
-    vec3 p = disperse(position, uFly);
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
-    vColor = aColor;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `;
 
-const LINE_FRAG = `
+const GRID_FRAG = `
   precision mediump float;
   uniform float uOpacity;
-  varying vec3 vColor;
   void main() {
-    gl_FragColor = vec4(vColor, uOpacity);
+    gl_FragColor = vec4(0.118, 0.357, 1.0, uOpacity);
   }
 `;
 
-export default function BrainHero() {
+// ── Chromatic-aberration post pass (Ato III): renders the scene to a target,
+// then samples it three times with per-channel UV offsets on a fullscreen
+// quad. Built from THREE.WebGLRenderTarget directly — no postprocessing
+// addon/dependency needed. Skipped on mobile (see CAMADA performance spec).
+const POST_VERT = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = vec4(position.xy, 0.0, 1.0);
+  }
+`;
+
+const POST_FRAG = `
+  precision mediump float;
+  uniform sampler2D uScene;
+  uniform vec2 uAberration;
+  varying vec2 vUv;
+  void main() {
+    float r = texture2D(uScene, vUv + uAberration).r;
+    float g = texture2D(uScene, vUv).g;
+    float b = texture2D(uScene, vUv - uAberration).b;
+    float a = texture2D(uScene, vUv).a;
+    gl_FragColor = vec4(r, g, b, a);
+  }
+`;
+
+export default function BrainHero({ progressRef }: { progressRef?: RefObject<number> }) {
   const mountRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+  const reduced = prefersReducedMotion ?? false;
+  const parallax = useMouseParallax(mountRef);
 
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
+
+    const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(55, mount.clientWidth / mount.clientHeight, 0.1, 100);
@@ -229,7 +319,10 @@ export default function BrainHero() {
     renderer.setPixelRatio(pixelRatio);
     mount.appendChild(renderer.domElement);
 
-    const COUNT = 9000;
+    // ── Mobile: 5 "planes" worth of density instead of 7 — reduce particle
+    // and node counts, and (below) disable the displacement shader and the
+    // chromatic-aberration post pass entirely.
+    const COUNT = isMobile ? 5000 : 9000;
     const brain = buildBrain(COUNT);
 
     const geom = new THREE.BufferGeometry();
@@ -244,6 +337,11 @@ export default function BrainHero() {
         uTime: { value: 0 },
         uFly: { value: 0 },
         uPixelRatio: { value: pixelRatio },
+        uBloom: { value: 0 },
+        uDissolve: { value: 0 },
+        uDisplace: { value: 0 },
+        uCursorNDC: { value: new THREE.Vector2(0, 0) },
+        uCursorActive: { value: 0 },
       },
       vertexShader: POINT_VERT,
       fragmentShader: POINT_FRAG,
@@ -255,140 +353,237 @@ export default function BrainHero() {
     const points = new THREE.Points(geom, pointMat);
     scene.add(points);
 
-    const gi = brain.glowIndices;
-    const maxNodes = Math.min(gi.length, 520);
-    const linePos: number[] = [];
-    const lineCol: number[] = [];
-    const pos = brain.positions;
-    for (let a = 0; a < maxNodes; a++) {
-      const ia = gi[a]!;
-      const ax = pos[ia * 3]!;
-      const ay = pos[ia * 3 + 1]!;
-      const az = pos[ia * 3 + 2]!;
-      let b1 = -1;
-      let b2 = -1;
-      let d1 = Infinity;
-      let d2 = Infinity;
-      for (let b = 0; b < maxNodes; b++) {
-        if (b === a) continue;
-        const ib = gi[b]!;
-        const dx = pos[ib * 3]! - ax;
-        const dy = pos[ib * 3 + 1]! - ay;
-        const dz = pos[ib * 3 + 2]! - az;
-        const dd = dx * dx + dy * dy + dz * dz;
-        if (dd < d1) {
-          d2 = d1;
-          b2 = b1;
-          d1 = dd;
-          b1 = ib;
-        } else if (dd < d2) {
-          d2 = dd;
-          b2 = ib;
-        }
-      }
-      const neigh = [b1, b2];
-      for (const ib of neigh) {
-        if (ib < 0) continue;
-        if (a % 2 === 0 && ib === b2) continue;
-        linePos.push(ax, ay, az, pos[ib * 3]!, pos[ib * 3 + 1]!, pos[ib * 3 + 2]!);
-        lineCol.push(C_BLUE.r, C_BLUE.g, C_BLUE.b, C_TEAL.r, C_TEAL.g, C_TEAL.b);
-      }
-    }
+    // ── Ato IV synapse graph — extracted module (kNN=3, blue-noise node
+    // spread, traveling pulses, hover-triggered spikes).
+    const synapse: SynapseGraph = createSynapseGraph({
+      positions: brain.positions,
+      glowIndices: brain.glowIndices,
+      maxNodes: isMobile ? 50 : 90,
+      kNeighbors: 3,
+      minNodeSeparation: 0.14,
+      pulseCount: isMobile ? 120 : 240,
+      pixelRatio,
+    });
+    scene.add(synapse.lines);
+    if (synapse.pulses) scene.add(synapse.pulses);
 
-    const lineGeom = new THREE.BufferGeometry();
-    lineGeom.setAttribute("position", new THREE.BufferAttribute(new Float32Array(linePos), 3));
-    lineGeom.setAttribute("aColor", new THREE.BufferAttribute(new Float32Array(lineCol), 3));
-    const lineMat = new THREE.ShaderMaterial({
-      uniforms: { uFly: { value: 0 }, uOpacity: { value: 0.16 } },
-      vertexShader: LINE_VERT,
-      fragmentShader: LINE_FRAG,
+    // ── Ato II: faint rotating vector grid behind the brain ──────────────
+    const gridGeom = new THREE.BufferGeometry();
+    gridGeom.setAttribute("position", new THREE.BufferAttribute(buildPolarGrid(6, 48, 16, 3.6), 3));
+    const gridMat = new THREE.ShaderMaterial({
+      uniforms: { uOpacity: { value: 0 } },
+      vertexShader: GRID_VERT,
+      fragmentShader: GRID_FRAG,
       transparent: true,
       depthWrite: false,
       blending: THREE.NormalBlending,
     });
-    const lines = new THREE.LineSegments(lineGeom, lineMat);
-    scene.add(lines);
+    const grid = new THREE.LineSegments(gridGeom, gridMat);
+    grid.position.z = -2.4;
+    scene.add(grid);
 
-    let targetFly = 0;
-    let fly = 0;
-    let targetRotX = 0;
-    let targetRotY = 0;
-    let rotX = 0;
-    let rotY = 0;
-    let scrollFly = 0;
+    // ── Chromatic-aberration post pass setup (desktop only) ───────────────
+    let renderTarget = isMobile
+      ? null
+      : new THREE.WebGLRenderTarget(mount.clientWidth * pixelRatio, mount.clientHeight * pixelRatio);
+    const postScene = new THREE.Scene();
+    const postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const postMat = new THREE.ShaderMaterial({
+      uniforms: {
+        uScene: { value: renderTarget?.texture ?? null },
+        uAberration: { value: new THREE.Vector2(0, 0) },
+      },
+      vertexShader: POST_VERT,
+      fragmentShader: POST_FRAG,
+      depthTest: false,
+      depthWrite: false,
+    });
+    const postQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), postMat);
+    postScene.add(postQuad);
 
-    const onPointerMove = (e: PointerEvent) => {
-      const rect = mount.getBoundingClientRect();
-      const nx = (e.clientX - rect.left) / rect.width;
-      const ny = (e.clientY - rect.top) / rect.height;
-      targetFly = Math.min(1, Math.max(0, ny * 1.05 - 0.02) + scrollFly);
-      targetFly = Math.min(1, targetFly);
-      targetRotY = (nx - 0.5) * 0.6;
-      targetRotX = (ny - 0.5) * 0.3;
+    let resizeTimer = 0;
+    const applyResize = () => {
+      const w = mount.clientWidth;
+      const h = mount.clientHeight;
+      camera.aspect = w / h || 1;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      if (renderTarget) {
+        renderTarget.dispose();
+        renderTarget = new THREE.WebGLRenderTarget(w * pixelRatio, h * pixelRatio);
+        postMat.uniforms.uScene!.value = renderTarget.texture;
+      }
+    };
+    // Debounced resize (150ms) — avoids thrashing the render target during
+    // a drag-resize.
+    const resize = () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(applyResize, RESIZE_DEBOUNCE_MS);
     };
 
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      scrollFly = Math.min(0.6, Math.max(0, scrollFly + e.deltaY * 0.0006));
-    };
+    // ── Reduced motion: one static, centered frame — no scroll-jack, no RAF ──
+    if (reduced) {
+      camera.position.z = 4.3;
+      camera.lookAt(0, 0, 0);
+      renderer.render(scene, camera);
+      window.addEventListener("resize", resize);
+      return () => {
+        window.clearTimeout(resizeTimer);
+        window.removeEventListener("resize", resize);
+        geom.dispose();
+        pointMat.dispose();
+        synapse.dispose();
+        gridGeom.dispose();
+        gridMat.dispose();
+        renderTarget?.dispose();
+        postMat.dispose();
+        renderer.dispose();
+        if (renderer.domElement.parentNode === mount) mount.removeChild(renderer.domElement);
+      };
+    }
 
-    mount.addEventListener("pointermove", onPointerMove);
-    mount.addEventListener("wheel", onWheel, { passive: false });
+    // ── Hub-node hover detection: project each synapse node to screen space
+    // and, if the pointer sits within its hit radius, fire an immediate spike.
+    const nodeWorldPos = new THREE.Vector3();
+    let lastHoverCheck = 0;
+    const checkHover = (elapsed: number) => {
+      if (elapsed - lastHoverCheck < 0.05) return; // ~20Hz is plenty for a hover check
+      lastHoverCheck = elapsed;
+      const cursorNdcX = parallax.xRef.current;
+      const cursorNdcY = -parallax.yRef.current;
+      const nodeCount = synapse.nodePositions.length / 3;
+      for (let i = 0; i < nodeCount; i++) {
+        nodeWorldPos.set(
+          synapse.nodePositions[i * 3]!,
+          synapse.nodePositions[i * 3 + 1]!,
+          synapse.nodePositions[i * 3 + 2]!,
+        );
+        nodeWorldPos.applyMatrix4(points.matrixWorld).project(camera);
+        const dx = nodeWorldPos.x - cursorNdcX;
+        const dy = nodeWorldPos.y - cursorNdcY;
+        if (dx * dx + dy * dy < 0.02 * 0.02) {
+          synapse.triggerSpikeFrom(i);
+        }
+      }
+    };
 
     const clock = new THREE.Clock();
     let raf = 0;
+    let running = true;
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
     const render = () => {
-      const t = clock.getElapsedTime();
+      // THREE.Clock.getElapsedTime() calls getDelta() internally — calling
+      // both in the same frame would double-consume the clock's timer.
+      // getDelta() alone gives us both values (it also updates
+      // clock.elapsedTime as a side effect).
+      const dt = Math.min(0.05, clock.getDelta());
+      const t = clock.elapsedTime;
+      const progress = progressRef?.current ?? 0;
 
-      fly = lerp(fly, targetFly, 0.06);
-      rotX = lerp(rotX, targetRotX, 0.05);
-      rotY = lerp(rotY, targetRotY, 0.05);
+      // ── ATO I (0–0.22): revelação — quase parado, cérebro a assentar ──
+      // ── ATO II (0.22–0.55): dissecação — grid vetorial surge atrás ──
+      const act2 = smoothstep(ACT2_START, ACT3_START, progress);
+      // ── ATO III (0.55–0.85): fly-through — explosão + aberração + displacement ──
+      const act3 = smoothstep(ACT3_START, ACT4_START, progress);
+      // ── ATO IV (0.85–1.0): emergência de dados — dissolve em pontos ──
+      const act4 = smoothstep(ACT4_START, 1.0, progress);
 
+      const fly = act3; // macro dive, driven by scroll
       pointMat.uniforms.uTime!.value = t;
       pointMat.uniforms.uFly!.value = fly;
-      lineMat.uniforms.uFly!.value = fly;
-      lineMat.uniforms.uOpacity!.value = 0.16 * (1 - fly * 0.7);
+      pointMat.uniforms.uBloom!.value = act2 * (1 - act4);
+      pointMat.uniforms.uDissolve!.value = act4;
+      pointMat.uniforms.uDisplace!.value = isMobile ? 0 : act3 * 0.18;
+      pointMat.uniforms.uCursorNDC!.value.set(parallax.xRef.current, -parallax.yRef.current);
+      pointMat.uniforms.uCursorActive!.value = 1;
 
-      points.rotation.y = rotY + t * 0.05;
-      points.rotation.x = rotX;
-      lines.rotation.copy(points.rotation);
+      synapse.lineMat.uniforms.uFly!.value = fly;
+      synapse.lineMat.uniforms.uOpacity!.value = 0.16 * (1 - act4) * (1 - act3 * 0.5);
+      gridMat.uniforms.uOpacity!.value = act2 * (1 - act4) * 0.22;
+      grid.rotation.z = t * 0.03 + act2 * ((8 * Math.PI) / 180);
+
+      // Micro-tremor idle (±0.4px equivalent, ~0.6Hz) on the core when the
+      // narrative is resting (Ato I) and the pointer parallax is near zero —
+      // reads as "alive" rather than a static render.
+      const idleTremor = (1 - smoothstep(0.02, ACT2_START, progress)) * 0.0025;
+      const tremorX = Math.sin(t * 0.6 * Math.PI * 2) * idleTremor;
+      const tremorY = Math.cos(t * 0.51 * Math.PI * 2) * idleTremor;
+
+      points.rotation.y = parallax.xRef.current * 0.25 + t * 0.05;
+      points.rotation.x = parallax.yRef.current * 0.15;
+      points.position.set(tremorX, tremorY, 0);
+      points.updateMatrixWorld();
+      synapse.lines.rotation.copy(points.rotation);
+      if (synapse.pulses) synapse.pulses.rotation.copy(points.rotation);
+
+      synapse.update(dt);
+      checkHover(t);
 
       camera.position.z = lerp(4.3, -1.4, fly);
       camera.lookAt(0, 0, 0);
 
-      renderer.render(scene, camera);
-      raf = requestAnimationFrame(render);
-    };
-    render();
+      const aberration = isMobile ? 0 : act3 * 0.006;
 
-    const onResize = () => {
-      if (!mount) return;
-      const w = mount.clientWidth;
-      const h = mount.clientHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
+      // The render-target + fullscreen-quad pass doubles fill-rate cost —
+      // only pay for it while the effect is actually visible (Ato III), and
+      // never on mobile (see performance spec).
+      if (renderTarget && aberration > 0.00005) {
+        postMat.uniforms.uAberration!.value.set(aberration, aberration);
+        renderer.setRenderTarget(renderTarget);
+        renderer.render(scene, camera);
+        renderer.setRenderTarget(null);
+        renderer.render(postScene, postCamera);
+      } else {
+        renderer.render(scene, camera);
+      }
+
+      if (running) raf = requestAnimationFrame(render);
     };
-    window.addEventListener("resize", onResize);
+    raf = requestAnimationFrame(render);
+
+    // Pause the RAF loop entirely once the visual scrolls out of view.
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        running = !!entry?.isIntersecting;
+        if (running) {
+          clock.getDelta(); // avoid a big dt jump after being paused
+          raf = requestAnimationFrame(render);
+        } else {
+          cancelAnimationFrame(raf);
+        }
+      },
+      { threshold: 0 },
+    );
+    observer.observe(mount);
+
+    window.addEventListener("resize", resize);
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("resize", onResize);
-      mount.removeEventListener("pointermove", onPointerMove);
-      mount.removeEventListener("wheel", onWheel);
+      window.clearTimeout(resizeTimer);
+      observer.disconnect();
+      window.removeEventListener("resize", resize);
       geom.dispose();
       pointMat.dispose();
-      lineGeom.dispose();
-      lineMat.dispose();
+      synapse.dispose();
+      gridGeom.dispose();
+      gridMat.dispose();
+      renderTarget?.dispose();
+      postMat.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode === mount) {
         mount.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [reduced, progressRef, parallax.xRef, parallax.yRef]);
 
-  return <div ref={mountRef} className="absolute inset-0 h-full w-full" />;
+  return (
+    <div
+      ref={mountRef}
+      aria-hidden="true"
+      className="absolute inset-0 h-full w-full"
+    />
+  );
 }
