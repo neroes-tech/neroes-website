@@ -2,11 +2,11 @@
 
 Reconstrução completa do site institucional da Neroes: WordPress (Elementor) → **Next.js + TypeScript**, com **Supabase** (dados/auth/storage), alojado na **Vercel**, deploy automático via **GitHub**. Referência de qualidade visual/UX: swordhealth.com.
 
-## Estado atual (2026-07-02)
+## Estado atual (2026-07-10)
 
-- Fase de análise concluída: auditoria completa do WordPress atual em `docs/content-inventory.md` (inventário de páginas, conteúdo verbatim a preservar, problemas de UX/UI/acessibilidade encontrados).
-- Fase seguinte: redesign visual **100% original** a decorrer no Replit (sem reaproveitar layout/estilos do WordPress antigo). O código produzido no Replit será trazido para este repositório para integração e revisão.
-- Ainda não existe nenhum código Next.js neste repositório — `src/`, `public/`, `package.json`, etc. só serão criados quando o output do Replit chegar.
+- Auditoria do WordPress original concluída em `docs/content-inventory.md` (inventário de páginas, conteúdo verbatim a preservar, problemas de UX/UI/acessibilidade encontrados).
+- O redesign Next.js já está em curso neste repositório (`src/`, `public/`, `package.json` existem e evoluem normalmente via commits/PRs) — a fase "à espera do output do Replit" ficou para trás.
+- Ver secções abaixo para a arquitetura e design system atuais.
 
 ## Fluxo de trabalho Replit → aqui
 
@@ -57,3 +57,27 @@ Ver `.env.example`. Nunca commitar `.env.local` (já está no `.gitignore`).
 |---|---|
 | Head of Tech | Bruno Sousa |
 | Desenvolvimento | Wendell Alves |
+
+---
+
+# Neroes Project — Claude Context Guide
+
+Este ficheiro serve como o mapa de contexto e otimização permanente para as sessões do Claude Code neste repositório. Consulta este guia antes de ler a árvore de ficheiros completa para economizar tokens (Prompt Caching).
+
+## 🧭 Arquitetura e Localizações-Chave
+* **Core:** Next.js (App Router) + TypeScript + Tailwind CSS.
+* **Componente do Cérebro 3D:** `src/components/BrainHero.tsx` (Usa Three.js e a diretiva `"use client"`).
+* **Página Principal (Hero Section):** `src/app/page.tsx` (Onde o `<BrainHero />` está renderizado como background).
+* **Logótipos de Parceiros Oficiais:** `public/partners/` (Contém as imagens oficiais em formato `.png` da KPMG, BGI, IPN, IBEB, FCUL e Portugal Ventures).
+
+## 🎨 Guia de Estilo e Design System (Neroes Light)
+* **Fundo Oficial (Off-White):** `#FAFAF7` (Deve ser aplicado como fundo principal das secções premium).
+* **Texto Principal (Escuro):** `#1E2233` (Tipografia limpa e de alto contraste).
+* **Azul de Destaque (Brand Blue):** `#1E5BFF` (Usado para spans, links, botões e nós sinápticos).
+* **Efeito Premium de Parceiros:** `grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all duration-300` (Aplicado uniformemente na grelha de logos).
+
+## ⚡ Diretivas de Poupança de Tokens e Performance
+1. **Prompt Caching:** Assume que já conheces a estrutura das pastas após a primeira leitura. Não executes `ls` ou leituras de ficheiros globais repetidamente.
+2. **Consultas Cirúrgicas:** Quando te pedir para alterar um componente, lê apenas esse ficheiro específico (ex: `src/components/BrainHero.tsx`) usando ferramentas de leitura direcionada em vez de ler pastas inteiras.
+3. **Respostas Concisas:** Foca-te em alterações de código diretas e precisas. Evita explicações teóricas longas sobre Next.js ou Tailwind, a menos que seja explicitamente solicitado.
+4. **Verificações de Segurança:** Nunca instales pacotes CLI globais (`-g`) ou scripts de repositórios não validados pelo ecossistema oficial do npm.
