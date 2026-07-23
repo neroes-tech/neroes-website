@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { PartnersBar } from "@/components/layout/PartnersBar";
+import ThreadCanvas from "@/components/layout/ThreadCanvas";
 import { CONTACT_INFO, SITE_URL } from "@/lib/constants";
 import "./globals.css";
 
@@ -50,10 +52,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to main content
         </a>
+        <ThreadCanvas />
         <Navbar />
         <main id="main-content" className="flex-1">
           {children}
         </main>
+        <PartnersBar />
         <Footer />
       </body>
     </html>

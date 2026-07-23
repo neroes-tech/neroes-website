@@ -1,0 +1,268 @@
+<title>Relatório Técnico — Pilares, Simulador Neural e Testemunhos Premium</title>
+<style>
+  :root {
+    --bg: #FAFAF7;
+    --bg-raised: #FFFFFF;
+    --text: #1E2233;
+    --text-muted: #5C6178;
+    --border: #E2E3EA;
+    --accent: #1E5BFF;
+    --accent-soft: #E9EFFF;
+    --teal: #0F9C8E;
+    --teal-soft: #E3F5F2;
+    --amber: #B4700A;
+    --amber-soft: #FBF0DD;
+    --violet: #6D4FD1;
+    --mono-bg: #F0F0EC;
+
+    --font-display: "Avenir Next", "Century Gothic", "Segoe UI", system-ui, sans-serif;
+    --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "Cascadia Code", "Consolas", "SFMono-Regular", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161F;
+      --bg-raised: #1B1E2A;
+      --text: #F2F1EC;
+      --text-muted: #9EA3B8;
+      --border: #2B2E3D;
+      --accent: #5C8AFF;
+      --accent-soft: #202742;
+      --teal: #3FC9B8;
+      --teal-soft: #172925;
+      --amber: #E3A94A;
+      --amber-soft: #2B2416;
+      --violet: #A48CF0;
+      --mono-bg: #10121A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14161F; --bg-raised: #1B1E2A; --text: #F2F1EC; --text-muted: #9EA3B8;
+    --border: #2B2E3D; --accent: #5C8AFF; --accent-soft: #202742; --teal: #3FC9B8;
+    --teal-soft: #172925; --amber: #E3A94A; --amber-soft: #2B2416; --violet: #A48CF0;
+    --mono-bg: #10121A;
+  }
+  :root[data-theme="light"] {
+    --bg: #FAFAF7; --bg-raised: #FFFFFF; --text: #1E2233; --text-muted: #5C6178;
+    --border: #E2E3EA; --accent: #1E5BFF; --accent-soft: #E9EFFF; --teal: #0F9C8E;
+    --teal-soft: #E3F5F2; --amber: #B4700A; --amber-soft: #FBF0DD; --violet: #6D4FD1;
+    --mono-bg: #F0F0EC;
+  }
+
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--font-body);
+    line-height: 1.6; margin: 0; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  header.masthead {
+    max-width: 860px; margin: 0 auto; padding: 56px 24px 40px; border-bottom: 1px solid var(--border);
+  }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 14px;
+  }
+  h1 {
+    font-family: var(--font-display); font-weight: 700; font-size: clamp(26px, 4vw, 36px);
+    letter-spacing: -0.01em; line-height: 1.2; margin: 0 0 16px; text-wrap: balance;
+  }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 13.5px; color: var(--text-muted); }
+  .meta strong { color: var(--text); font-weight: 600; }
+
+  main { max-width: 860px; margin: 0 auto; padding: 48px 24px 96px; }
+
+  section { margin-bottom: 52px; }
+  section > h2 {
+    font-family: var(--font-display); font-size: 21px; font-weight: 700; letter-spacing: -0.005em;
+    margin: 0 0 6px;
+  }
+  section > .section-sub { color: var(--text-muted); font-size: 14.5px; margin: 0 0 22px; }
+
+  p { margin: 0 0 14px; max-width: 68ch; }
+  .lede { font-size: 16px; max-width: 66ch; }
+
+  h3 { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin: 24px 0 6px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono);
+    font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 8px;
+    border-radius: 3px; vertical-align: middle; margin-left: 8px;
+  }
+  .badge.done { background: var(--teal-soft); color: var(--teal); }
+  .badge.pending { background: var(--amber-soft); color: var(--amber); }
+
+  .feature-block { border-left: 2px solid var(--border); padding-left: 18px; margin: 16px 0 24px; }
+  .feature-block p { font-size: 14.5px; }
+  .feature-block ul { margin: 8px 0 0; padding-left: 18px; font-size: 14.5px; }
+  .feature-block li { margin-bottom: 5px; }
+
+  code, .path {
+    font-family: var(--font-mono); font-size: 0.88em; background: var(--mono-bg);
+    padding: 1px 6px; border-radius: 3px; white-space: nowrap;
+  }
+
+  .decision-card {
+    background: var(--bg-raised); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px 20px; margin-bottom: 14px;
+  }
+  .decision-card .d-title {
+    font-weight: 700; font-size: 14.5px; margin-bottom: 8px; display: flex;
+    align-items: baseline; gap: 10px; flex-wrap: wrap;
+  }
+  .decision-card p { font-size: 14px; margin-bottom: 6px; max-width: none; }
+  .decision-card p:last-child { margin-bottom: 0; }
+  .decision-card .label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 8px; }
+  th, td { text-align: left; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; }
+  .table-wrap { overflow-x: auto; }
+
+  .formula {
+    background: var(--mono-bg); border-radius: 8px; padding: 16px 20px; font-family: var(--font-mono);
+    font-size: 13px; line-height: 1.7; overflow-x: auto; margin: 12px 0;
+  }
+
+  .pending-card {
+    background: var(--amber-soft); border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent);
+    border-radius: 8px; padding: 16px 20px; margin-bottom: 12px;
+  }
+  .pending-card .d-title { color: var(--amber); font-weight: 700; font-size: 14.5px; margin-bottom: 6px; }
+  .pending-card p { font-size: 14px; margin-bottom: 0; max-width: none; }
+
+  footer {
+    max-width: 860px; margin: 0 auto; padding: 28px 24px 56px; border-top: 1px solid var(--border);
+    font-size: 12.5px; color: var(--text-muted); display: flex; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
+  }
+</style>
+
+<header class="masthead">
+  <p class="eyebrow">Relatório técnico — interno</p>
+  <h1>Alinhamento de conteúdo, simulador demonstrativo e testemunhos premium</h1>
+  <div class="meta">
+    <span>De <strong>Wendell Alves</strong> para <strong>Bruno Sousa</strong></span>
+    <span>Branch <code>v2-claudeFable</code></span>
+    <span>2026-07-20</span>
+  </div>
+</header>
+
+<main>
+  <section id="sumario">
+    <h2>Sumário</h2>
+    <p class="lede">
+      Três entregas nesta ronda: uma secção "Como funciona" com os 3 pilares SENSE/TRAIN/MEASURE
+      alinhados ao conteúdo já verificado; um simulador demonstrativo de "Mental Score", isolado do
+      calculador de ROI empresarial real; e um redesenho premium dos cartões de testemunho. Em cada
+      um destes três pontos havia um risco real de conteúdo fabricado ou de quebrar algo que já
+      funcionava — os detalhes de como foi resolvido estão abaixo.
+    </p>
+  </section>
+
+  <section id="pilares">
+    <h2>Secção "Como funciona" <span class="badge done">concluído</span></h2>
+    <p class="section-sub"><span class="path">src/components/sections/HowItWorks.tsx</span> — inserida na homepage logo após a Hero.</p>
+    <div class="feature-block">
+      <p>O pedido original trazia texto de marketing ("SENSE / TRAIN / MEASURE", "calm, focus, or performance")
+      que não existia em <code>docs/content-inventory.md</code> — a nossa fonte de verdade para copy
+      aprovado. Em vez de publicar isso às cegas, mapeámos a estrutura pedida aos 3 blocos reais já
+      verificados no inventário de conteúdo:</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Pilar</th><th>Bloco real do inventário</th><th>Conceito</th></tr>
+        <tr><td>I — SENSE</td><td>Como funciona</td><td>Headset EEG + biossensores leem o estado cerebral em tempo real</td></tr>
+        <tr><td>II — TRAIN</td><td>Objetivo do jogo</td><td>Jogo adaptativo por IA ajusta o desafio conforme os sinais</td></tr>
+        <tr><td>III — MEASURE</td><td>Porque é desafiante</td><td>Sinais monitorizados sessão a sessão, transformados em métricas</td></tr>
+      </table>
+    </div>
+    <div class="feature-block">
+      <p>O texto "Treino de redes neurais focado em calm, focus, or performance" foi incluído tal como
+      pedido, com a frase em inglês marcada <code>lang="en"</code> (a página é <code>lang="pt-PT"</code>) —
+      requisito de acessibilidade já estabelecido no <code>CLAUDE.md</code> do projeto.</p>
+    </div>
+  </section>
+
+  <section id="simulador">
+    <h2>Simulador de Performance Neural <span class="badge done">concluído</span></h2>
+    <p class="section-sub"><span class="path">src/components/sections/MentalHealthCalculator.tsx</span> — novo, em <code>/mental-health-calculator</code>.</p>
+    <div class="decision-card">
+      <div class="d-title">Decisão de arquitetura: não tocar no calculador real</div>
+      <p>O calculador existente (<code>CalculatorForm.tsx</code>) calcula custo empresarial
+      (presenteeismo/absentismo/turnover) a partir de nº de funcionários, salário e indústria — um
+      cálculo de ROI para leads B2B. O pedido descrevia algo completamente diferente: um "Mental
+      Score" pessoal de 1 a 10 a partir de sliders. Substituir o calculador real por isto teria
+      apagado uma ferramenta de vendas que já funciona, por uma métrica sem o mesmo propósito.</p>
+      <p>Ficou como um <strong>componente novo e isolado</strong>, claramente rotulado
+      "Demonstrativo — não é um diagnóstico clínico", inserido abaixo do calculador real na mesma
+      página, sem alterar uma linha do ficheiro original.</p>
+    </div>
+
+    <h3>A fórmula</h3>
+    <p>Os 4 indicadores usam os KPIs reais já publicados (<code>docs/content-inventory.md</code>),
+    com os pesos exatamente como especificados — e os pesos somam 1.00, o que torna a normalização
+    matematicamente limpa:</p>
+    <div class="formula">
+peso(Controlo Emocional)     = 0.40   · referência: até +111%
+peso(Velocidade de Decisão)  = 0.25   · referência: até +21.7%
+peso(Autoconfiança)          = 0.15   · referência: até +9.4%
+peso(Redução de Ansiedade)   = 0.20   · referência: até -14.2%
+                               ────
+                               1.00
+
+média_ponderada = Σ (slider_i / 100 × peso_i)      ∈ [0, 1]
+Mental Score    = 1.00 + média_ponderada × 9.00     ∈ [1.00, 10.00]
+    </div>
+    <p>A redução de ansiedade entra como contributo positivo para o score (menos ansiedade = melhor
+    bem-estar), não como subtração — é a leitura semanticamente correta do "-14.2%", em vez de tratar
+    um sinal negativo como penalização direta.</p>
+    <p>Testado nos três pontos-limite: todos os sliders a 0 → <strong>1.00</strong>; todos a 50
+    (default) → <strong>5.50</strong>; todos a 100 → <strong>10.00</strong>. Confirmado visualmente
+    no browser.</p>
+  </section>
+
+  <section id="testemunhos">
+    <h2>Testemunhos premium <span class="badge done">concluído</span></h2>
+    <p class="section-sub"><span class="path">src/components/sections/ClientTestimonials.tsx</span> · <span class="path">src/lib/constants.ts</span></p>
+    <div class="decision-card">
+      <div class="d-title">Verificação prévia: logótipos de cliente</div>
+      <p>Novartis, CCA Law e Valadares não apareciam em nenhum lado do projeto como clientes
+      confirmados antes desta ronda. Confirmaste entretanto que são clientes reais — mas ainda não
+      sabemos <strong>qual dos 5 testemunhos existentes (José, Conguito, Joana, Alice, Maria João)
+      pertence a qual empresa</strong>, nem temos os ficheiros de logótipo.</p>
+    </div>
+    <div class="feature-block">
+      <p>Estrutura implementada, pronta a receber os dados assim que confirmados:</p>
+      <ul>
+        <li>Tipo <code>Testimonial</code> em <code>constants.ts</code> ganhou os campos opcionais <code>company?</code> e <code>companyLogo?</code> — em branco para os 5 atuais.</li>
+        <li>Cartão: logótipo subtil no topo (só aparece se <code>companyLogo</code> estiver definido — sem buraco visual enquanto estiver vazio), citação em itálico ao centro, avatar circular com inicial + nome/cargo no rodapé.</li>
+        <li>Colocado na homepage lado a lado com os cartões de vídeo dos "Campeões" (João Crisóstomo/George), como pedido.</li>
+      </ul>
+    </div>
+    <div class="pending-card">
+      <div class="d-title">Pendente</div>
+      <p>Mapeamento pessoa → empresa, e os 3 ficheiros de logótipo reais (Novartis, CCA Law,
+      Valadares). Assim que os tiver, preencho <code>company</code>/<code>companyLogo</code> nas
+      entradas certas — o layout já está pronto para os receber sem mais alterações de código.</p>
+    </div>
+  </section>
+
+  <section id="verificacao">
+    <h2>Verificação</h2>
+    <div class="feature-block">
+      <p><code>npm run typecheck</code> → <code>npm run lint</code> → <code>npm run build</code> — todos
+      limpos. Servidor de desenvolvimento reiniciado e verificado visualmente com Playwright, incluindo
+      arrastar os 4 sliders do simulador aos extremos (0/50/100) para confirmar a fórmula na prática,
+      não só na leitura do código.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>Relatório gerado a partir do histórico de trabalho da sessão em <code>v2-claudeFable</code>.</span>
+  <span>Neroes — treino mental com neurofeedback</span>
+</footer>

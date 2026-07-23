@@ -9,6 +9,7 @@ const C_TEAL = new THREE.Color("#12C7C0");
 
 const LINE_VERT = `
   uniform float uFly;
+  uniform float uHemisphereSplit;
   attribute vec3 aColor;
   varying vec3 vColor;
   vec3 disperse(vec3 p, float f) {
@@ -18,8 +19,13 @@ const LINE_VERT = `
     p.z += f * 3.4;
     return p;
   }
+  vec3 splitHemispheres(vec3 p, float amount) {
+    p.x += sign(p.x) * amount;
+    return p;
+  }
   void main() {
-    vec3 p = disperse(position, uFly);
+    vec3 p = splitHemispheres(position, uHemisphereSplit);
+    p = disperse(p, uFly);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
     vColor = aColor;
   }
@@ -189,7 +195,7 @@ export function createSynapseGraph(opts: SynapseGraphOptions): SynapseGraph {
   lineGeom.setAttribute("position", new THREE.BufferAttribute(new Float32Array(linePos), 3));
   lineGeom.setAttribute("aColor", new THREE.BufferAttribute(new Float32Array(lineCol), 3));
   const lineMat = new THREE.ShaderMaterial({
-    uniforms: { uFly: { value: 0 }, uOpacity: { value: 0.16 } },
+    uniforms: { uFly: { value: 0 }, uOpacity: { value: 0.16 }, uHemisphereSplit: { value: 0 } },
     vertexShader: LINE_VERT,
     fragmentShader: LINE_FRAG,
     transparent: true,

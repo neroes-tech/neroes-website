@@ -20,6 +20,12 @@ export interface ScrollNarrative {
    * re-rendering on every one of the 60fps lerp ticks.
    */
   actProgress: number;
+  /**
+   * Raw scroll progress (0..1) across the whole section, throttled the same
+   * way as `actProgress`. Use this (not `progressRef`) for JSX-driven reveals
+   * that need to react outside a single act's boundaries.
+   */
+  progress: number;
 }
 
 // ── Ato boundaries, in scroll progress (0..1) ──────────────────────────
@@ -62,6 +68,7 @@ export function useScrollNarrative(sectionRef?: RefObject<HTMLElement | null>): 
   const targetRef = useRef(0);
   const [act, setAct] = useState<NarrativeAct>(1);
   const [actProgress, setActProgress] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     let rafId = 0;
@@ -95,6 +102,7 @@ export function useScrollNarrative(sectionRef?: RefObject<HTMLElement | null>): 
         const resolved = resolveAct(progressRef.current);
         setAct((prev) => (prev !== resolved.act ? resolved.act : prev));
         setActProgress(resolved.actProgress);
+        setProgress(progressRef.current);
       }
 
       rafId = requestAnimationFrame(tick);
@@ -108,5 +116,5 @@ export function useScrollNarrative(sectionRef?: RefObject<HTMLElement | null>): 
     };
   }, [sectionRef]);
 
-  return { progressRef, act, actProgress };
+  return { progressRef, act, actProgress, progress };
 }

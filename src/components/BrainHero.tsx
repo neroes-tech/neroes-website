@@ -28,6 +28,24 @@ const ACT4_START = 0.85;
 const MOBILE_BREAKPOINT = 768;
 const RESIZE_DEBOUNCE_MS = 150;
 
+// Hemisphere-opening reveal: independent of the 4-act timeline, spans the
+// first half of the scroll (0 → 0.5) so it settles alongside the Hero's
+// text-block reveal. Max separation is a world-space offset added to each
+// particle's existing hemisphere gap (~0.045–0.065 at rest).
+const HEMISPHERE_OPEN_END = 0.5;
+const HEMISPHERE_SPLIT_MAX = 0.17;
+
+// Fixed lateral/profile viewing angle (90°, i.e. Math.PI/2, from the old
+// frontal start) — the camera holds this angle for the whole scroll journey;
+// only its distance (radius) changes. See CAMERA_MIN_RADIUS below for why
+// the dolly never crosses zero.
+const ORBIT_RADIUS = 4.3;
+const ORBIT_PHASE = Math.PI / 2;
+// Closest the camera ever dollies in to — kept positive and well clear of
+// zero so it never crosses through the point cloud's origin (crossing zero
+// flips the camera to the opposite side, which read as a sudden pirouette).
+const CAMERA_MIN_RADIUS = 1.1;
+
 function smoothstep(edge0: number, edge1: number, x: number) {
   const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
   return t * t * (3 - 2 * t);
@@ -64,8 +82,13 @@ function buildBrain(count: number): BrainData {
     let y = 0;
     let z = 0;
     let t = 0;
+    // 35% of the cerebrum's particles fill the interior volume instead of
+    // sitting on the folded cortex surface — without this, the surface-only
+    // distribution reads as a hollow shell with an empty center.
+    let isInterior = false;
 
     if (i < nCerebrum) {
+      isInterior = i >= nCerebrum * 0.65;
       const side = Math.random() < 0.5 ? -1 : 1;
       const u = Math.random();
       const v = Math.random();
@@ -81,20 +104,30 @@ function buildBrain(count: number): BrainData {
 
       py -= 0.12 * pz * pz * 0.4;
 
-      let ex = px / (rx * rx);
-      let ey = py / (ry * ry);
-      let ez = pz / (rz * rz);
-      const el = Math.hypot(ex, ey, ez) || 1;
-      ex /= el;
-      ey /= el;
-      ez /= el;
+      if (isInterior) {
+        // Uniform-in-volume radial pull-in — cube root of a uniform random
+        // gives uniform density per unit volume (not clustered at the
+        // center), so the fill reads as solid mass, not a shell.
+        const innerT = Math.cbrt(Math.random()) * 0.82;
+        px *= innerT;
+        py *= innerT;
+        pz *= innerT;
+      } else {
+        let ex = px / (rx * rx);
+        let ey = py / (ry * ry);
+        let ez = pz / (rz * rz);
+        const el = Math.hypot(ex, ey, ez) || 1;
+        ex /= el;
+        ey /= el;
+        ez /= el;
 
-      const f = fold(px, py, pz);
-      const layer = 1 - Math.random() * Math.random() * 0.16;
+        const f = fold(px, py, pz);
+        const layer = 1 - Math.random() * Math.random() * 0.16;
 
-      px = (px + ex * f) * layer;
-      py = (py + ey * f) * layer;
-      pz = (pz + ez * f) * layer;
+        px = (px + ex * f) * layer;
+        py = (py + ey * f) * layer;
+        pz = (pz + ez * f) * layer;
+      }
 
       const gap = 0.045 + (1 - nx) * 0.02;
       x = side * (px + gap);
@@ -141,15 +174,23 @@ function buildBrain(count: number): BrainData {
     positions[i * 3 + 2] = z;
 
     tmp.copy(C_TEAL).lerp(C_BLUE, t);
-    const isGlow = Math.random() < 0.09;
+    // 80% small/subtle "mass" particles, 20% larger/brighter "glow" hubs —
+    // perspective (see uPixelRatio scaling in the vertex shader) already
+    // shrinks whichever of these sit farther from camera, so this ratio
+    // reads as background-fill vs. foreground-detail without a separate
+    // depth pass. Interior-fill particles never glow (keeps hub candidates,
+    // and the synapse graph built from them, on the visible surface) and
+    // render smaller/dimmer than the surface shell, for real depth.
+    const isGlow = !isInterior && Math.random() < 0.2;
     if (isGlow) {
       tmp.lerp(C_VIOLET, 0.55);
       glow[i] = 1;
-      sizes[i] = 1.5 + Math.random() * 1.0;
+      sizes[i] = 1.5 + Math.random() * 1.2;
       glowIndices.push(i);
     } else {
       glow[i] = 0;
-      sizes[i] = 0.55 + Math.random() * 0.5;
+      sizes[i] = isInterior ? 0.3 + Math.random() * 0.22 : 0.5 + Math.random() * 0.4;
+      if (isInterior) tmp.lerp(C_TEAL, 0.3); // slightly duller/cooler, so it recedes behind the shell
     }
 
     colors[i * 3] = tmp.r;
@@ -161,30 +202,22 @@ function buildBrain(count: number): BrainData {
   return { positions, colors, sizes, glow, phase, glowIndices };
 }
 
-/** A faint rotating polar grid (concentric rings + spokes) revealed behind the brain in Ato II. */
-function buildPolarGrid(rings: number, segments: number, spokes: number, maxRadius: number) {
-  const verts: number[] = [];
-  for (let r = 1; r <= rings; r++) {
-    const radius = (r / rings) * maxRadius;
-    for (let s = 0; s < segments; s++) {
-      const a0 = (s / segments) * Math.PI * 2;
-      const a1 = ((s + 1) / segments) * Math.PI * 2;
-      verts.push(Math.cos(a0) * radius, Math.sin(a0) * radius, 0, Math.cos(a1) * radius, Math.sin(a1) * radius, 0);
-    }
-  }
-  for (let s = 0; s < spokes; s++) {
-    const a = (s / spokes) * Math.PI * 2;
-    verts.push(0, 0, 0, Math.cos(a) * maxRadius, Math.sin(a) * maxRadius, 0);
-  }
-  return new Float32Array(verts);
-}
-
 const DISPERSE_GLSL = `
   vec3 disperse(vec3 p, float f) {
     float len = length(p.xy);
     vec2 dir = len > 0.0001 ? p.xy / len : vec2(0.0);
     p.xy += dir * f * (1.7 + 0.6 * (p.z + 1.5));
     p.z += f * 3.4;
+    return p;
+  }
+`;
+
+// Every cerebrum/cerebellum particle already carries its left/right hemisphere
+// side baked into the sign of its rest-position x (see buildBrain's `side`
+// variable) — "opening" the brain is just widening that existing gap along x.
+const HEMISPHERE_SPLIT_GLSL = `
+  vec3 splitHemispheres(vec3 p, float amount) {
+    p.x += sign(p.x) * amount;
     return p;
   }
 `;
@@ -202,6 +235,7 @@ const POINT_VERT = `
   uniform float uFly;
   uniform float uPixelRatio;
   uniform float uDisplace;
+  uniform float uHemisphereSplit;
   uniform vec2 uCursorNDC;
   uniform float uCursorActive;
   attribute vec3 aColor;
@@ -213,15 +247,17 @@ const POINT_VERT = `
   varying float vPhase;
   varying float vCursorBoost;
   ${DISPERSE_GLSL}
+  ${HEMISPHERE_SPLIT_GLSL}
   ${SIMPLEX_NOISE_GLSL}
   ${DISPLACEMENT_GLSL}
   void main() {
-    vec3 p = disperse(position, uFly);
+    vec3 p = splitHemispheres(position, uHemisphereSplit);
+    p = disperse(p, uFly);
     p = displace(p, uDisplace, uTime);
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
-    float pulse = 0.5 + 0.5 * sin(uTime * 2.2 + aPhase);
-    float size = aSize * (1.0 + aGlow * pulse * 1.4);
-    gl_PointSize = clamp(size * uPixelRatio * (4.6 / -mv.z), 0.6, 15.0);
+    float pulse = 0.5 + 0.5 * sin(uTime * 0.9 + aPhase);
+    float size = aSize * (1.0 + aGlow * pulse * 0.35);
+    gl_PointSize = clamp(size * uPixelRatio * (4.6 / -mv.z), 1.1, 15.0);
     gl_Position = projectionMatrix * mv;
     vColor = aColor;
     vGlow = aGlow * pulse;
@@ -249,25 +285,11 @@ const POINT_FRAG = `
     vec2 uv = gl_PointCoord - 0.5;
     float d = length(uv);
     if (d > 0.5) discard;
-    float alpha = 1.0 - smoothstep(0.40, 0.5, d);
+    float alpha = 1.0 - smoothstep(0.42, 0.48, d);
     vec3 col = mix(vColor, vec3(0.55, 0.25, 0.95), vGlow * 0.6);
     col = mix(col, vec3(1.0), uBloom * 0.35 * (1.0 - d * 1.6));
     col += vCursorBoost;
     gl_FragColor = vec4(col, alpha * (0.9 + vGlow * 0.1));
-  }
-`;
-
-const GRID_VERT = `
-  void main() {
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-const GRID_FRAG = `
-  precision mediump float;
-  uniform float uOpacity;
-  void main() {
-    gl_FragColor = vec4(0.118, 0.357, 1.0, uOpacity);
   }
 `;
 
@@ -311,7 +333,14 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(55, mount.clientWidth / mount.clientHeight, 0.1, 100);
-    camera.position.set(0, 0, 4.3);
+    // Lateral/profile view, not frontal: the brain's front-back axis (z) is
+    // its longest (rz=1.42 vs rx=1.15, ry=0.92 in buildBrain), so viewing
+    // along world +X reads that length as the horizontal silhouette —
+    // frontal lobe curve on one side, cerebellum/brainstem on the other —
+    // instead of the symmetric, mirrored left/right hemisphere view. Starts
+    // at full viewing distance (ORBIT_RADIUS) — clarity and impact first;
+    // the render loop dives in from here as the user scrolls.
+    camera.position.set(ORBIT_RADIUS, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(mount.clientWidth, mount.clientHeight);
@@ -319,10 +348,12 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     renderer.setPixelRatio(pixelRatio);
     mount.appendChild(renderer.domElement);
 
-    // ── Mobile: 5 "planes" worth of density instead of 7 — reduce particle
-    // and node counts, and (below) disable the displacement shader and the
-    // chromatic-aberration post pass entirely.
-    const COUNT = isMobile ? 5000 : 9000;
+    // ── Density bumped ~2.8x on desktop (~2.4x on mobile, kept a bit more
+    // conservative to protect frame rate on lower-power devices) so the
+    // interior reads as anatomical mass rather than a hollow wireframe.
+    // Mobile still runs a reduced count, and (below) disables the
+    // displacement shader and the chromatic-aberration post pass entirely.
+    const COUNT = isMobile ? 12000 : 25000;
     const brain = buildBrain(COUNT);
 
     const geom = new THREE.BufferGeometry();
@@ -340,6 +371,7 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
         uBloom: { value: 0 },
         uDissolve: { value: 0 },
         uDisplace: { value: 0 },
+        uHemisphereSplit: { value: 0 },
         uCursorNDC: { value: new THREE.Vector2(0, 0) },
         uCursorActive: { value: 0 },
       },
@@ -353,34 +385,22 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     const points = new THREE.Points(geom, pointMat);
     scene.add(points);
 
-    // ── Ato IV synapse graph — extracted module (kNN=3, blue-noise node
-    // spread, traveling pulses, hover-triggered spikes).
+    // ── Ato IV synapse graph — extracted module (blue-noise node spread,
+    // traveling pulses, hover-triggered spikes). Cut down ~90% from the
+    // previous pass: the brief wants dense luminous PARTICLES to read as
+    // the brain, not a braided line web — the graph is now a faint accent,
+    // not a structural feature.
     const synapse: SynapseGraph = createSynapseGraph({
       positions: brain.positions,
       glowIndices: brain.glowIndices,
-      maxNodes: isMobile ? 50 : 90,
-      kNeighbors: 3,
-      minNodeSeparation: 0.14,
-      pulseCount: isMobile ? 120 : 240,
+      maxNodes: isMobile ? 8 : 14,
+      kNeighbors: 2,
+      minNodeSeparation: 0.22,
+      pulseCount: isMobile ? 16 : 28,
       pixelRatio,
     });
     scene.add(synapse.lines);
     if (synapse.pulses) scene.add(synapse.pulses);
-
-    // ── Ato II: faint rotating vector grid behind the brain ──────────────
-    const gridGeom = new THREE.BufferGeometry();
-    gridGeom.setAttribute("position", new THREE.BufferAttribute(buildPolarGrid(6, 48, 16, 3.6), 3));
-    const gridMat = new THREE.ShaderMaterial({
-      uniforms: { uOpacity: { value: 0 } },
-      vertexShader: GRID_VERT,
-      fragmentShader: GRID_FRAG,
-      transparent: true,
-      depthWrite: false,
-      blending: THREE.NormalBlending,
-    });
-    const grid = new THREE.LineSegments(gridGeom, gridMat);
-    grid.position.z = -2.4;
-    scene.add(grid);
 
     // ── Chromatic-aberration post pass setup (desktop only) ───────────────
     let renderTarget = isMobile
@@ -423,7 +443,7 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
 
     // ── Reduced motion: one static, centered frame — no scroll-jack, no RAF ──
     if (reduced) {
-      camera.position.z = 4.3;
+      camera.position.set(ORBIT_RADIUS, 0, 0);
       camera.lookAt(0, 0, 0);
       renderer.render(scene, camera);
       window.addEventListener("resize", resize);
@@ -433,8 +453,6 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
         geom.dispose();
         pointMat.dispose();
         synapse.dispose();
-        gridGeom.dispose();
-        gridMat.dispose();
         renderTarget?.dispose();
         postMat.dispose();
         renderer.dispose();
@@ -483,7 +501,7 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       const progress = progressRef?.current ?? 0;
 
       // ── ATO I (0–0.22): revelação — quase parado, cérebro a assentar ──
-      // ── ATO II (0.22–0.55): dissecação — grid vetorial surge atrás ──
+      // ── ATO II (0.22–0.55): dissecação — bloom sobe no núcleo ──
       const act2 = smoothstep(ACT2_START, ACT3_START, progress);
       // ── ATO III (0.55–0.85): fly-through — explosão + aberração + displacement ──
       const act3 = smoothstep(ACT3_START, ACT4_START, progress);
@@ -491,18 +509,19 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       const act4 = smoothstep(ACT4_START, 1.0, progress);
 
       const fly = act3; // macro dive, driven by scroll
+      const hemisphereOpen = smoothstep(0, HEMISPHERE_OPEN_END, progress);
       pointMat.uniforms.uTime!.value = t;
       pointMat.uniforms.uFly!.value = fly;
       pointMat.uniforms.uBloom!.value = act2 * (1 - act4);
       pointMat.uniforms.uDissolve!.value = act4;
-      pointMat.uniforms.uDisplace!.value = isMobile ? 0 : act3 * 0.18;
+      pointMat.uniforms.uDisplace!.value = isMobile ? 0 : act3 * 0.04;
+      pointMat.uniforms.uHemisphereSplit!.value = hemisphereOpen * HEMISPHERE_SPLIT_MAX;
       pointMat.uniforms.uCursorNDC!.value.set(parallax.xRef.current, -parallax.yRef.current);
       pointMat.uniforms.uCursorActive!.value = 1;
 
       synapse.lineMat.uniforms.uFly!.value = fly;
-      synapse.lineMat.uniforms.uOpacity!.value = 0.16 * (1 - act4) * (1 - act3 * 0.5);
-      gridMat.uniforms.uOpacity!.value = act2 * (1 - act4) * 0.22;
-      grid.rotation.z = t * 0.03 + act2 * ((8 * Math.PI) / 180);
+      synapse.lineMat.uniforms.uHemisphereSplit!.value = hemisphereOpen * HEMISPHERE_SPLIT_MAX;
+      synapse.lineMat.uniforms.uOpacity!.value = 0.35 * (1 - act4) * (1 - act3 * 0.5);
 
       // Micro-tremor idle (±0.4px equivalent, ~0.6Hz) on the core when the
       // narrative is resting (Ato I) and the pointer parallax is near zero —
@@ -511,7 +530,13 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       const tremorX = Math.sin(t * 0.6 * Math.PI * 2) * idleTremor;
       const tremorY = Math.cos(t * 0.51 * Math.PI * 2) * idleTremor;
 
-      points.rotation.y = parallax.xRef.current * 0.25 + t * 0.05;
+      // Continuous idle spin while resting at the very top (time-driven, not
+      // scroll-driven) — hands off fast (within the first 5% of scroll) to
+      // the scroll-driven hemisphere opening, instead of the two competing.
+      const idleSpinFade = 1 - smoothstep(0.0, 0.05, progress);
+      const idleSpinAngle = t * 0.18 * idleSpinFade;
+
+      points.rotation.y = parallax.xRef.current * 0.25 + idleSpinAngle;
       points.rotation.x = parallax.yRef.current * 0.15;
       points.position.set(tremorX, tremorY, 0);
       points.updateMatrixWorld();
@@ -521,10 +546,19 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       synapse.update(dt);
       checkHover(t);
 
-      camera.position.z = lerp(4.3, -1.4, fly);
+      // ── Camera: holds the fixed lateral/profile angle (ORBIT_PHASE) for the
+      // entire scroll journey — no rotation, no orbit. The brain itself
+      // idle-spins in place at rest (see idleSpin above); scroll drives only
+      // a straight dolly-in from ORBIT_RADIUS toward CAMERA_MIN_RADIUS, read
+      // as a clean, direct expansion/zoom with no swirl or pirouette.
+      const zoomIn = smoothstep(0.0, 0.9, progress);
+      const orbitRadius = lerp(ORBIT_RADIUS, CAMERA_MIN_RADIUS, zoomIn);
+      camera.position.x = Math.sin(ORBIT_PHASE) * orbitRadius;
+      camera.position.z = Math.cos(ORBIT_PHASE) * orbitRadius;
+      camera.position.y = 0;
       camera.lookAt(0, 0, 0);
 
-      const aberration = isMobile ? 0 : act3 * 0.006;
+      const aberration = isMobile ? 0 : act3 * 0.0015;
 
       // The render-target + fullscreen-quad pass doubles fill-rate cost —
       // only pay for it while the effect is actually visible (Ato III), and
@@ -568,8 +602,6 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       geom.dispose();
       pointMat.dispose();
       synapse.dispose();
-      gridGeom.dispose();
-      gridMat.dispose();
       renderTarget?.dispose();
       postMat.dispose();
       renderer.dispose();

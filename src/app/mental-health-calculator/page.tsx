@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Reveal } from "@/components/home/Reveal";
+import { MentalHealthCalculator } from "@/components/sections/MentalHealthCalculator";
 import { Button } from "@/components/ui/button";
 import { PageHero } from "@/components/ui/PageHero";
 import { CalculatorForm } from "./CalculatorForm";
@@ -57,6 +58,8 @@ export default function CalculatorPage() {
           <CalculatorForm />
         </div>
       </section>
+
+      <MentalHealthCalculator />
 
       <section className="border-t border-border bg-muted py-24">
         <div className="container mx-auto max-w-6xl space-y-16 px-4 md:px-6">

@@ -7,13 +7,13 @@ import { useReducedMotion } from "framer-motion";
  * ── MOTION INSTEAD OF CHROME ─────────────────────────────────────────────
  * A 2000-particle Canvas 2D system layered over BrainHero's WebGL scene —
  * purely additive, doesn't touch BrainHero's internals. Each particle has
- * four precomputed 3D "shape targets" (toroid, galaxy, brain-hugging,
- * dot-matrix); every frame we blend between them by scroll progress and
+ * three precomputed 3D "shape targets" (galaxy, brain-hugging, dot-matrix);
+ * every frame we blend between them by scroll progress and
  * project the result with hand-rolled perspective math (same technique as
  * the rest of this project's canvas-based visuals — no new dependency).
  *
- * ── ATO I   (0.00–0.22) Toroide que respira ──
- * ── ATO II  (0.22–0.55) Galáxia em rotação acelerada (eixo Y) ──
+ * ── ATO I   (0.00–0.22) Camada oculta — só o cérebro WebGL fica visível ──
+ * ── ATO II  (0.22–0.55) Surge já em galáxia, rotação acelerada (eixo Y) ──
  * ── ATO III (0.55–0.85) Colapso sobre o córtex — spikes de luz ──
  * ── ATO IV  (0.85–1.00) Dot-matrix minimalista ──
  */
@@ -44,7 +44,6 @@ function mulberry32(seed: number) {
 }
 
 interface Shapes {
-  toroid: Float32Array;
   galaxy: Float32Array;
   brain: Float32Array;
   dotMatrix: Float32Array;
@@ -54,7 +53,6 @@ interface Shapes {
 
 function buildShapes(count: number): Shapes {
   const rand = mulberry32(20260713);
-  const toroid = new Float32Array(count * 3);
   const galaxy = new Float32Array(count * 3);
   const brain = new Float32Array(count * 3);
   const dotMatrix = new Float32Array(count * 3);
@@ -64,20 +62,10 @@ function buildShapes(count: number): Shapes {
   const gridSize = Math.ceil(Math.sqrt(count));
 
   for (let i = 0; i < count; i++) {
-    const u = rand() * Math.PI * 2;
-    const v = rand() * Math.PI * 2;
-
-    // ── ATO I: toroide — raio maior 130, raio do tubo 42 ──
-    const R = 130;
-    const r = 42;
-    toroid[i * 3] = (R + r * Math.cos(v)) * Math.cos(u);
-    toroid[i * 3 + 1] = (R + r * Math.cos(v)) * Math.sin(u) * 0.5;
-    toroid[i * 3 + 2] = r * Math.sin(v);
-
     // ── ATO II: galáxia — braços espirais achatados ──
     const arm = Math.floor(rand() * 3);
     const armAngle = (arm / 3) * Math.PI * 2;
-    const galaxyRadius = Math.pow(rand(), 0.6) * 190;
+    const galaxyRadius = Math.pow(rand(), 0.6) * 150;
     const spiral = armAngle + galaxyRadius * 0.045 + rand() * 0.4;
     galaxy[i * 3] = Math.cos(spiral) * galaxyRadius;
     galaxy[i * 3 + 1] = (rand() - 0.5) * 10 * (1 - galaxyRadius / 190);
@@ -106,7 +94,7 @@ function buildShapes(count: number): Shapes {
     phase[i] = rand() * Math.PI * 2;
   }
 
-  return { toroid, galaxy, brain, dotMatrix, colorIndex, phase };
+  return { galaxy, brain, dotMatrix, colorIndex, phase };
 }
 
 export function ParticleMorph({ progressRef }: { progressRef: RefObject<number> }) {
@@ -177,15 +165,19 @@ export function ParticleMorph({ progressRef }: { progressRef: RefObject<number> 
       const elapsed = (performance.now() - start) / 1000;
       const progress = progressRef.current;
 
-      // ── Blend weights across the 4 Ato shapes — overlapping smoothstep
-      // ramps so the morph crossfades instead of popping at boundaries.
-      const w1 = 1 - smoothstep(0.15, 0.3, progress);
-      const w2 = smoothstep(0.15, 0.3, progress) * (1 - smoothstep(0.45, 0.6, progress));
+      // ── Blend weights across the 3 remaining Ato shapes — overlapping
+      // smoothstep ramps so the morph crossfades instead of popping at
+      // boundaries. Galaxy now covers the full Ato I–II span (no toroid).
+      const w2 = 1 - smoothstep(0.45, 0.6, progress);
       const w3 = smoothstep(0.45, 0.6, progress) * (1 - smoothstep(0.78, 0.9, progress));
       const w4 = smoothstep(0.78, 0.9, progress);
-      const total = w1 + w2 + w3 + w4 || 1;
+      const total = w2 + w3 + w4 || 1;
 
-      const breathe = 1 + Math.sin(elapsed * 0.5) * 0.04 * w1; // Ato I: respira
+      // The layer itself stays invisible through Ato I (progress 0–0.22) so
+      // only BrainHero's WebGL cloud is on screen at rest, then fades in
+      // already in galaxy form for Ato II onward.
+      const layerFadeIn = smoothstep(0.0, 0.22, progress);
+
       const rotY = elapsed * (0.15 + w2 * 0.9); // Ato II: rotação acelerada no eixo Y
       const rotX = 0.25;
       const cosY = Math.cos(rotY);
@@ -197,11 +189,11 @@ export function ParticleMorph({ progressRef }: { progressRef: RefObject<number> 
       const cx = width / 2;
       const cy = height / 2;
 
-      // Boost this layer's visual prominence during Atos I–II (toroid/galaxy
-      // are meant to be the star there), easing back toward baseline once
-      // the brain's own WebGL light show (synapse spikes, dissolve) takes
-      // over in Atos III–IV — keeps both layers from competing for attention.
-      const prominence = 0.75 + 0.6 * (w1 + w2);
+      // Boost this layer's visual prominence during Ato II (galaxy is meant
+      // to be the star there), easing back toward baseline once the brain's
+      // own WebGL light show (synapse spikes, dissolve) takes over in Atos
+      // III–IV — keeps both layers from competing for attention.
+      const prominence = layerFadeIn * (0.75 + 0.6 * w2);
 
       ctx.clearRect(0, 0, width, height);
       ctx.save();
@@ -209,23 +201,12 @@ export function ParticleMorph({ progressRef }: { progressRef: RefObject<number> 
 
       for (let i = 0; i < PARTICLE_COUNT; i++) {
         const bx =
-          ((shapes.toroid[i * 3]! * w1 +
-            shapes.galaxy[i * 3]! * w2 +
-            shapes.brain[i * 3]! * w3 +
-            shapes.dotMatrix[i * 3]! * w4) /
-            total) *
-          breathe;
+          (shapes.galaxy[i * 3]! * w2 + shapes.brain[i * 3]! * w3 + shapes.dotMatrix[i * 3]! * w4) / total;
         const by =
-          (shapes.toroid[i * 3 + 1]! * w1 +
-            shapes.galaxy[i * 3 + 1]! * w2 +
-            shapes.brain[i * 3 + 1]! * w3 +
-            shapes.dotMatrix[i * 3 + 1]! * w4) /
+          (shapes.galaxy[i * 3 + 1]! * w2 + shapes.brain[i * 3 + 1]! * w3 + shapes.dotMatrix[i * 3 + 1]! * w4) /
           total;
         const bz =
-          (shapes.toroid[i * 3 + 2]! * w1 +
-            shapes.galaxy[i * 3 + 2]! * w2 +
-            shapes.brain[i * 3 + 2]! * w3 +
-            shapes.dotMatrix[i * 3 + 2]! * w4) /
+          (shapes.galaxy[i * 3 + 2]! * w2 + shapes.brain[i * 3 + 2]! * w3 + shapes.dotMatrix[i * 3 + 2]! * w4) /
           total;
 
         // Dot-matrix (w4-dominant) shouldn't spin with the rest — blend the
@@ -257,7 +238,7 @@ export function ParticleMorph({ progressRef }: { progressRef: RefObject<number> 
         sx += offsetX[i]!;
         sy += offsetY[i]!;
 
-        const twinkle = 0.7 + 0.3 * Math.sin(elapsed * 2 + shapes.phase[i]!);
+        const twinkle = 0.85 + 0.15 * Math.sin(elapsed * 0.9 + shapes.phase[i]!);
         // Ato III core "spikes": near the brain surface, occasional bright flares.
         const spike = w3 > 0.3 && shapes.phase[i]! % 1.7 < 0.02 * w3 ? 1.8 : 1;
 

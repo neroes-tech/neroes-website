@@ -13,22 +13,40 @@ export const CALENDLY_URL = "https://calendly.com/pedro-ebw/brain-experience-eve
 
 export const SITE_URL = "https://neroes.tech";
 
-export const TESTIMONIALS = [
+export interface Testimonial {
+  name: string;
+  role: string;
+  content: string;
+  /** Client company name — only set once confirmed against a real, named affiliation. */
+  company?: string;
+  /** Path to the client's logo file — only set once the real asset is supplied. */
+  companyLogo?: string;
+}
+
+// TODO(assets): Bruno confirmed Novartis / Bayer / Mega Hits / CCA Law /
+// Valadares as real clients, and the José/Conguito/Joana mapping below — but
+// the real logo files for those companies still haven't been supplied. Cards
+// render fine without them (see ClientTestimonials.tsx's fallback); the logo
+// slot just stays empty until the files are added.
+export const TESTIMONIALS: Testimonial[] = [
   {
     name: "José Faria Machado",
     role: "Communication Manager",
+    company: "Bayer",
     content:
       "The Neroes platform gave our team the mental clarity needed to excel under pressure. A truly transformative tool.",
   },
   {
     name: "Conguito",
     role: "Humorist/Broadcaster/Musician",
+    company: "Mega Hits",
     content:
       "As someone constantly in the public eye, maintaining focus is hard. This brain training changed how I approach my daily work.",
   },
   {
     name: "Joana Caetano",
     role: "Business Intelligence Manager",
+    company: "Novartis",
     content:
       "We've seen a measurable improvement in decision-making speed across our department since implementing Neroes.",
   },
@@ -100,6 +118,11 @@ export const TEAM_BIOS: Record<string, string[]> = {
 // ratio, so next/image doesn't distort them (object-contain also guards
 // against this, but matching the intrinsic ratio avoids a layout-shift
 // warning).
+//
+// `sizeBoost: true` flags logos whose visible mark occupies a much smaller
+// fraction of the source canvas than the others (portugal-ventures.png has
+// generous internal padding), so a shared height makes it read as noticeably
+// smaller/fainter next to the rest — this renders it larger to compensate.
 export const PARTNERS = [
   { name: "KPMG", url: "https://home.kpmg/pt/pt/home.html", logo: "/partners/kpmg.png", logoWidth: 40 },
   { name: "BGI", url: "http://bgi.pt/", logo: "/partners/bgi.png", logoWidth: 80 },
@@ -110,6 +133,7 @@ export const PARTNERS = [
     name: "Portugal Ventures",
     url: "https://www.portugalventures.pt/en/",
     logo: "/partners/portugal-ventures.png",
-    logoWidth: 56,
+    logoWidth: 123,
+    sizeBoost: true,
   },
 ];

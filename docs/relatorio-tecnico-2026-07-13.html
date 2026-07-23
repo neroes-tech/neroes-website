@@ -1,0 +1,591 @@
+<title>Relatório Técnico — Redesign Neroes</title>
+<style>
+  :root {
+    --bg: #FAFAF7;
+    --bg-raised: #FFFFFF;
+    --text: #1E2233;
+    --text-muted: #5C6178;
+    --border: #E2E3EA;
+    --accent: #1E5BFF;
+    --accent-soft: #E9EFFF;
+    --teal: #0F9C8E;
+    --teal-soft: #E3F5F2;
+    --amber: #B4700A;
+    --amber-soft: #FBF0DD;
+    --violet: #6D4FD1;
+    --mono-bg: #F0F0EC;
+
+    --font-display: "Avenir Next", "Century Gothic", "Segoe UI", system-ui, sans-serif;
+    --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "Cascadia Code", "Consolas", "SFMono-Regular", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161F;
+      --bg-raised: #1B1E2A;
+      --text: #F2F1EC;
+      --text-muted: #9EA3B8;
+      --border: #2B2E3D;
+      --accent: #5C8AFF;
+      --accent-soft: #202742;
+      --teal: #3FC9B8;
+      --teal-soft: #172925;
+      --amber: #E3A94A;
+      --amber-soft: #2B2416;
+      --violet: #A48CF0;
+      --mono-bg: #10121A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14161F;
+    --bg-raised: #1B1E2A;
+    --text: #F2F1EC;
+    --text-muted: #9EA3B8;
+    --border: #2B2E3D;
+    --accent: #5C8AFF;
+    --accent-soft: #202742;
+    --teal: #3FC9B8;
+    --teal-soft: #172925;
+    --amber: #E3A94A;
+    --amber-soft: #2B2416;
+    --violet: #A48CF0;
+    --mono-bg: #10121A;
+  }
+  :root[data-theme="light"] {
+    --bg: #FAFAF7;
+    --bg-raised: #FFFFFF;
+    --text: #1E2233;
+    --text-muted: #5C6178;
+    --border: #E2E3EA;
+    --accent: #1E5BFF;
+    --accent-soft: #E9EFFF;
+    --teal: #0F9C8E;
+    --teal-soft: #E3F5F2;
+    --amber: #B4700A;
+    --amber-soft: #FBF0DD;
+    --violet: #6D4FD1;
+    --mono-bg: #F0F0EC;
+  }
+
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, .toc a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 220px minmax(0, 740px);
+    gap: 64px;
+    justify-content: center;
+  }
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .toc { display: none; }
+  }
+
+  header.masthead {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 56px 24px 40px;
+    border-bottom: 1px solid var(--border);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(28px, 4vw, 40px);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    margin: 0 0 16px;
+    text-wrap: balance;
+    max-width: 760px;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+  .meta strong { color: var(--text); font-weight: 600; }
+
+  .stat-strip {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat {
+    flex: 1 1 160px;
+    padding: 0 28px;
+    border-left: 1px solid var(--border);
+  }
+  .stat:first-child { border-left: none; padding-left: 0; }
+  .stat .num {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 26px;
+    display: block;
+  }
+  .stat .label {
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+
+  .toc {
+    position: sticky;
+    top: 40px;
+    align-self: start;
+    padding-top: 48px;
+    font-size: 13px;
+  }
+  .toc-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  .toc ol { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
+  .toc li { counter-increment: toc; margin-bottom: 9px; }
+  .toc a {
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    gap: 8px;
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--font-mono);
+    color: var(--border);
+    font-size: 11px;
+    padding-top: 1px;
+  }
+
+  main { padding: 48px 0 96px; min-width: 0; }
+
+  section { margin-bottom: 56px; scroll-margin-top: 24px; }
+  section > h2 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    margin: 0 0 6px;
+  }
+  section > .section-sub {
+    color: var(--text-muted);
+    font-size: 14.5px;
+    margin: 0 0 24px;
+  }
+
+  p { margin: 0 0 14px; max-width: 68ch; }
+  .lede { font-size: 16.5px; max-width: 66ch; }
+
+  h3 {
+    font-family: var(--font-display);
+    font-size: 16.5px;
+    font-weight: 700;
+    margin: 28px 0 6px;
+  }
+  h3 .badge { font-weight: 500; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+  .badge.done { background: var(--teal-soft); color: var(--teal); }
+  .badge.limitation { background: var(--amber-soft); color: var(--amber); }
+  .badge.pending { background: var(--accent-soft); color: var(--accent); }
+
+  .feature-block {
+    border-left: 2px solid var(--border);
+    padding-left: 18px;
+    margin: 18px 0 26px;
+  }
+  .feature-block p { font-size: 14.5px; }
+  .feature-block ul { margin: 8px 0 0; padding-left: 18px; font-size: 14.5px; }
+  .feature-block li { margin-bottom: 5px; }
+
+  code, .path {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    background: var(--mono-bg);
+    padding: 1px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .fix-card {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+  }
+  .fix-card .fix-title {
+    font-weight: 700;
+    font-size: 14.5px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .fix-card .metric {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--teal);
+    font-weight: 600;
+  }
+  .fix-card p { font-size: 14px; margin-bottom: 0; max-width: none; }
+
+  .learning-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .learning-item {
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 12px;
+    padding: 4px 0;
+  }
+  .learning-item .n {
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 13px;
+    padding-top: 2px;
+  }
+  .learning-item p { margin: 0; font-size: 14.5px; max-width: none; }
+  .learning-item .why { color: var(--text-muted); font-size: 13px; margin-top: 3px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-top: 8px;
+  }
+  th, td {
+    text-align: left;
+    padding: 9px 12px 9px 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .table-wrap { overflow-x: auto; }
+
+  .pending-card {
+    background: var(--amber-soft);
+    border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+  }
+  .pending-card .fix-title { color: var(--amber); }
+  .pending-card p { font-size: 14px; margin-bottom: 0; max-width: none; }
+
+  footer {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 24px 56px;
+    border-top: 1px solid var(--border);
+    font-size: 12.5px;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    section { animation: rise 0.5s ease-out both; }
+    section:nth-of-type(1) { animation-delay: 0s; }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<header class="masthead">
+  <p class="eyebrow">Relatório técnico — interno</p>
+  <h1>Redesign Neroes: hero cinematográfico em WebGL, narrativa em scroll e novas secções de produto</h1>
+  <div class="meta">
+    <span>De <strong>Wendell Alves</strong> para <strong>Bruno Sousa</strong></span>
+    <span>Branch <code>v2-claudeFable</code></span>
+    <span>Repositório <code>neroes-tech/neroes-website</code></span>
+    <span>2026-07-13</span>
+  </div>
+</header>
+
+<div class="stat-strip">
+  <div class="stat"><span class="num">9</span><span class="label">componentes novos criados</span></div>
+  <div class="stat"><span class="num">4</span><span class="label">bugs de engenharia corrigidos</span></div>
+  <div class="stat"><span class="num">2</span><span class="label">limitações/pendências em aberto</span></div>
+  <div class="stat"><span class="num">100%</span><span class="label">typecheck · lint · build limpos</span></div>
+</div>
+
+<div class="shell">
+  <nav class="toc" aria-label="Índice">
+    <p class="toc-label">Índice</p>
+    <ol>
+      <li><a href="#stack">Stack e arquitetura</a></li>
+      <li><a href="#estrutural">Limpeza estrutural</a></li>
+      <li><a href="#hero">Hero 3D — o cérebro</a></li>
+      <li><a href="#narrativa">Narrativa em 4 atos</a></li>
+      <li><a href="#particulas">Sistema de partículas</a></li>
+      <li><a href="#produto">Secções de produto</a></li>
+      <li><a href="#bugs">Bugs corrigidos</a></li>
+      <li><a href="#aprendizagens">Aprendizagens técnicas</a></li>
+      <li><a href="#workflow">Workflow de verificação</a></li>
+      <li><a href="#pendencias">Pendências</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section id="sumario">
+      <h2>Sumário</h2>
+      <p class="lede">
+        Esta sessão evoluiu o redesign Next.js do site Neroes em duas frentes: correções estruturais herdadas
+        do WordPress (navegação, equipa, calculadora, logótipos de parceiros) e a construção de um hero
+        completamente novo — um cérebro processual em WebGL com uma narrativa em quatro atos controlada por
+        scroll, uma camada de 2000 partículas 2D que muda de forma ao longo da narrativa, e efeitos de
+        pós-produção (grão, halação, aberração cromática). A sessão terminou com duas novas secções de produto
+        e testemunhos logo a seguir ao hero. Todo o código passa em <code>typecheck</code>, <code>lint</code> e
+        <code>build</code> antes de cada entrega.
+      </p>
+    </section>
+
+    <section id="stack">
+      <h2>Stack e arquitetura</h2>
+      <p class="section-sub">Sem alterações à stack acordada — apenas consolidação sobre o que já existia.</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Camada</th><th>Tecnologia</th></tr>
+          <tr><td>Framework</td><td>Next.js 15 (App Router), React 19</td></tr>
+          <tr><td>Linguagem</td><td>TypeScript estrito — <code>noUncheckedIndexedAccess</code> ativo</td></tr>
+          <tr><td>Estilos</td><td>Tailwind v4, tokens CSS-first em <code>@theme inline</code></td></tr>
+          <tr><td>Motor 3D</td><td>Three.js 0.185 — shaders GLSL escritos à mão, sem addon de post-processing</td></tr>
+          <tr><td>Animação</td><td>Framer Motion (reveals, variantes de texto)</td></tr>
+          <tr><td>Backend previsto</td><td>Supabase · deploy Vercel</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section id="estrutural">
+      <h2>Limpeza estrutural</h2>
+      <p class="section-sub">Correções de base antes da fase visual, todas <span class="badge done">concluído</span></p>
+      <div class="feature-block">
+        <ul>
+          <li><strong>Navbar</strong> — logótipo e ordem do menu limpos.</li>
+          <li><strong>Equipa</strong> — <code>src/app/team/page.tsx</code> removida; conteúdo fundido em <code>/about</code> com bios reais (<code>TEAM_BIOS</code>) e cartões de testemunho.</li>
+          <li><strong>Calculadora</strong> — cartão de resultado "Turnover" recentrado na sua linha.</li>
+          <li><strong>Parceiros</strong> — logótipos reais (KPMG, BGI, IPN, IBEB, FCUL, Portugal Ventures) servidos via <code>next/image</code> com <code>grayscale opacity-60 hover:opacity-100 hover:grayscale-0</code>.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="hero">
+      <h2>Hero 3D — o cérebro <span class="badge done">concluído</span></h2>
+      <p class="section-sub"><span class="path">src/components/BrainHero.tsx</span> · <span class="path">src/components/hero/SynapseGraph.ts</span> · <span class="path">src/components/hero/displacementShader.ts</span></p>
+      <div class="feature-block">
+        <p>
+          Nuvem de pontos processual (<code>buildBrain()</code>) renderizada com shaders GLSL próprios
+          (<code>POINT_VERT</code>/<code>POINT_FRAG</code>), com deslocamento por ruído simplex e um grafo de
+          sinapses independente:
+        </p>
+        <ul>
+          <li>Grafo de sinapses com amostragem tipo Poisson-disk (nós bem espalhados), arestas por 3-vizinhos-mais-próximos (kNN), pulsos ambiente a cada ~500ms e pulsos disparados ao passar o cursor sobre um nó (hit-testing em screen-space).</li>
+          <li>Aberração cromática (post-process de 2 passes) só corre no Ato III — fora dessa janela, o custo extra nem existe.</li>
+          <li>Redução para mobile (&lt;768px): 5000 pontos em vez de 9000, 50 nós em vez de 90, sem deslocamento nem aberração cromática.</li>
+          <li>Resize com debounce de 150ms; um único <code>requestAnimationFrame</code> para toda a cena.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="narrativa">
+      <h2>Narrativa em 4 atos <span class="badge done">concluído</span></h2>
+      <p class="section-sub"><span class="path">src/components/hero/useScrollNarrative.ts</span> · <span class="path">useMouseParallax.ts</span> · <span class="path">GrainOverlay.tsx</span> · <span class="path">CursorHalo.tsx</span> · <span class="path">AtmosphericBackdrop.tsx</span></p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Ato</th><th>Janela de scroll</th><th>O que acontece</th></tr>
+          <tr><td>I — Revelação</td><td>0 – 0.22</td><td>Headline revela-se linha a linha; cérebro emerge</td></tr>
+          <tr><td>II — Dissecação</td><td>0.22 – 0.55</td><td>Deslocamento do ruído expõe a estrutura interna</td></tr>
+          <tr><td>III — Fly-Through</td><td>0.55 – 0.85</td><td>Câmara atravessa a nuvem; aberração cromática ativa</td></tr>
+          <tr><td>IV — Emergência de dados</td><td>0.85 – 1.00</td><td>KPIs reais fazem count-up: +111% controlo emocional, +21.7% velocidade de decisão, -14.2% ansiedade</td></tr>
+        </table>
+      </div>
+      <div class="feature-block">
+        <p>Progresso de scroll suavizado por interpolação (fator 0.04) guardado numa ref — sem re-render por frame; o estado React (<code>act</code>) só é atualizado a cada ~100ms para os consumidores JSX. Paralaxe do rato é independente do scroll (interpolação 0.08). Por cima de tudo, quatro camadas "cinema grade": grão (canvas a 12fps), halação âmbar, LUT azul de marca a 3%, e scanline a 2%.</p>
+      </div>
+    </section>
+
+    <section id="particulas">
+      <h2>Sistema de partículas 2D <span class="badge done">concluído</span></h2>
+      <p class="section-sub"><span class="path">src/components/hero/ParticleMorph.tsx</span></p>
+      <div class="feature-block">
+        <p>2000 partículas em Canvas 2D, sobrepostas à cena WebGL sem tocar em <code>BrainHero.tsx</code>. Quatro formas pré-computadas (toroide, galáxia, invólucro do cérebro, matriz de pontos) que se misturam de acordo com o progresso do scroll, mais interação magnética com o rato.</p>
+        <ul>
+          <li>Projeção em perspetiva escrita à mão (sem biblioteca) — <code>FOCAL=640</code>, <code>CAM_DIST=430</code>.</li>
+          <li>Desenho via <code>fillRect</code> em vez de <code>arc()</code> — medido como mais rápido para 2000 partículas por frame.</li>
+          <li>Um único observer de interseção pausa o RAF quando a secção sai do ecrã; devolve <code>null</code> sob <code>prefers-reduced-motion</code>.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="produto">
+      <h2>Novas secções de produto <span class="badge done">concluído</span></h2>
+      <p class="section-sub"><span class="path">src/components/sections/ProductShowcase.tsx</span> · <span class="path">TestimonialsGrid.tsx</span> · <span class="path">useLazyVideoInView.ts</span></p>
+      <div class="feature-block">
+        <p>Integradas em <code>page.tsx</code> logo a seguir ao Hero:</p>
+        <ul>
+          <li><strong>Rendimento Mental Treinável</strong> — grid de 12 colunas, player de vídeo com botão Play flutuante em azul de marca.</li>
+          <li><strong>Apoiado por Campeões</strong> — cartões verticais <code>aspect-[9/16]</code>, overlay que esvazia em 300ms no hover/foco, clique ativa áudio.</li>
+          <li>Vídeo em <code>preload="none"</code> com <code>IntersectionObserver</code> partilhado — o <code>src</code> só é anexado quando o elemento entra no viewport.</li>
+        </ul>
+      </div>
+      <div class="pending-card">
+        <div class="fix-title">Sem ficheiros de vídeo reais <span class="badge pending">pendente</span></div>
+        <p>Estrutura e caminhos já preparados (<code>/videos/game-demo.mp4</code>, <code>/videos/joao-crisostomo.mp4</code>, <code>/videos/george-executive.mp4</code>); layout já tem fallback gracioso caso o ficheiro não exista. Faltam os ficheiros reais e, por identificarem pessoas reais pelo nome, confirmação de autorização de uso.</p>
+      </div>
+    </section>
+
+    <section id="bugs">
+      <h2>Bugs corrigidos</h2>
+      <div class="fix-card">
+        <div class="fix-title">THREE.Clock consumido duas vezes por frame <span class="metric">velocidade dos pulsos estava errada</span></div>
+        <p>Chamar <code>clock.getElapsedTime()</code> e depois <code>clock.getDelta()</code> no mesmo frame avança o relógio interno duas vezes. Corrigido para uma única chamada a <code>getDelta()</code>, lendo <code>clock.elapsedTime</code> diretamente para o tempo total.</p>
+      </div>
+      <div class="fix-card">
+        <div class="fix-title">Aberração cromática sempre ativa <span class="metric">~14.5fps → ~20+fps (headless)</span></div>
+        <p>O passe de post-processing (render-target + quad fullscreen) corria em todos os frames, mesmo fora do Ato III onde é invisível. Agora só corre quando <code>aberration &gt; 0.00005</code>.</p>
+      </div>
+      <div class="fix-card">
+        <div class="fix-title">Partículas quadradas em vez de circulares</div>
+        <p><code>THREE.PointsMaterial</code> usa sprites quadrados por omissão. Corrigido com um fragment shader próprio (<code>discard</code> fora do raio 0.5).</p>
+      </div>
+      <div class="fix-card">
+        <div class="fix-title"><span class="path">.gitignore</span> com regra nunca aplicada</div>
+        <p>Um <code>echo</code> anterior tinha concatenado <code>.claude/</code> na linha de <code>yarn-error.log*</code> sem quebra de linha, produzindo um glob inválido — <code>.claude/</code> nunca foi realmente ignorado. Corrigido para linhas separadas.</p>
+      </div>
+    </section>
+
+    <section id="aprendizagens">
+      <h2>Aprendizagens técnicas</h2>
+      <p class="section-sub">Padrões que vieram desta sessão e que valem para o resto do projeto.</p>
+      <div class="learning-grid">
+        <div class="learning-item">
+          <span class="n">01</span>
+          <div>
+            <p>Em qualquer loop de <code>requestAnimationFrame</code>, usar <em>refs</em> em vez de estado React para valores por-frame; estado só para mudanças discretas e "throttled" que a UI precisa de ler (ex.: o número do ato).</p>
+            <p class="why">Porquê: estado React em cada frame força re-render 60x/s; refs não.</p>
+          </div>
+        </div>
+        <div class="learning-item">
+          <span class="n">02</span>
+          <div>
+            <p>Efeitos caros (como a aberração cromática) devem ser condicionados à janela em que são visíveis, não correr sempre "por garantia".</p>
+            <p class="why">Porquê: o mesmo efeito invisível fora do Ato III estava a custar ~30% de FPS.</p>
+          </div>
+        </div>
+        <div class="learning-item">
+          <span class="n">03</span>
+          <div>
+            <p>Quando faltam ativos reais (logótipos, vídeos), construir a estrutura de código completa e tipada com caminhos de substituição claramente assinalados, em vez de bloquear a entrega ou inventar conteúdo.</p>
+            <p class="why">Porquê: permite entregar o resto do trabalho e trocar o ficheiro depois sem tocar em código.</p>
+          </div>
+        </div>
+        <div class="learning-item">
+          <span class="n">04</span>
+          <div>
+            <p>Nunca inventar estatísticas ou citações — todos os KPIs usados no hero (+111%, +21.7%, -14.2%) vêm da página de Ciência já verificada, não de números sugeridos em prompts externos.</p>
+            <p class="why">Porquê: prompts vindos de outras ferramentas (Lovable/Fable) por vezes sugeriam números fabricados.</p>
+          </div>
+        </div>
+        <div class="learning-item">
+          <span class="n">05</span>
+          <div>
+            <p>Prompts escritos para outra stack (Vite/TanStack Start, imagens estáticas) são adaptados à arquitetura real (Next.js + Three.js), preservando a intenção criativa em vez de construir um sistema paralelo incompatível.</p>
+            <p class="why">Porquê: evita duplicar lógica e manter dois sistemas de animação a competir pelo mesmo canvas.</p>
+          </div>
+        </div>
+        <div class="learning-item">
+          <span class="n">06</span>
+          <div>
+            <p>Antes de fazer push, confirmar com <code>git rev-list --left-right --count</code> se o branch remoto realmente diverge — evita usar <code>--force</code> quando um push normal chega.</p>
+            <p class="why">Porquê: <code>--force</code> sem necessidade arrisca apagar histórico de outra pessoa.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="workflow">
+      <h2>Workflow de verificação</h2>
+      <p class="section-sub">Repetido antes de cada entrega significativa nesta sessão.</p>
+      <div class="feature-block">
+        <p><code>npm run typecheck</code> → <code>npm run lint</code> → <code>npm run build</code> → reiniciar o servidor de desenvolvimento (<code>.next</code> limpo) → verificação visual com Playwright, incluindo isolar camadas individuais do canvas quando o resultado composto era ambíguo (ex.: esconder todos os canvas menos um para confirmar a forma das partículas isoladamente).</p>
+      </div>
+    </section>
+
+    <section id="pendencias">
+      <h2>Pendências e limitações conhecidas</h2>
+      <div class="pending-card">
+        <div class="fix-title">Vídeos de testemunho e demonstração <span class="badge pending">pendente</span></div>
+        <p>Ver secção "Novas secções de produto" acima — faltam os 3 ficheiros reais e confirmação de autorização para as pessoas identificadas.</p>
+      </div>
+      <div class="pending-card">
+        <div class="fix-title">Hydration mismatch sob <code>prefers-reduced-motion</code> <span class="badge limitation">limitação conhecida</span></div>
+        <p><code>useReducedMotion()</code> assume <code>false</code> no servidor; num cliente com o SO já configurado para movimento reduzido, o React descarta e regenera a árvore. É um padrão pré-existente, usado em todo o projeto desde antes desta sessão — não corrigido agora porque exige um refactor mais amplo de segurança-SSR; sinalizado ao utilizador como limitação conhecida, não bloqueante.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <span>Relatório gerado a partir do histórico de trabalho da sessão em <code>v2-claudeFable</code>.</span>
+  <span>Neroes — treino mental com neurofeedback</span>
+</footer>

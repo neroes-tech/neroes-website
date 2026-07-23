@@ -4,16 +4,18 @@ import { useEffect, useRef } from "react";
 
 /**
  * ── CAMADA 5 · CINEMA GRADE ──────────────────────────────────────────────
- * Bundles the four "film" treatments from the brief into one overlay stack:
+ * Bundles the "film" treatments from the brief into one overlay stack:
  *   1. Grain   — noise tile redrawn at a fixed 12fps (not tied to the main
  *                render loop, so it never competes with the WebGL scene).
- *   2. Halation — a soft amber smear around the frame's optical center,
- *                approximating 35mm halogenation around a bloomed highlight.
- *   3. LUT      — a faint brand-blue screen-blend wash across the whole
+ *   2. LUT      — a faint brand-blue screen-blend wash across the whole
  *                section, for a cohesive "graded" color feel.
- *   4. Scanline — a repeating 1px horizontal gradient at 2% opacity.
+ *   3. Scanline — a repeating 1px horizontal gradient at 2% opacity.
  * All skipped under prefers-reduced-motion (the caller controls that by not
  * mounting this component).
+ *
+ * A "halation" radial-gradient layer (soft amber smear at the frame's
+ * optical center) used to sit here too — removed because it read as a
+ * visible circular halo behind the brain rather than a subtle grade.
  */
 export function GrainOverlay() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -56,22 +58,13 @@ export function GrainOverlay() {
         style={{ imageRendering: "pixelated" }}
       />
 
-      {/* 2. Halation — soft amber smear around the core's screen position (frame center) */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 mix-blend-screen"
-        style={{
-          background: "radial-gradient(circle at 50% 50%, rgba(255,184,107,0.04) 0%, transparent 35%)",
-        }}
-      />
-
-      {/* 3. LUT — faint brand-blue grade wash */}
+      {/* 2. LUT — faint brand-blue grade wash */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-brand-blue/[0.03] mix-blend-screen"
       />
 
-      {/* 4. Scanline — repeating 1px horizontal gradient */}
+      {/* 3. Scanline — repeating 1px horizontal gradient */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 opacity-[0.02]"

@@ -30,10 +30,10 @@ const SECONDARY_LINKS = [
 ];
 
 const SPORT_LINKS = [
-  { href: "/sport", label: "Sport Home" },
-  { href: "/sport/science", label: "Sport Science" },
-  { href: "/sport/services", label: "Sport Services" },
-  { href: "/sport/about", label: "Sport About" },
+  { href: "/sport", label: "Overview" },
+  { href: "/sport/services", label: "Mental Training & Neurofeedback" },
+  { href: "/sport/science", label: "Science & Case Studies" },
+  { href: "/sport/about", label: "Team & Partnerships" },
 ];
 
 export function Navbar() {
@@ -65,11 +65,11 @@ export function Navbar() {
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2.5" onClick={closeMenu}>
           <Image
-            src="/neroes-logo.png"
+            src="/neroes-logo-horizontal.png"
             alt="Neroes"
-            width={2648}
-            height={3212}
-            className="h-10 w-auto"
+            width={2039}
+            height={771}
+            className="h-10 w-auto object-contain md:h-12"
             priority
           />
         </Link>
@@ -84,16 +84,19 @@ export function Navbar() {
           <DropdownMenu>
             <DropdownMenuTrigger
               className={cn(
-                "flex items-center gap-1 rounded-sm py-2 outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "flex items-center gap-1 rounded-sm py-2 outline-none transition-colors duration-200 hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 pathname.startsWith("/sport") ? "text-primary" : "text-muted-foreground",
               )}
             >
-              Sport <ChevronDown className="h-4 w-4" aria-hidden="true" />
+              Athletic Performance <ChevronDown className="h-4 w-4" aria-hidden="true" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
+            <DropdownMenuContent align="start" className="w-64">
               {SPORT_LINKS.map((link) => (
-                <DropdownMenuItem key={link.href} asChild>
-                  <Link href={link.href} className="w-full cursor-pointer">
+                <DropdownMenuItem key={link.href} asChild className="focus:bg-transparent focus:text-[#1E5BFF]">
+                  <Link
+                    href={link.href}
+                    className="w-full cursor-pointer rounded-sm px-3 py-2.5 text-slate-700 transition-colors duration-200 hover:text-[#1E5BFF]"
+                  >
                     {link.label}
                   </Link>
                 </DropdownMenuItem>
@@ -140,7 +143,7 @@ export function Navbar() {
           ))}
           <div className="mb-2 mt-2 flex flex-col gap-2 border-l-2 border-muted pl-4">
             <span className="mb-1 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Sport
+              Athletic Performance
             </span>
             {SPORT_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className="text-base" onClick={closeMenu}>
