@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { Brain } from "lucide-react";
 
 // Exactly the "Schedule Brain Experience" button's color — verified against
-// --secondary in globals.css (hsl(186 100% 26%) = #007785), not a guessed
-// or invented teal.
-const RAIL_COLOR = "#007785";
+// --secondary in globals.css (hsl(192 59% 29%) = #1F6677), the brand
+// manual's own dark-teal swatch.
+const RAIL_COLOR = "#1F6677";
 const RAIL_X = 52;
 
 // Just below the Navbar (h-20 = 80px) — any higher and the icon renders

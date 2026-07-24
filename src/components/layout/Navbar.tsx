@@ -4,40 +4,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useMotionValueEvent, useScroll } from "framer-motion";
 
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { CALENDLY_URL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/science", label: "Science" },
-  { href: "/brain-experience", label: "Brain Experience" },
-];
-
-const SECONDARY_LINKS = [
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-  { href: "/mental-health-calculator", label: "Calculator" },
-];
-
-const SPORT_LINKS = [
-  { href: "/sport", label: "Overview" },
-  { href: "/sport/services", label: "Mental Training & Neurofeedback" },
-  { href: "/sport/science", label: "Science & Case Studies" },
-  { href: "/sport/about", label: "Team & Partnerships" },
-];
-
 export function Navbar() {
   const pathname = usePathname();
+  const { t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const closeMenu = () => setIsMobileMenuOpen(false);
@@ -46,6 +24,19 @@ export function Navbar() {
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 12);
   });
+
+  const navLinks = [
+    { href: "/", label: t.nav.home },
+    { href: "/science", label: t.nav.science },
+    { href: "/brain-experience", label: t.nav.brainExperience },
+    { href: "/services", label: t.nav.services },
+  ];
+
+  const secondaryLinks = [
+    { href: "/about", label: t.nav.about },
+    { href: "/contact", label: t.nav.contact },
+    { href: "/mental-health-calculator", label: t.nav.calculator },
+  ];
 
   const linkClass = (href: string) =>
     cn(
@@ -75,36 +66,12 @@ export function Navbar() {
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
-          {NAV_LINKS.map((link) => (
+          {navLinks.map((link) => (
             <Link key={link.href} href={link.href} className={linkClass(link.href)}>
               {link.label}
             </Link>
           ))}
-
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              className={cn(
-                "flex items-center gap-1 rounded-sm py-2 outline-none transition-colors duration-200 hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                pathname.startsWith("/sport") ? "text-primary" : "text-muted-foreground",
-              )}
-            >
-              Athletic Performance <ChevronDown className="h-4 w-4" aria-hidden="true" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-64">
-              {SPORT_LINKS.map((link) => (
-                <DropdownMenuItem key={link.href} asChild className="focus:bg-transparent focus:text-[#1E5BFF]">
-                  <Link
-                    href={link.href}
-                    className="w-full cursor-pointer rounded-sm px-3 py-2.5 text-slate-700 transition-colors duration-200 hover:text-[#1E5BFF]"
-                  >
-                    {link.label}
-                  </Link>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {SECONDARY_LINKS.map((link) => (
+          {secondaryLinks.map((link) => (
             <Link key={link.href} href={link.href} className={linkClass(link.href)}>
               {link.label}
             </Link>
@@ -112,12 +79,13 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-4 md:flex">
+          <LanguageSwitcher />
           <Button
             asChild
             className="rounded-full bg-secondary px-6 font-semibold text-secondary-foreground transition-shadow hover:bg-secondary/90 hover:shadow-glow-secondary"
           >
             <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">
-              Schedule Brain Experience
+              {t.nav.schedule}
             </a>
           </Button>
         </div>
@@ -128,7 +96,7 @@ export function Navbar() {
           onClick={() => setIsMobileMenuOpen((open) => !open)}
           aria-expanded={isMobileMenuOpen}
           aria-controls="mobile-menu"
-          aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-label={isMobileMenuOpen ? t.nav.closeMenu : t.nav.openMenu}
         >
           {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
@@ -136,33 +104,26 @@ export function Navbar() {
 
       {isMobileMenuOpen && (
         <div id="mobile-menu" className="flex flex-col gap-4 border-t border-border bg-background px-4 py-6 md:hidden">
-          {[...NAV_LINKS].map((link) => (
+          {navLinks.map((link) => (
             <Link key={link.href} href={link.href} className="text-lg font-medium" onClick={closeMenu}>
               {link.label}
             </Link>
           ))}
-          <div className="mb-2 mt-2 flex flex-col gap-2 border-l-2 border-muted pl-4">
-            <span className="mb-1 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Athletic Performance
-            </span>
-            {SPORT_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className="text-base" onClick={closeMenu}>
-                {link.label}
-              </Link>
-            ))}
+          {secondaryLinks.map((link) => (
+            <Link key={link.href} href={link.href} className="text-lg font-medium" onClick={closeMenu}>
+              {link.label}
+            </Link>
+          ))}
+          <div className="mt-2 flex items-center justify-between border-t border-border pt-4">
+            <LanguageSwitcher />
           </div>
-          {SECONDARY_LINKS.map((link) => (
-            <Link key={link.href} href={link.href} className="text-lg font-medium" onClick={closeMenu}>
-              {link.label}
-            </Link>
-          ))}
-          <div className="mt-4 flex flex-col gap-4 border-t border-border pt-4">
+          <div className="flex flex-col gap-4">
             <Button
               asChild
               className="w-full rounded-full bg-secondary font-semibold text-secondary-foreground hover:bg-secondary/90"
             >
               <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">
-                Schedule Brain Experience
+                {t.nav.schedule}
               </a>
             </Button>
           </div>

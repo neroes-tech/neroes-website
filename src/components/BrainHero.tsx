@@ -15,12 +15,13 @@ type BrainData = {
   phase: Float32Array;
 };
 
-// Official Neroes brand palette: teal primary, green secondary/glow, dark
-// corporate navy as the deep gradient base (replaces the earlier electric
-// blue/violet placeholders).
-const C_BLUE = new THREE.Color("#0B1C31");
-const C_TEAL = new THREE.Color("#00A3A6");
-const C_VIOLET = new THREE.Color("#11B077");
+// Sourced directly from the brand manual's "Referências Cromáticas" table
+// (Web hex column) — not approximated. Teal/blue form the surface gradient
+// (matching the logo icon's own teal-to-blue hemisphere gradient); amber
+// (the logo's circuit-node accent color) tints the glow hubs.
+const C_BLUE = new THREE.Color("#1270B0");
+const C_TEAL = new THREE.Color("#0F9CAC");
+const C_VIOLET = new THREE.Color("#DB9B1D");
 
 // ── Act boundaries (scroll progress 0..1) ──────────────────────────────
 const ACT2_START = 0.22;
@@ -187,12 +188,17 @@ function buildBrain(count: number): BrainData {
   return { positions, colors, sizes, glow, phase };
 }
 
+// Fully radial in 3D (was XY-radial + a flat, unconditional +Z push) — the
+// old +Z-only term shoved every particle the same direction along Z
+// regardless of its own position, which reads as a one-sided drift once
+// the camera is viewing from the side (its screen-horizontal axis is world
+// Z, not X). Displacing along each particle's own direction from the
+// origin keeps the explosion centered from any viewing angle.
 const DISPERSE_GLSL = `
   vec3 disperse(vec3 p, float f) {
-    float len = length(p.xy);
-    vec2 dir = len > 0.0001 ? p.xy / len : vec2(0.0);
-    p.xy += dir * f * (1.7 + 0.6 * (p.z + 1.5));
-    p.z += f * 3.4;
+    float len = length(p);
+    vec3 dir = len > 0.0001 ? p / len : vec3(0.0);
+    p += dir * f * (2.6 + 0.6 * (p.z + 1.5));
     return p;
   }
 `;
@@ -271,9 +277,9 @@ const POINT_FRAG = `
     float d = length(uv);
     if (d > 0.5) discard;
     float alpha = 1.0 - smoothstep(0.42, 0.48, d);
-    // vec3(0.067, 0.690, 0.467) = #11B077, the official brand green — not a
-    // hardcoded violet like this used to be.
-    vec3 col = mix(vColor, vec3(0.067, 0.690, 0.467), vGlow * 0.6);
+    // vec3(0.859, 0.608, 0.114) = #DB9B1D, the brand manual's amber swatch
+    // (the logo icon's own circuit-node accent color).
+    vec3 col = mix(vColor, vec3(0.859, 0.608, 0.114), vGlow * 0.6);
     col = mix(col, vec3(1.0), uBloom * 0.35 * (1.0 - d * 1.6));
     col += vCursorBoost;
     gl_FragColor = vec4(col, alpha * (0.9 + vGlow * 0.1));
