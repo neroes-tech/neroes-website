@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 import { Reveal } from "@/components/home/Reveal";
+import { StarRating } from "@/components/ui/StarRating";
 import { TESTIMONIALS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -87,6 +88,7 @@ export function ClientTestimonials() {
                 </span>
               ) : null}
 
+              <StarRating className="mb-4" />
               <blockquote lang="en" className="pr-16 text-lg leading-relaxed text-foreground">
                 &ldquo;{t.content}&rdquo;
               </blockquote>

@@ -69,7 +69,7 @@ export function Navbar() {
             alt="Neroes"
             width={2039}
             height={771}
-            className="h-10 w-auto object-contain md:h-12"
+            className="h-12 w-auto object-contain mix-blend-multiply md:h-14"
             priority
           />
         </Link>

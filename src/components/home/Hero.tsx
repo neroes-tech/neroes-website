@@ -7,7 +7,6 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { CursorHalo } from "@/components/hero/CursorHalo";
-import { ParticleMorph } from "@/components/hero/ParticleMorph";
 import { useScrollNarrative } from "@/components/hero/useScrollNarrative";
 import { Button } from "@/components/ui/button";
 
@@ -88,15 +87,27 @@ export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const { progressRef, act, progress } = useScrollNarrative(reduced ? undefined : sectionRef);
 
+  // Holds the whole text block at opacity 0 for the first ~500ms after
+  // mount, regardless of scroll — gives the brain's own entrance a beat to
+  // breathe before any text starts competing for attention.
+  const [textReady, setTextReady] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setTextReady(true), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
   const hoverSpring = { type: "spring", stiffness: 400, damping: 17 } as const;
 
   // ── Text-block reveal, coupled to scroll progress (0..0.5) instead of to
   // mount time — the whole block starts at opacity 0 / translateY 32px at
   // progress 0, and is fully settled by progress 0.5, staggered slightly so
-  // the headline leads, then the subtitle, then the CTAs.
-  const headlineReveal = reduced ? 1 : smoothstep(0.0, 0.32, progress);
-  const subtitleReveal = reduced ? 1 : smoothstep(0.08, 0.4, progress);
-  const ctaReveal = reduced ? 1 : smoothstep(0.16, 0.5, progress);
+  // the headline leads, then the subtitle, then the CTAs. Gated by
+  // textReady (see above) so it never starts before the 500ms breathing
+  // room has passed, even if the user scrolls immediately.
+  const gate = reduced || textReady;
+  const headlineReveal = reduced ? 1 : gate ? smoothstep(0.0, 0.32, progress) : 0;
+  const subtitleReveal = reduced ? 1 : gate ? smoothstep(0.08, 0.4, progress) : 0;
+  const ctaReveal = reduced ? 1 : gate ? smoothstep(0.16, 0.5, progress) : 0;
 
   const act4Active = !reduced && act >= 4;
 
@@ -109,7 +120,6 @@ export function Hero() {
     >
       <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden">
         <BrainHero progressRef={progressRef} />
-        {!reduced && <ParticleMorph progressRef={progressRef} />}
 
         {!reduced && <CursorHalo containerRef={sectionRef} />}
 

@@ -5,7 +5,6 @@ import { useReducedMotion } from "framer-motion";
 import * as THREE from "three";
 
 import { DISPLACEMENT_GLSL, SIMPLEX_NOISE_GLSL } from "@/components/hero/displacementShader";
-import { createSynapseGraph, type SynapseGraph } from "@/components/hero/SynapseGraph";
 import { useMouseParallax } from "@/components/hero/useMouseParallax";
 
 type BrainData = {
@@ -14,12 +13,14 @@ type BrainData = {
   sizes: Float32Array;
   glow: Float32Array;
   phase: Float32Array;
-  glowIndices: number[];
 };
 
-const C_BLUE = new THREE.Color("#1E5BFF");
-const C_TEAL = new THREE.Color("#12C7C0");
-const C_VIOLET = new THREE.Color("#8B5CF6");
+// Official Neroes brand palette: teal primary, green secondary/glow, dark
+// corporate navy as the deep gradient base (replaces the earlier electric
+// blue/violet placeholders).
+const C_BLUE = new THREE.Color("#0B1C31");
+const C_TEAL = new THREE.Color("#00A3A6");
+const C_VIOLET = new THREE.Color("#11B077");
 
 // ── Act boundaries (scroll progress 0..1) ──────────────────────────────
 const ACT2_START = 0.22;
@@ -66,7 +67,6 @@ function buildBrain(count: number): BrainData {
   const sizes = new Float32Array(count);
   const glow = new Float32Array(count);
   const phase = new Float32Array(count);
-  const glowIndices: number[] = [];
 
   const tmp = new THREE.Color();
 
@@ -82,13 +82,12 @@ function buildBrain(count: number): BrainData {
     let y = 0;
     let z = 0;
     let t = 0;
-    // 35% of the cerebrum's particles fill the interior volume instead of
-    // sitting on the folded cortex surface — without this, the surface-only
-    // distribution reads as a hollow shell with an empty center.
-    let isInterior = false;
 
     if (i < nCerebrum) {
-      isInterior = i >= nCerebrum * 0.65;
+      // Surface-only: every cerebrum particle sits on the folded cortex
+      // hull, none fill the interior volume — a hollow shell, not a solid
+      // mass, so the core reads as empty/transparent rather than a dense
+      // inner "aurora".
       const side = Math.random() < 0.5 ? -1 : 1;
       const u = Math.random();
       const v = Math.random();
@@ -104,30 +103,20 @@ function buildBrain(count: number): BrainData {
 
       py -= 0.12 * pz * pz * 0.4;
 
-      if (isInterior) {
-        // Uniform-in-volume radial pull-in — cube root of a uniform random
-        // gives uniform density per unit volume (not clustered at the
-        // center), so the fill reads as solid mass, not a shell.
-        const innerT = Math.cbrt(Math.random()) * 0.82;
-        px *= innerT;
-        py *= innerT;
-        pz *= innerT;
-      } else {
-        let ex = px / (rx * rx);
-        let ey = py / (ry * ry);
-        let ez = pz / (rz * rz);
-        const el = Math.hypot(ex, ey, ez) || 1;
-        ex /= el;
-        ey /= el;
-        ez /= el;
+      let ex = px / (rx * rx);
+      let ey = py / (ry * ry);
+      let ez = pz / (rz * rz);
+      const el = Math.hypot(ex, ey, ez) || 1;
+      ex /= el;
+      ey /= el;
+      ez /= el;
 
-        const f = fold(px, py, pz);
-        const layer = 1 - Math.random() * Math.random() * 0.16;
+      const f = fold(px, py, pz);
+      const layer = 1 - Math.random() * Math.random() * 0.16;
 
-        px = (px + ex * f) * layer;
-        py = (py + ey * f) * layer;
-        pz = (pz + ez * f) * layer;
-      }
+      px = (px + ex * f) * layer;
+      py = (py + ey * f) * layer;
+      pz = (pz + ez * f) * layer;
 
       const gap = 0.045 + (1 - nx) * 0.02;
       x = side * (px + gap);
@@ -178,19 +167,15 @@ function buildBrain(count: number): BrainData {
     // perspective (see uPixelRatio scaling in the vertex shader) already
     // shrinks whichever of these sit farther from camera, so this ratio
     // reads as background-fill vs. foreground-detail without a separate
-    // depth pass. Interior-fill particles never glow (keeps hub candidates,
-    // and the synapse graph built from them, on the visible surface) and
-    // render smaller/dimmer than the surface shell, for real depth.
-    const isGlow = !isInterior && Math.random() < 0.2;
+    // depth pass.
+    const isGlow = Math.random() < 0.2;
     if (isGlow) {
       tmp.lerp(C_VIOLET, 0.55);
       glow[i] = 1;
       sizes[i] = 1.5 + Math.random() * 1.2;
-      glowIndices.push(i);
     } else {
       glow[i] = 0;
-      sizes[i] = isInterior ? 0.3 + Math.random() * 0.22 : 0.5 + Math.random() * 0.4;
-      if (isInterior) tmp.lerp(C_TEAL, 0.3); // slightly duller/cooler, so it recedes behind the shell
+      sizes[i] = 0.5 + Math.random() * 0.4;
     }
 
     colors[i * 3] = tmp.r;
@@ -199,7 +184,7 @@ function buildBrain(count: number): BrainData {
     phase[i] = Math.random() * Math.PI * 2;
   }
 
-  return { positions, colors, sizes, glow, phase, glowIndices };
+  return { positions, colors, sizes, glow, phase };
 }
 
 const DISPERSE_GLSL = `
@@ -286,7 +271,9 @@ const POINT_FRAG = `
     float d = length(uv);
     if (d > 0.5) discard;
     float alpha = 1.0 - smoothstep(0.42, 0.48, d);
-    vec3 col = mix(vColor, vec3(0.55, 0.25, 0.95), vGlow * 0.6);
+    // vec3(0.067, 0.690, 0.467) = #11B077, the official brand green — not a
+    // hardcoded violet like this used to be.
+    vec3 col = mix(vColor, vec3(0.067, 0.690, 0.467), vGlow * 0.6);
     col = mix(col, vec3(1.0), uBloom * 0.35 * (1.0 - d * 1.6));
     col += vCursorBoost;
     gl_FragColor = vec4(col, alpha * (0.9 + vGlow * 0.1));
@@ -350,9 +337,10 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
 
     // ── Density bumped ~2.8x on desktop (~2.4x on mobile, kept a bit more
     // conservative to protect frame rate on lower-power devices) so the
-    // interior reads as anatomical mass rather than a hollow wireframe.
-    // Mobile still runs a reduced count, and (below) disables the
-    // displacement shader and the chromatic-aberration post pass entirely.
+    // hollow surface shell still reads as a dense, detailed silhouette
+    // rather than a sparse wireframe. Mobile still runs a reduced count,
+    // and (below) disables the displacement shader and the
+    // chromatic-aberration post pass entirely.
     const COUNT = isMobile ? 12000 : 25000;
     const brain = buildBrain(COUNT);
 
@@ -382,25 +370,11 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       blending: THREE.NormalBlending,
     });
 
+    // Clean point-cloud only — no connecting lines/synapse graph, no
+    // internal mesh or "aurora" volume. The brain's silhouette is defined
+    // purely by these points.
     const points = new THREE.Points(geom, pointMat);
     scene.add(points);
-
-    // ── Ato IV synapse graph — extracted module (blue-noise node spread,
-    // traveling pulses, hover-triggered spikes). Cut down ~90% from the
-    // previous pass: the brief wants dense luminous PARTICLES to read as
-    // the brain, not a braided line web — the graph is now a faint accent,
-    // not a structural feature.
-    const synapse: SynapseGraph = createSynapseGraph({
-      positions: brain.positions,
-      glowIndices: brain.glowIndices,
-      maxNodes: isMobile ? 8 : 14,
-      kNeighbors: 2,
-      minNodeSeparation: 0.22,
-      pulseCount: isMobile ? 16 : 28,
-      pixelRatio,
-    });
-    scene.add(synapse.lines);
-    if (synapse.pulses) scene.add(synapse.pulses);
 
     // ── Chromatic-aberration post pass setup (desktop only) ───────────────
     let renderTarget = isMobile
@@ -452,38 +426,12 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
         window.removeEventListener("resize", resize);
         geom.dispose();
         pointMat.dispose();
-        synapse.dispose();
         renderTarget?.dispose();
         postMat.dispose();
         renderer.dispose();
         if (renderer.domElement.parentNode === mount) mount.removeChild(renderer.domElement);
       };
     }
-
-    // ── Hub-node hover detection: project each synapse node to screen space
-    // and, if the pointer sits within its hit radius, fire an immediate spike.
-    const nodeWorldPos = new THREE.Vector3();
-    let lastHoverCheck = 0;
-    const checkHover = (elapsed: number) => {
-      if (elapsed - lastHoverCheck < 0.05) return; // ~20Hz is plenty for a hover check
-      lastHoverCheck = elapsed;
-      const cursorNdcX = parallax.xRef.current;
-      const cursorNdcY = -parallax.yRef.current;
-      const nodeCount = synapse.nodePositions.length / 3;
-      for (let i = 0; i < nodeCount; i++) {
-        nodeWorldPos.set(
-          synapse.nodePositions[i * 3]!,
-          synapse.nodePositions[i * 3 + 1]!,
-          synapse.nodePositions[i * 3 + 2]!,
-        );
-        nodeWorldPos.applyMatrix4(points.matrixWorld).project(camera);
-        const dx = nodeWorldPos.x - cursorNdcX;
-        const dy = nodeWorldPos.y - cursorNdcY;
-        if (dx * dx + dy * dy < 0.02 * 0.02) {
-          synapse.triggerSpikeFrom(i);
-        }
-      }
-    };
 
     const clock = new THREE.Clock();
     let raf = 0;
@@ -493,10 +441,10 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
 
     const render = () => {
       // THREE.Clock.getElapsedTime() calls getDelta() internally — calling
-      // both in the same frame would double-consume the clock's timer.
-      // getDelta() alone gives us both values (it also updates
-      // clock.elapsedTime as a side effect).
-      const dt = Math.min(0.05, clock.getDelta());
+      // both in the same frame would double-consume the clock's timer, so
+      // getDelta() is called for its side effect of advancing
+      // clock.elapsedTime, and only that elapsed value is used below.
+      clock.getDelta();
       const t = clock.elapsedTime;
       const progress = progressRef?.current ?? 0;
 
@@ -519,10 +467,6 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       pointMat.uniforms.uCursorNDC!.value.set(parallax.xRef.current, -parallax.yRef.current);
       pointMat.uniforms.uCursorActive!.value = 1;
 
-      synapse.lineMat.uniforms.uFly!.value = fly;
-      synapse.lineMat.uniforms.uHemisphereSplit!.value = hemisphereOpen * HEMISPHERE_SPLIT_MAX;
-      synapse.lineMat.uniforms.uOpacity!.value = 0.35 * (1 - act4) * (1 - act3 * 0.5);
-
       // Micro-tremor idle (±0.4px equivalent, ~0.6Hz) on the core when the
       // narrative is resting (Ato I) and the pointer parallax is near zero —
       // reads as "alive" rather than a static render.
@@ -540,11 +484,6 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       points.rotation.x = parallax.yRef.current * 0.15;
       points.position.set(tremorX, tremorY, 0);
       points.updateMatrixWorld();
-      synapse.lines.rotation.copy(points.rotation);
-      if (synapse.pulses) synapse.pulses.rotation.copy(points.rotation);
-
-      synapse.update(dt);
-      checkHover(t);
 
       // ── Camera: holds the fixed lateral/profile angle (ORBIT_PHASE) for the
       // entire scroll journey — no rotation, no orbit. The brain itself
@@ -601,7 +540,6 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       window.removeEventListener("resize", resize);
       geom.dispose();
       pointMat.dispose();
-      synapse.dispose();
       renderTarget?.dispose();
       postMat.dispose();
       renderer.dispose();

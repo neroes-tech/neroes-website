@@ -1,26 +1,56 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Brain } from "lucide-react";
 
-// Same brand accent used everywhere else in the design system (Navbar hover,
-// Hero headline span, ProductShowcase play button, and — per CLAUDE.md's
-// design-system doc — the brain's own synapse nodes in SynapseGraph.ts).
-// Matches --color-brand-blue in globals.css.
-const RAIL_COLOR = "#1E5BFF";
+// Exactly the "Schedule Brain Experience" button's color — verified against
+// --secondary in globals.css (hsl(186 100% 26%) = #007785), not a guessed
+// or invented teal.
+const RAIL_COLOR = "#007785";
+const RAIL_X = 52;
 
-const HERO_SECTION_SELECTOR = 'section[aria-label="Introdução Neroes — inteligência neural viva"]';
+// Just below the Navbar (h-20 = 80px) — any higher and the icon renders
+// behind its translucent, blurred glass background and reads as a smudge.
+const ICON_TOP = 96;
+const ICON_SIZE = 26;
+
+// Rail + icon stay hidden until the brain's own hemisphere-opening/dissection
+// sequence is underway, so they don't compete with the Hero's brain reveal.
+const VISIBILITY_TRIGGER = 0.6; // × window.innerHeight
 
 /**
- * Fixed left-edge "EEG signal" rail — a glowing waveform anchored to the
- * page's scroll position (not the animation clock), so it reads as a static
- * rail the page slides past rather than a shape wobbling in place. Invisible
- * during the Hero's brain sequence, fading in only once the user has
- * scrolled past it; a bright node travels along it to mark scroll position,
- * and the whole rail stops short of the footer's dark background. Purely
- * decorative/ambient, so it's skipped entirely under prefers-reduced-motion.
+ * Fixed left-edge "EEG signal" rail — a glowing teal waveform, anchored to
+ * the page's scroll position (not the animation clock) so it reads as a
+ * static rail the page slides past rather than a shape wobbling in place.
+ * Topped by a real lucide-react Brain icon (a hand-drawn canvas version
+ * warped at small sizes; an actual SVG stays crisp at any DPI) the line
+ * grows out of — its rendered position is measured via ref so the two never
+ * drift apart. A bright node travels along the rail to mark scroll
+ * position, and the whole thing stops short of the footer's dark
+ * background. Purely decorative/ambient, so it's skipped entirely under
+ * prefers-reduced-motion.
  */
 export default function ThreadCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const iconRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    // Under reduced motion, skip the scroll-driven reveal entirely — the
+    // canvas draws nothing anyway (see the effect below), so just leave the
+    // (empty) icon+rail shown with no transition to worry about.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setIsVisible(true);
+      return;
+    }
+
+    const handleScroll = () => {
+      setIsVisible(window.scrollY > window.innerHeight * VISIBILITY_TRIGGER);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -46,25 +76,14 @@ export default function ThreadCanvas() {
       const dpr = window.devicePixelRatio || 1;
       const h = canvas.height;
       const scrollY = window.scrollY;
-      const railX = 52 * dpr;
+      const railX = RAIL_X * dpr;
 
       ctx.clearRect(0, 0, canvas.width, h);
 
-      // Fade in only after the Hero's brain sequence — the Hero section is
-      // 320vh tall (sticky pin for the scroll-driven brain), not one
-      // viewport, so its real measured height is used instead of guessing
-      // at a fraction of window.innerHeight (which would fade the rail in
-      // while the brain animation is still playing).
-      const heroEl = document.querySelector<HTMLElement>(HERO_SECTION_SELECTOR);
-      const heroHeight = heroEl?.offsetHeight ?? window.innerHeight;
-      const fadeStart = Math.max(0, heroHeight - window.innerHeight * 0.5);
-      const fadeEnd = heroHeight;
-
-      if (scrollY < fadeStart) {
-        animId = requestAnimationFrame(render);
-        return;
-      }
-      const alpha = Math.min(1, (scrollY - fadeStart) / Math.max(1, fadeEnd - fadeStart));
+      // Line starts right where the real SVG icon (rendered as DOM, not
+      // canvas) ends — measured live so the two elements never drift apart.
+      const iconRect = iconRef.current?.getBoundingClientRect();
+      const lineStartY = (iconRect ? iconRect.bottom + 4 : ICON_TOP + ICON_SIZE) * dpr;
 
       // Stop the rail before it crosses into the footer's dark background.
       let maxY = h;
@@ -76,15 +95,21 @@ export default function ThreadCanvas() {
         }
       }
 
-      // Follower node: drifts gently down the visible rail as scroll
-      // progresses through the page, capped at the footer boundary.
+      if (maxY <= lineStartY) {
+        animId = requestAnimationFrame(render);
+        return;
+      }
+
+      // Follower node: a true scroll-progress indicator, like a scrollbar
+      // thumb. It starts right at the icon (scrollY = 0) and travels the
+      // full length of the visible rail — from lineStartY down to maxY
+      // (the footer boundary) — reaching the very bottom exactly when the
+      // user has scrolled to the end of the document.
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       const scrollProgress = maxScroll > 0 ? Math.min(1, Math.max(0, scrollY / maxScroll)) : 0;
-      const nodeViewportY = (window.innerHeight * 0.4 + scrollProgress * window.innerHeight * 0.3) * dpr;
-      const targetNodeY = Math.min(maxY, nodeViewportY);
+      const targetNodeY = lineStartY + scrollProgress * (maxY - lineStartY);
 
       ctx.save();
-      ctx.globalAlpha = alpha;
       ctx.shadowColor = RAIL_COLOR;
       ctx.shadowBlur = 8 * dpr;
       ctx.strokeStyle = RAIL_COLOR;
@@ -93,7 +118,7 @@ export default function ThreadCanvas() {
       ctx.beginPath();
       let activeNodeX = railX;
 
-      for (let viewportY = 0; viewportY <= maxY; viewportY += 2 * dpr) {
+      for (let viewportY = lineStartY; viewportY <= maxY; viewportY += 2 * dpr) {
         // Anchor the wave's shape to the page's absolute scroll position
         // (viewportY + scrollY), not to elapsed time — this is what keeps
         // the curve reading as a fixed rail the page slides past, instead
@@ -106,7 +131,7 @@ export default function ThreadCanvas() {
         const waveX = (Math.sin(freq * 1.2) * 6 + Math.sin(freq * 2.8) * 3 + microNoise) * dpr;
         const x = railX + waveX;
 
-        if (viewportY === 0) ctx.moveTo(x, viewportY);
+        if (viewportY === lineStartY) ctx.moveTo(x, viewportY);
         else ctx.lineTo(x, viewportY);
 
         if (Math.abs(viewportY - targetNodeY) < 3 * dpr) {
@@ -115,7 +140,7 @@ export default function ThreadCanvas() {
       }
       ctx.stroke();
 
-      if (targetNodeY > 0 && targetNodeY < maxY) {
+      if (targetNodeY > lineStartY && targetNodeY < maxY) {
         ctx.beginPath();
         ctx.arc(activeNodeX, targetNodeY, 4 * dpr, 0, Math.PI * 2);
         ctx.fillStyle = RAIL_COLOR;
@@ -136,10 +161,20 @@ export default function ThreadCanvas() {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
+    <div
       aria-hidden="true"
-      className="pointer-events-none fixed left-0 top-0 z-30 h-full w-full"
-    />
+      className={`pointer-events-none fixed inset-0 z-30 transition-opacity duration-500 ${
+        isVisible ? "opacity-100" : "opacity-0"
+      }`}
+    >
+      <div
+        ref={iconRef}
+        // top-[96px] must stay in sync with ICON_TOP above.
+        className="fixed left-[52px] top-[96px] z-40 -translate-x-1/2"
+      >
+        <Brain width={ICON_SIZE} height={ICON_SIZE} stroke={RAIL_COLOR} strokeWidth={1.75} />
+      </div>
+      <canvas ref={canvasRef} className="fixed left-0 top-0 z-30 h-full w-full" />
+    </div>
   );
 }
