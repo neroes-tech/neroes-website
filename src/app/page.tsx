@@ -19,7 +19,6 @@ import { Reveal } from "@/components/home/Reveal";
 import { ClientTestimonials } from "@/components/sections/ClientTestimonials";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { ProductShowcase } from "@/components/sections/ProductShowcase";
-import { TestimonialsGrid } from "@/components/sections/TestimonialsGrid";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -291,7 +290,6 @@ export default function Home() {
       </section>
 
       <ClientTestimonials />
-      <TestimonialsGrid />
 
       {/* Final CTA */}
       <section className="relative overflow-hidden border-t border-border bg-card py-24 md:py-32">

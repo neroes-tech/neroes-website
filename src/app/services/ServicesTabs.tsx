@@ -82,7 +82,7 @@ export function ServicesTabs() {
             </div>
 
             <h3 className="mt-16 text-center font-exo text-2xl font-bold text-foreground">
-              {t.services.testimonialsHeading}
+              {t.services.sportTestimonialsHeading}
             </h3>
             <div className="mx-auto mt-8 grid max-w-3xl gap-6 sm:grid-cols-2">
               {sportTestimonials.map((item) => (

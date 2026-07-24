@@ -20,6 +20,7 @@ export interface Translations {
     corporateTab: string;
     sportHeading: string;
     sportBody: string;
+    sportTestimonialsHeading: string;
     corporateHeading: string;
     corporateBody: string;
     testimonialsHeading: string;
@@ -49,9 +50,10 @@ export const translations: Record<Locale, Translations> = {
       title: "Uma plataforma, dois caminhos",
       sportTab: "Desporto",
       corporateTab: "Empresas",
-      sportHeading: "Alta performance para atletas de elite",
+      sportHeading: "Neurotecnologia aplicada ao desporto de elite",
       sportBody:
         "Stress e ansiedade são as principais causas de quebra de rendimento sob pressão. O Neroes MTP™ treina o controlo emocional e a tomada de decisão dos atletas, sessão após sessão.",
+      sportTestimonialsHeading: "Casos de sucesso em alta competição",
       corporateHeading: "Resiliência e liderança para equipas",
       corporateBody:
         "Presenteísmo, absentismo e turnover têm um custo real. O Neroes treina foco, controlo emocional e resiliência — reduzindo o burnout e reforçando a liderança das equipas.",
@@ -76,9 +78,10 @@ export const translations: Record<Locale, Translations> = {
       title: "One platform, two paths",
       sportTab: "Sport",
       corporateTab: "Corporate",
-      sportHeading: "High performance for elite athletes",
+      sportHeading: "Neurotechnology applied to elite sport",
       sportBody:
         "Stress and anxiety are the leading cause of performance breakdown under pressure. Neroes MTP™ trains athletes' emotional control and decision-making, session after session.",
+      sportTestimonialsHeading: "Success stories in elite competition",
       corporateHeading: "Resilience and leadership for teams",
       corporateBody:
         "Presenteeism, absenteeism, and turnover carry a real cost. Neroes trains focus, emotional control, and resilience — reducing burnout and strengthening team leadership.",
