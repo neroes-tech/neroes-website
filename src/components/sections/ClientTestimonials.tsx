@@ -5,10 +5,12 @@ import Image from "next/image";
 
 import { Reveal } from "@/components/home/Reveal";
 import { StarRating } from "@/components/ui/StarRating";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { TESTIMONIALS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 export function ClientTestimonials() {
+  const { t } = useLanguage();
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -59,7 +61,7 @@ export function ClientTestimonials() {
       <div className="container mx-auto px-4 md:px-6">
         <Reveal className="mb-16 text-center">
           <h2 id="client-testimonials-heading" className="font-exo text-4xl font-bold text-primary">
-            Clients Love It
+            {t.shared.clientsLoveHeading}
           </h2>
         </Reveal>
 
@@ -67,30 +69,30 @@ export function ClientTestimonials() {
           ref={trackRef}
           className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {TESTIMONIALS.map((t) => (
+          {TESTIMONIALS.map((testimonial) => (
             <article
-              key={t.name}
+              key={testimonial.name}
               className="relative w-[85%] shrink-0 snap-start rounded-3xl border border-border bg-card p-8 shadow-sm transition-shadow duration-300 hover:shadow-md sm:w-[60%] lg:w-[31%]"
             >
-              {t.companyLogo ? (
+              {testimonial.companyLogo ? (
                 <Image
-                  src={t.companyLogo}
-                  alt={t.company ?? ""}
+                  src={testimonial.companyLogo}
+                  alt={testimonial.company ?? ""}
                   width={100}
                   height={40}
                   className="absolute right-6 top-6 h-9 w-auto object-contain opacity-90"
                 />
-              ) : t.company ? (
+              ) : testimonial.company ? (
                 // Real logo file not supplied yet — company name stands in
                 // as a legible placeholder rather than a blank corner.
                 <span className="absolute right-6 top-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {t.company}
+                  {testimonial.company}
                 </span>
               ) : null}
 
               <StarRating className="mb-4" />
               <blockquote lang="en" className="pr-16 text-lg leading-relaxed text-foreground">
-                &ldquo;{t.content}&rdquo;
+                &ldquo;{testimonial.content}&rdquo;
               </blockquote>
 
               <figcaption className="mt-8 flex items-center gap-4 border-t border-border pt-6">
@@ -98,11 +100,11 @@ export function ClientTestimonials() {
                   aria-hidden="true"
                   className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-border bg-gradient-to-br from-brand-blue/15 to-brand-violet/15 font-exo text-base font-bold text-brand-blue"
                 >
-                  {t.name.charAt(0)}
+                  {testimonial.name.charAt(0)}
                 </span>
                 <div>
-                  <p className="font-bold text-foreground">{t.name}</p>
-                  <p className="text-sm text-muted-foreground">{t.role}</p>
+                  <p className="font-bold text-foreground">{testimonial.name}</p>
+                  <p className="text-sm text-muted-foreground">{testimonial.role}</p>
                 </div>
               </figcaption>
             </article>
@@ -110,12 +112,12 @@ export function ClientTestimonials() {
         </div>
 
         <div className="mt-8 flex items-center justify-center gap-2">
-          {TESTIMONIALS.map((t, i) => (
+          {TESTIMONIALS.map((testimonial, i) => (
             <button
-              key={t.name}
+              key={testimonial.name}
               type="button"
               onClick={() => scrollToIndex(i)}
-              aria-label={`Ir para o testemunho de ${t.name}`}
+              aria-label={t.shared.goToTestimonial.replace("{name}", testimonial.name)}
               aria-current={activeIndex === i}
               className={cn(
                 "h-2 rounded-full transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue",

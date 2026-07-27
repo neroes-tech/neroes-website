@@ -1,28 +1,34 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
-
-const formSchema = z.object({
-  name: z.string().min(2, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().optional(),
-  message: z.string().optional(),
-  gdpr: z.boolean().refine((val) => val === true, "You must accept the privacy policy"),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
 const inputClasses =
   "w-full rounded-xl border border-input bg-background px-4 outline-none transition-shadow focus:border-ring focus:ring-2 focus:ring-ring/30";
 
 export function ContactForm() {
+  const { t } = useLanguage();
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [statusMessage, setStatusMessage] = useState("");
+
+  const formSchema = useMemo(
+    () =>
+      z.object({
+        name: z.string().min(2, t.contact.form.nameError),
+        email: z.string().email(t.contact.form.emailError),
+        phone: z.string().optional(),
+        message: z.string().optional(),
+        gdpr: z.boolean().refine((val) => val === true, t.contact.form.gdprError),
+      }),
+    [t],
+  );
+
+  type FormValues = z.infer<typeof formSchema>;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -46,17 +52,11 @@ export function ContactForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Unexpected error");
       setStatus("success");
-      setStatusMessage(
-        "Thank you. Your message has been sent successfully. We will get back to you shortly.",
-      );
+      setStatusMessage(t.contact.form.successMessage);
       form.reset();
     } catch (err) {
       setStatus("error");
-      setStatusMessage(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Please try again or email us directly at info@neroes.tech.",
-      );
+      setStatusMessage(err instanceof Error ? err.message : t.contact.form.errorFallback);
     }
   };
 
@@ -84,7 +84,7 @@ export function ContactForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
         <div className="space-y-2">
           <label htmlFor="name" className="text-sm font-medium text-foreground">
-            Name *
+            {t.contact.form.nameLabel}
           </label>
           <input
             id="name"
@@ -103,7 +103,7 @@ export function ContactForm() {
 
         <div className="space-y-2">
           <label htmlFor="email" className="text-sm font-medium text-foreground">
-            Email *
+            {t.contact.form.emailLabel}
           </label>
           <input
             id="email"
@@ -123,7 +123,7 @@ export function ContactForm() {
 
         <div className="space-y-2">
           <label htmlFor="phone" className="text-sm font-medium text-foreground">
-            Phone
+            {t.contact.form.phoneLabel}
           </label>
           <input
             id="phone"
@@ -135,7 +135,7 @@ export function ContactForm() {
 
         <div className="space-y-2">
           <label htmlFor="message" className="text-sm font-medium text-foreground">
-            Message
+            {t.contact.form.messageLabel}
           </label>
           <textarea
             id="message"
@@ -146,7 +146,7 @@ export function ContactForm() {
         </div>
 
         <fieldset className="mt-6 border-t border-border pt-6">
-          <legend className="sr-only">Privacy Policy Agreement</legend>
+          <legend className="sr-only">{t.contact.form.gdprLink}</legend>
           <div className="flex items-start space-x-3">
             <input
               type="checkbox"
@@ -158,11 +158,11 @@ export function ContactForm() {
               className="mt-0.5 h-6 w-6 shrink-0 rounded-md border-input accent-primary"
             />
             <label htmlFor="gdpr" className="text-sm leading-relaxed text-muted-foreground">
-              I agree to the processing of my personal data as described in the{" "}
+              {t.contact.form.gdprPrefix}
               <a href="/privacy-policy" className="text-secondary hover:underline">
-                Privacy Policy
+                {t.contact.form.gdprLink}
               </a>
-              . *
+              {t.contact.form.gdprSuffix}
             </label>
           </div>
           {form.formState.errors.gdpr && (
@@ -177,7 +177,7 @@ export function ContactForm() {
           disabled={status === "submitting"}
           className="h-12 w-full rounded-full bg-secondary text-base font-semibold text-secondary-foreground transition-shadow hover:bg-secondary/90 hover:shadow-glow-secondary"
         >
-          {status === "submitting" ? "Sending..." : "Send Message"}
+          {status === "submitting" ? t.contact.form.submittingLabel : t.contact.form.submitLabel}
         </Button>
       </form>
     </div>

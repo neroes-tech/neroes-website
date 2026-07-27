@@ -6,9 +6,9 @@ import Link from "next/link";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 
-import { CursorHalo } from "@/components/hero/CursorHalo";
 import { useScrollNarrative } from "@/components/hero/useScrollNarrative";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
 // The three.js-powered brain is a decorative, non-critical visual — load it
 // after the initial page render instead of blocking the Hero's first paint
@@ -16,14 +16,13 @@ import { Button } from "@/components/ui/button";
 const BrainHero = dynamic(() => import("@/components/BrainHero"), { ssr: false });
 
 // Real, already-verified metrics (Science page) — the Ato IV "data emergence"
-// reveal must not invent numbers that aren't backed by the site's own content.
-const KPIS = [
-  { target: 111, prefix: "+", suffix: "%", decimals: 0, label: "Controlo emocional" },
-  { target: 21.7, prefix: "+", suffix: "%", decimals: 1, label: "Velocidade de decisão" },
-  { target: 14.2, prefix: "-", suffix: "%", decimals: 1, label: "Ansiedade" },
+// reveal must not invent numbers that aren't backed by the site's own
+// content. Labels come from t.home.statsLabels (same order).
+const KPI_VALUES = [
+  { target: 111, prefix: "+", suffix: "%", decimals: 0 },
+  { target: 21.7, prefix: "+", suffix: "%", decimals: 1 },
+  { target: 14.2, prefix: "-", suffix: "%", decimals: 1 },
 ] as const;
-
-const HEADLINE_LINES = ["Treinamos o cérebro", "como treinas o corpo."] as const;
 
 function smoothstep(edge0: number, edge1: number, x: number) {
   const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
@@ -66,7 +65,15 @@ function useCountUp(target: number, decimals: number, active: boolean, durationM
   return value.toFixed(decimals);
 }
 
-function KpiTicker({ kpi, active }: { kpi: (typeof KPIS)[number]; active: boolean }) {
+function KpiTicker({
+  kpi,
+  label,
+  active,
+}: {
+  kpi: (typeof KPI_VALUES)[number];
+  label: string;
+  active: boolean;
+}) {
   const formatted = useCountUp(kpi.target, kpi.decimals, active);
   return (
     <div className="rounded-2xl border border-border bg-card/70 px-4 py-3 backdrop-blur-sm">
@@ -75,12 +82,13 @@ function KpiTicker({ kpi, active }: { kpi: (typeof KPIS)[number]; active: boolea
         {formatted}
         {kpi.suffix}
       </p>
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{kpi.label}</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
     </div>
   );
 }
 
 export function Hero() {
+  const { t } = useLanguage();
   const prefersReducedMotion = useReducedMotion();
   const reduced = prefersReducedMotion ?? false;
 
@@ -98,16 +106,22 @@ export function Hero() {
 
   const hoverSpring = { type: "spring", stiffness: 400, damping: 17 } as const;
 
-  // ── Text-block reveal, coupled to scroll progress (0..0.5) instead of to
-  // mount time — the whole block starts at opacity 0 / translateY 32px at
-  // progress 0, and is fully settled by progress 0.5, staggered slightly so
-  // the headline leads, then the subtitle, then the CTAs. Gated by
-  // textReady (see above) so it never starts before the 500ms breathing
-  // room has passed, even if the user scrolls immediately.
+  // ── Text-block reveal, coupled to scroll progress instead of to mount
+  // time — starts at opacity 0 / translateY 32px, staggered so the headline
+  // leads, then the subtitle, then the CTAs. The window (0.15 → 0.45/0.5/0.55)
+  // is deliberately later than the scroll's very start: the camera's zoom-in
+  // (smoothstep(0, 0.9, progress) — see BrainHero) is only ~29% done by
+  // progress 0.32, which is where the old window finished — text used to
+  // arrive fully visible before the brain had visibly expanded much at all.
+  // This window instead completes around progress 0.45-0.55 (camera ~50-70%
+  // zoomed in), staying inside Ato II so it settles before Ato III's fly-
+  // through/explosion at 0.55. Gated by textReady (see above) so it never
+  // starts before the 500ms breathing room has passed, even if the user
+  // scrolls immediately.
   const gate = reduced || textReady;
-  const headlineReveal = reduced ? 1 : gate ? smoothstep(0.0, 0.32, progress) : 0;
-  const subtitleReveal = reduced ? 1 : gate ? smoothstep(0.08, 0.4, progress) : 0;
-  const ctaReveal = reduced ? 1 : gate ? smoothstep(0.16, 0.5, progress) : 0;
+  const headlineReveal = reduced ? 1 : gate ? smoothstep(0.15, 0.45, progress) : 0;
+  const subtitleReveal = reduced ? 1 : gate ? smoothstep(0.2, 0.5, progress) : 0;
+  const ctaReveal = reduced ? 1 : gate ? smoothstep(0.25, 0.55, progress) : 0;
 
   const act4Active = !reduced && act >= 4;
 
@@ -121,19 +135,14 @@ export function Hero() {
       <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden">
         <BrainHero progressRef={progressRef} />
 
-        {!reduced && <CursorHalo containerRef={sectionRef} />}
-
         <div className="pointer-events-none relative z-20 mx-auto max-w-4xl px-4 text-center md:px-6">
           {/* Headline — fades/rises in as the brain's hemispheres open (scroll 0 → 0.32) */}
           <h1
             className="font-exo text-5xl font-bold leading-tight tracking-tight text-foreground md:text-7xl"
             style={revealStyle(headlineReveal, reduced)}
           >
-            {HEADLINE_LINES.map((line, i) => (
-              <span key={line} className={i === 1 ? "block text-brand-blue" : "block"}>
-                {line}
-              </span>
-            ))}
+            <span className="block">{t.home.heroHeadlineLine1}</span>
+            <span className="block text-brand-blue">{t.home.heroHeadlineLine2}</span>
           </h1>
 
           {/* Subtitle — follows the headline (scroll 0.08 → 0.4) */}
@@ -141,9 +150,7 @@ export function Hero() {
             className="mx-auto mt-6 max-w-3xl text-xl leading-relaxed text-muted-foreground md:text-2xl"
             style={revealStyle(subtitleReveal, reduced)}
           >
-            Um headset EEG lê as tuas ondas cerebrais enquanto jogas um jogo
-            que só se ganha mantendo a calma e a concentração — treinando foco,
-            controlo emocional e resiliência, sessão após sessão.
+            {t.home.heroSubtitle}
           </p>
 
           {/* CTAs — settle last, fully visible by scroll 0.5 */}
@@ -162,7 +169,7 @@ export function Hero() {
                 className="group h-14 rounded-full bg-secondary px-8 text-lg font-semibold text-secondary-foreground transition-shadow hover:bg-secondary/90 hover:shadow-glow-secondary"
               >
                 <Link href="/contact">
-                  Marcar uma demonstração
+                  {t.home.heroPrimaryCta}
                   <ArrowRight
                     className="h-5 w-5 transition-transform group-hover:translate-x-1"
                     aria-hidden="true"
@@ -181,7 +188,7 @@ export function Hero() {
                 variant="outline"
                 className="h-14 rounded-full border-primary px-8 text-lg text-primary hover:bg-primary/5"
               >
-                <Link href="/science">Ver a ciência</Link>
+                <Link href="/science">{t.home.heroSecondaryCta}</Link>
               </Button>
             </motion.div>
           </div>
@@ -193,8 +200,8 @@ export function Hero() {
               style={{ opacity: act >= 4 ? 1 : 0 }}
               aria-hidden={act < 4}
             >
-              {KPIS.map((kpi) => (
-                <KpiTicker key={kpi.label} kpi={kpi} active={act4Active} />
+              {KPI_VALUES.map((kpi, i) => (
+                <KpiTicker key={t.home.heroKpiLabels[i]} kpi={kpi} label={t.home.heroKpiLabels[i]!} active={act4Active} />
               ))}
             </div>
           )}

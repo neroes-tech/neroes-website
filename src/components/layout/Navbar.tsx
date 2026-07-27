@@ -54,13 +54,13 @@ export function Navbar() {
       )}
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2.5" onClick={closeMenu}>
+        <Link href="/" aria-label="Neroes" onClick={closeMenu}>
           <Image
-            src="/neroes-logo-horizontal.png"
-            alt="Neroes"
-            width={2039}
-            height={771}
-            className="h-12 w-auto object-contain mix-blend-multiply md:h-14"
+            src="/horizontal.png"
+            alt="Neroes Corporate"
+            width={406}
+            height={136}
+            className="h-11 w-auto object-contain mix-blend-multiply md:h-14"
             priority
           />
         </Link>

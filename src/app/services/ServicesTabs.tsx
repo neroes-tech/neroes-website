@@ -84,9 +84,12 @@ export function ServicesTabs() {
             <h3 className="mt-16 text-center font-exo text-2xl font-bold text-foreground">
               {t.services.sportTestimonialsHeading}
             </h3>
-            <div className="mx-auto mt-8 grid max-w-3xl gap-6 sm:grid-cols-2">
+            <div className="mx-auto mt-8 flex max-w-3xl flex-wrap justify-center gap-6">
               {sportTestimonials.map((item) => (
-                <article key={item.name} className="rounded-3xl border border-border bg-card p-8 shadow-sm">
+                <article
+                  key={item.name}
+                  className="w-full rounded-3xl border border-border bg-card p-8 shadow-sm sm:w-[calc((100%-1.5rem)/2)]"
+                >
                   <StarRating className="mb-4" />
                   <blockquote lang="en" className="text-lg leading-relaxed text-foreground">
                     &ldquo;{item.quote}&rdquo;
@@ -109,9 +112,12 @@ export function ServicesTabs() {
             <h3 className="mt-16 text-center font-exo text-2xl font-bold text-foreground">
               {t.services.testimonialsHeading}
             </h3>
-            <div className="mx-auto mt-8 grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mx-auto mt-8 flex max-w-5xl flex-wrap justify-center gap-6">
               {corporateTestimonials.map((item) => (
-                <article key={item.name} className="rounded-3xl border border-border bg-card p-8 shadow-sm">
+                <article
+                  key={item.name}
+                  className="w-full rounded-3xl border border-border bg-card p-8 shadow-sm sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3rem)/3)]"
+                >
                   <StarRating className="mb-4" />
                   <blockquote lang="en" className="text-lg leading-relaxed text-foreground">
                     &ldquo;{item.content}&rdquo;

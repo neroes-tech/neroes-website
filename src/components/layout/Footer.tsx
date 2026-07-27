@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { CONTACT_INFO } from "@/lib/constants";
 
 function LinkedInIcon({ className }: { className?: string }) {
@@ -17,24 +20,26 @@ const SOCIAL_LINKS = [
   { label: "Facebook", href: CONTACT_INFO.social.facebook, Icon: FacebookIcon },
 ] as const;
 
-const NAV_ITEMS = [
-  { href: "/", label: "Home" },
-  { href: "/brain-experience", label: "Brain Experience" },
-  { href: "/science", label: "Science" },
-  { href: "/sport", label: "Sport" },
-  { href: "/about", label: "About Us" },
-  { href: "/contact", label: "Contact" },
-] as const;
-
-const LEGAL_ITEMS = [
-  { href: "/privacy-policy", label: "Privacy Policy" },
-  { href: "/terms-conditions", label: "Terms and Conditions" },
-] as const;
-
 const footerLinkClass =
   "inline-block py-0.5 transition-colors hover:text-primary-foreground";
 
 export function Footer() {
+  const { t } = useLanguage();
+
+  const navItems = [
+    { href: "/", label: t.nav.home },
+    { href: "/brain-experience", label: t.nav.brainExperience },
+    { href: "/science", label: t.nav.science },
+    { href: "/services", label: t.nav.services },
+    { href: "/about", label: t.nav.about },
+    { href: "/contact", label: t.nav.contact },
+  ];
+
+  const legalItems = [
+    { href: "/privacy-policy", label: t.footer.privacyPolicy },
+    { href: "/terms-conditions", label: t.footer.termsConditions },
+  ];
+
   return (
     <footer className="relative bg-primary text-primary-foreground">
       {/* Subtle gradient hairline separating the footer from the page */}
@@ -47,17 +52,15 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:gap-12">
           <div className="flex flex-col">
             <Image
-              src="/neroes-logo.png"
-              alt="Neroes"
-              width={2648}
-              height={3212}
-              className="h-10 w-auto self-start object-contain brightness-0 invert"
+              src="/horizontal.png"
+              alt="Neroes Corporate"
+              width={406}
+              height={136}
+              className="h-11 w-auto self-start object-contain mix-blend-multiply md:h-14"
             />
-            <p className="mt-6 max-w-xs font-exo text-lg font-medium leading-snug">
-              A precision instrument for the human mind.
-            </p>
+            <p className="mt-6 max-w-xs font-exo text-lg font-medium leading-snug">{t.footer.tagline}</p>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-primary-foreground/70">
-              Improve mental performance in corporations and sports.
+              {t.footer.subtagline}
             </p>
             <div className="mt-8 flex gap-3">
               {SOCIAL_LINKS.map(({ label, href, Icon }) => (
@@ -77,10 +80,10 @@ export function Footer() {
 
           <nav aria-label="Footer navigation">
             <h2 className="mb-6 font-exo text-sm font-semibold uppercase tracking-[0.2em] text-primary-foreground/60">
-              Navigation
+              {t.footer.navigationHeading}
             </h2>
             <ul className="space-y-3 text-sm text-primary-foreground/75">
-              {NAV_ITEMS.map((item) => (
+              {navItems.map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className={footerLinkClass}>
                     {item.label}
@@ -92,10 +95,10 @@ export function Footer() {
 
           <nav aria-label="Legal navigation">
             <h2 className="mb-6 font-exo text-sm font-semibold uppercase tracking-[0.2em] text-primary-foreground/60">
-              Legal
+              {t.footer.legalHeading}
             </h2>
             <ul className="space-y-3 text-sm text-primary-foreground/75">
-              {LEGAL_ITEMS.map((item) => (
+              {legalItems.map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className={footerLinkClass}>
                     {item.label}
@@ -107,17 +110,17 @@ export function Footer() {
 
           <div>
             <h2 className="mb-6 font-exo text-sm font-semibold uppercase tracking-[0.2em] text-primary-foreground/60">
-              Contact Us
+              {t.footer.contactHeading}
             </h2>
             <ul className="space-y-5 text-sm text-primary-foreground/75">
               <li className="flex flex-col gap-1">
-                <span className="font-exo font-medium text-primary-foreground">Email</span>
+                <span className="font-exo font-medium text-primary-foreground">{t.footer.emailLabel}</span>
                 <a href={`mailto:${CONTACT_INFO.email}`} className={footerLinkClass}>
                   {CONTACT_INFO.email}
                 </a>
               </li>
               <li className="flex flex-col gap-1">
-                <span className="font-exo font-medium text-primary-foreground">Phone</span>
+                <span className="font-exo font-medium text-primary-foreground">{t.footer.phoneLabel}</span>
                 <a
                   href={`tel:${CONTACT_INFO.phone.replace(/\s+/g, "")}`}
                   className={footerLinkClass}
@@ -126,7 +129,7 @@ export function Footer() {
                 </a>
               </li>
               <li className="flex flex-col gap-1">
-                <span className="font-exo font-medium text-primary-foreground">Address</span>
+                <span className="font-exo font-medium text-primary-foreground">{t.footer.addressLabel}</span>
                 <span className="leading-relaxed">{CONTACT_INFO.address}</span>
               </li>
             </ul>
@@ -134,7 +137,9 @@ export function Footer() {
         </div>
 
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-primary-foreground/10 pt-8 text-sm text-primary-foreground/60 md:flex-row">
-          <p>&copy; {new Date().getFullYear()} Neroes Technologies. All rights reserved.</p>
+          <p>
+            &copy; {new Date().getFullYear()} Neroes Technologies. {t.footer.copyright}
+          </p>
         </div>
       </div>
     </footer>

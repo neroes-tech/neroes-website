@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 
 import { Reveal } from "@/components/home/Reveal";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { PARTNERS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -10,12 +13,14 @@ import { cn } from "@/lib/utils";
  * in their real colors, no invert/chip workaround needed.
  */
 export function PartnersBar() {
+  const { t } = useLanguage();
+
   return (
     <section className="border-t border-border bg-[#FAFAF7] py-16" aria-label="Parceiros">
       <div className="container mx-auto px-4 md:px-6">
         <Reveal className="flex flex-col items-center text-center">
           <p className="text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
-            Com o apoio de
+            {t.shared.partnersHeading}
           </p>
           <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-6 md:gap-x-16">
             {PARTNERS.map((partner) => (

@@ -1,26 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { Button } from "@/components/ui/button";
-
-const INDUSTRIES = [
-  "Healthcare", "Finance", "Technology", "Retail", "Manufacturing",
-  "Education", "Government", "Hospitality", "Legal", "Media & Entertainment",
-  "Transportation", "Construction", "Energy & Utilities", "Professional Services", "Other",
-];
-
-const formSchema = z.object({
-  industry: z.string().min(1, "Please select an industry"),
-  employees: z.coerce.number().min(1, "Must have at least 1 employee"),
-  salary: z.coerce.number().optional().or(z.literal("")),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
 interface Results {
   presenteeism: number;
@@ -30,11 +17,27 @@ interface Results {
 }
 
 export function CalculatorForm() {
+  const { t } = useLanguage();
   const [results, setResults] = useState<Results | null>(null);
+
+  const formSchema = useMemo(
+    () =>
+      z.object({
+        // Keyed by index rather than the translated label, so the selection
+        // survives a language switch instead of silently resetting because
+        // the previously stored label no longer matches any option.
+        industry: z.string().min(1),
+        employees: z.coerce.number().min(1, t.calculator.form.employeesError),
+        salary: z.coerce.number().optional().or(z.literal("")),
+      }),
+    [t],
+  );
+
+  type FormValues = z.infer<typeof formSchema>;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { industry: "Technology", employees: 100, salary: 35000 },
+    defaultValues: { industry: "2", employees: 100, salary: 35000 },
   });
 
   const onSubmit = (values: FormValues) => {
@@ -52,15 +55,15 @@ export function CalculatorForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
           <div className="space-y-2">
             <label htmlFor="industry" className="text-sm font-medium text-foreground">
-              Industry
+              {t.calculator.form.industryLabel}
             </label>
             <select
               id="industry"
               {...form.register("industry")}
               className="h-11 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring"
             >
-              {INDUSTRIES.map((industry) => (
-                <option key={industry} value={industry}>
+              {t.calculator.form.industries.map((industry, i) => (
+                <option key={i} value={String(i)}>
                   {industry}
                 </option>
               ))}
@@ -69,7 +72,7 @@ export function CalculatorForm() {
 
           <div className="space-y-2">
             <label htmlFor="employees" className="text-sm font-medium text-foreground">
-              Number of Employees <span className="text-destructive">*</span>
+              {t.calculator.form.employeesLabel} <span className="text-destructive">*</span>
             </label>
             <input
               id="employees"
@@ -89,7 +92,7 @@ export function CalculatorForm() {
 
           <div className="space-y-2">
             <label htmlFor="salary" className="text-sm font-medium text-foreground">
-              Annual Average Salary in EUR (optional)
+              {t.calculator.form.salaryLabel}
             </label>
             <input
               id="salary"
@@ -100,12 +103,12 @@ export function CalculatorForm() {
               className="h-11 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring"
             />
             <p id="salary-hint" className="text-xs text-muted-foreground">
-              Defaults to &euro;35,000 if left empty
+              {t.calculator.form.salaryHint}
             </p>
           </div>
 
           <Button type="submit" className="h-12 w-full rounded-full text-lg">
-            Calculate Cost
+            {t.calculator.form.submitLabel}
           </Button>
         </form>
       </div>
@@ -114,15 +117,25 @@ export function CalculatorForm() {
         {results ? (
           <div className="space-y-6 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500">
             <div className="rounded-3xl bg-primary p-8 text-primary-foreground shadow-sm">
-              <h2 className="mb-2 text-lg font-medium opacity-80">Total Estimated Annual Cost</h2>
+              <h2 className="mb-2 text-lg font-medium opacity-80">{t.calculator.form.totalHeading}</h2>
               <div className="font-exo text-5xl font-bold">
                 <AnimatedCounter prefix="€" end={results.total} />
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {[
-                { label: "Presenteeism", value: results.presenteeism, desc: "20% productivity loss", color: "text-primary" },
-                { label: "Absenteeism", value: results.absenteeism, desc: "17.5% sick leaves", color: "text-primary" },
+                {
+                  label: t.calculator.form.presenteeismLabel,
+                  value: results.presenteeism,
+                  desc: t.calculator.form.presenteeismDesc,
+                  color: "text-primary",
+                },
+                {
+                  label: t.calculator.form.absenteeismLabel,
+                  value: results.absenteeism,
+                  desc: t.calculator.form.absenteeismDesc,
+                  color: "text-primary",
+                },
               ].map(({ label, value, desc, color }) => (
                 <div key={label} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
                   <h3 className="mb-1 text-sm font-bold uppercase tracking-wide text-foreground">{label}</h3>
@@ -133,17 +146,19 @@ export function CalculatorForm() {
                 </div>
               ))}
               <div className="rounded-2xl border border-border bg-card p-6 text-center shadow-sm sm:col-span-2 sm:mx-auto sm:w-1/2 sm:min-w-[220px]">
-                <h3 className="mb-1 text-sm font-bold uppercase tracking-wide text-foreground">Turnover</h3>
+                <h3 className="mb-1 text-sm font-bold uppercase tracking-wide text-foreground">
+                  {t.calculator.form.turnoverLabel}
+                </h3>
                 <div className="font-exo text-2xl font-bold text-secondary">
                   <AnimatedCounter prefix="€" end={results.turnover} />
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">15% of annual payroll cost</p>
+                <p className="mt-2 text-xs text-muted-foreground">{t.calculator.form.turnoverDesc}</p>
               </div>
             </div>
           </div>
         ) : (
           <div className="flex h-full min-h-[300px] items-center justify-center rounded-3xl border-2 border-dashed border-border bg-muted/30 p-8 text-center text-muted-foreground">
-            Enter your company details to see the hidden financial impact of poor mental health.
+            {t.calculator.form.placeholderText}
           </div>
         )}
       </div>

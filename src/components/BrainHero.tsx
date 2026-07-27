@@ -16,12 +16,14 @@ type BrainData = {
 };
 
 // Sourced directly from the brand manual's "Referências Cromáticas" table
-// (Web hex column) — not approximated. Teal/blue form the surface gradient
-// (matching the logo icon's own teal-to-blue hemisphere gradient); amber
-// (the logo's circuit-node accent color) tints the glow hubs.
+// (Web hex column) — not approximated. Strictly cold tones: teal/blue form
+// the surface gradient (matching the logo icon's own teal-to-blue hemisphere
+// gradient); glow hubs tint toward the manual's vivid blue, not the amber
+// swatch used here previously — mixed with the teal/blue base, amber read as
+// a muddy brown rather than a clean highlight.
 const C_BLUE = new THREE.Color("#1270B0");
 const C_TEAL = new THREE.Color("#0F9CAC");
-const C_VIOLET = new THREE.Color("#DB9B1D");
+const C_VIOLET = new THREE.Color("#00A5E9");
 
 // ── Act boundaries (scroll progress 0..1) ──────────────────────────────
 const ACT2_START = 0.22;
@@ -277,9 +279,10 @@ const POINT_FRAG = `
     float d = length(uv);
     if (d > 0.5) discard;
     float alpha = 1.0 - smoothstep(0.42, 0.48, d);
-    // vec3(0.859, 0.608, 0.114) = #DB9B1D, the brand manual's amber swatch
-    // (the logo icon's own circuit-node accent color).
-    vec3 col = mix(vColor, vec3(0.859, 0.608, 0.114), vGlow * 0.6);
+    // vec3(0.0, 0.647, 0.914) = #00A5E9, the brand manual's vivid-blue
+    // swatch — cold, not the amber this used to be (which muddied toward
+    // brown when mixed with the teal/blue base).
+    vec3 col = mix(vColor, vec3(0.0, 0.647, 0.914), vGlow * 0.6);
     col = mix(col, vec3(1.0), uBloom * 0.35 * (1.0 - d * 1.6));
     col += vCursorBoost;
     gl_FragColor = vec4(col, alpha * (0.9 + vGlow * 0.1));
