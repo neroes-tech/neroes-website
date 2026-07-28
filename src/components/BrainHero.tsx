@@ -44,6 +44,12 @@ const HEMISPHERE_SPLIT_MAX = 0.17;
 // only its distance (radius) changes. See CAMERA_MIN_RADIUS below for why
 // the dolly never crosses zero.
 const ORBIT_RADIUS = 4.3;
+// On narrow viewports the sticky Hero section is much shorter relative to
+// its width, so the same radius reads as a much larger silhouette relative
+// to the screen — big enough to crowd under the fixed Navbar and blow past
+// the section's own side margins. A larger starting radius (camera farther
+// back) keeps the point cloud proportionally smaller on mobile instead.
+const MOBILE_ORBIT_RADIUS = 5.6;
 const ORBIT_PHASE = Math.PI / 2;
 // Closest the camera ever dollies in to — kept positive and well clear of
 // zero so it never crosses through the point cloud's origin (crossing zero
@@ -326,6 +332,7 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     if (!mount) return;
 
     const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+    const orbitStart = isMobile ? MOBILE_ORBIT_RADIUS : ORBIT_RADIUS;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(55, mount.clientWidth / mount.clientHeight, 0.1, 100);
@@ -334,9 +341,9 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     // along world +X reads that length as the horizontal silhouette —
     // frontal lobe curve on one side, cerebellum/brainstem on the other —
     // instead of the symmetric, mirrored left/right hemisphere view. Starts
-    // at full viewing distance (ORBIT_RADIUS) — clarity and impact first;
+    // at full viewing distance (orbitStart) — clarity and impact first;
     // the render loop dives in from here as the user scrolls.
-    camera.position.set(ORBIT_RADIUS, 0, 0);
+    camera.position.set(orbitStart, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(mount.clientWidth, mount.clientHeight);
@@ -426,7 +433,7 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
 
     // ── Reduced motion: one static, centered frame — no scroll-jack, no RAF ──
     if (reduced) {
-      camera.position.set(ORBIT_RADIUS, 0, 0);
+      camera.position.set(orbitStart, 0, 0);
       camera.lookAt(0, 0, 0);
       renderer.render(scene, camera);
       window.addEventListener("resize", resize);
@@ -445,15 +452,19 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     const clock = new THREE.Clock();
     let raf = 0;
     let running = true;
+    // Accumulated idle-spin angle (see render() below) — kept outside the
+    // render loop so it persists frame-to-frame without depending on the
+    // clock's raw elapsed time.
+    let idleAngle = 0;
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
     const render = () => {
       // THREE.Clock.getElapsedTime() calls getDelta() internally — calling
-      // both in the same frame would double-consume the clock's timer, so
-      // getDelta() is called for its side effect of advancing
-      // clock.elapsedTime, and only that elapsed value is used below.
-      clock.getDelta();
+      // both would double-consume the clock's timer, so getDelta() is
+      // called once and its return value (this frame's dt) is reused both
+      // directly and via clock.elapsedTime below.
+      const dt = clock.getDelta();
       const t = clock.elapsedTime;
       const progress = progressRef?.current ?? 0;
 
@@ -486,10 +497,18 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       // Continuous idle spin while resting at the very top (time-driven, not
       // scroll-driven) — hands off fast (within the first 5% of scroll) to
       // the scroll-driven hemisphere opening, instead of the two competing.
+      // Accumulated as a per-frame increment (rate × dt × fade) rather than
+      // (elapsed-time × fade): the latter multiplies an ever-growing clock
+      // value by a shrinking fade factor, so the longer the brain idles at
+      // the top before the user scrolls, the harder that product snaps
+      // toward zero as fade collapses — reading as a sudden "spinning top"
+      // flick right as scrolling starts (reported by Duarte). Accumulating
+      // the rate instead means the increment itself shrinks to zero with
+      // fade, so idle duration no longer affects how hard the handoff snaps.
       const idleSpinFade = 1 - smoothstep(0.0, 0.05, progress);
-      const idleSpinAngle = t * 0.18 * idleSpinFade;
+      idleAngle += 0.18 * dt * idleSpinFade;
 
-      points.rotation.y = parallax.xRef.current * 0.25 + idleSpinAngle;
+      points.rotation.y = parallax.xRef.current * 0.25 + idleAngle;
       points.rotation.x = parallax.yRef.current * 0.15;
       points.position.set(tremorX, tremorY, 0);
       points.updateMatrixWorld();
@@ -497,10 +516,10 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       // ── Camera: holds the fixed lateral/profile angle (ORBIT_PHASE) for the
       // entire scroll journey — no rotation, no orbit. The brain itself
       // idle-spins in place at rest (see idleSpin above); scroll drives only
-      // a straight dolly-in from ORBIT_RADIUS toward CAMERA_MIN_RADIUS, read
+      // a straight dolly-in from orbitStart toward CAMERA_MIN_RADIUS, read
       // as a clean, direct expansion/zoom with no swirl or pirouette.
       const zoomIn = smoothstep(0.0, 0.9, progress);
-      const orbitRadius = lerp(ORBIT_RADIUS, CAMERA_MIN_RADIUS, zoomIn);
+      const orbitRadius = lerp(orbitStart, CAMERA_MIN_RADIUS, zoomIn);
       camera.position.x = Math.sin(ORBIT_PHASE) * orbitRadius;
       camera.position.z = Math.cos(ORBIT_PHASE) * orbitRadius;
       camera.position.y = 0;

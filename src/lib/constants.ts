@@ -11,6 +11,16 @@ export const CONTACT_INFO = {
 
 export const CALENDLY_URL = "https://calendly.com/pedro-ebw/brain-experience-event";
 
+// Original source links for the Calculator page's Deloitte/WHO citations —
+// carried over from the WordPress site (_referencia/wordpress/mhc), not
+// invented. The Deloitte one points to the Drive-hosted PDF copy the
+// original site itself linked to (no stable public URL was ever published
+// on deloitte.com for this report).
+export const EXTERNAL_REPORTS = {
+  deloitte: "https://drive.google.com/file/d/1ifG3h_swbY6-xwz8RoHj_vRUtYg5LrZP/view?usp=drive_link",
+  who: "https://www.who.int/news-room/fact-sheets/detail/mental-health-at-work",
+};
+
 export const SITE_URL = "https://neroes.tech";
 
 export interface Testimonial {

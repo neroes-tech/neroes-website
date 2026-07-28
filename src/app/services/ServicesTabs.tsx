@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { StarRating } from "@/components/ui/StarRating";
 import { TESTIMONIALS } from "@/lib/constants";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { useSegment } from "@/lib/segment/SegmentProvider";
 import { cn } from "@/lib/utils";
 
 interface SportTestimonial {
@@ -32,7 +33,15 @@ type Tab = "sport" | "corporate";
 
 export function ServicesTabs() {
   const { t } = useLanguage();
+  const { setSegment } = useSegment();
   const [tab, setTab] = useState<Tab>("sport");
+
+  // Mirrors the active tab into the Navbar's logo — reset back to the
+  // default logo when leaving /services (unmount), not just on tab switch.
+  useEffect(() => {
+    setSegment(tab === "sport" ? "sports" : "corporate");
+    return () => setSegment("default");
+  }, [tab, setSegment]);
 
   const tabButtonClass = (active: boolean) =>
     cn(

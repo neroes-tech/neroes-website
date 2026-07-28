@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PartnersBar } from "@/components/layout/PartnersBar";
-import ThreadCanvas from "@/components/layout/ThreadCanvas";
 import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
+import { SegmentProvider } from "@/lib/segment/SegmentProvider";
 import { CONTACT_INFO, SITE_URL } from "@/lib/constants";
 import "./globals.css";
 
@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   },
   description:
     "Neroes improves mental performance in corporations and sports through neurofeedback-based mental training.",
+  icons: {
+    icon: "/favicon-brain.png",
+    shortcut: "/favicon-brain.png",
+    apple: "/favicon-brain.png",
+  },
 };
 
 const organizationSchema = {
@@ -54,13 +59,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to main content
         </a>
         <LanguageProvider>
-          <ThreadCanvas />
-          <Navbar />
-          <main id="main-content" className="flex-1">
-            {children}
-          </main>
-          <PartnersBar />
-          <Footer />
+          <SegmentProvider>
+            <Navbar />
+            <main id="main-content" className="flex-1">
+              {children}
+            </main>
+            <PartnersBar />
+            <Footer />
+          </SegmentProvider>
         </LanguageProvider>
       </body>
     </html>

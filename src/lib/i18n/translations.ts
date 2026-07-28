@@ -476,7 +476,7 @@ export const translations: Record<Locale, Translations> = {
       bottomQuote1Author: "— Deloitte, Relatório de Saúde Mental e Colaboradores 2024",
       bottomQuote2:
         "Estima-se que, globalmente, se percam 12 mil milhões de dias de trabalho por ano devido a depressão e ansiedade, a um custo de 1 bilião de dólares por ano.",
-      bottomQuote2Author: "— OMS",
+      bottomQuote2Author: "— Organização Mundial da Saúde",
       ctaButton1: "Descubra como resolver este problema",
       ctaButton2: "Saiba mais sobre a nossa solução",
     },
@@ -764,7 +764,7 @@ export const translations: Record<Locale, Translations> = {
       bottomQuote1Author: "— Deloitte, Mental Health & Employees Report 2024",
       bottomQuote2:
         "Globally, an estimated 12 billion working days are lost every year to depression and anxiety at a cost of US$ 1 trillion per year.",
-      bottomQuote2Author: "— WHO",
+      bottomQuote2Author: "— World Health Organization",
       ctaButton1: "Find out how to solve this problem",
       ctaButton2: "Know more about our solution",
     },

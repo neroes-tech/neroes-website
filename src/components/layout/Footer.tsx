@@ -28,9 +28,10 @@ export function Footer() {
 
   const navItems = [
     { href: "/", label: t.nav.home },
-    { href: "/brain-experience", label: t.nav.brainExperience },
-    { href: "/science", label: t.nav.science },
     { href: "/services", label: t.nav.services },
+    { href: "/brain-experience", label: t.nav.brainExperience },
+    { href: "/mental-health-calculator", label: t.nav.calculator },
+    { href: "/science", label: t.nav.science },
     { href: "/about", label: t.nav.about },
     { href: "/contact", label: t.nav.contact },
   ];
@@ -56,7 +57,7 @@ export function Footer() {
               alt="Neroes Corporate"
               width={406}
               height={136}
-              className="h-11 w-auto self-start object-contain mix-blend-multiply md:h-14"
+              className="h-10 w-auto self-start object-contain mix-blend-multiply md:h-12"
             />
             <p className="mt-6 max-w-xs font-exo text-lg font-medium leading-snug">{t.footer.tagline}</p>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-primary-foreground/70">
