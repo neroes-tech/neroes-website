@@ -17,9 +17,9 @@ export const metadata: Metadata = {
   description:
     "Neroes improves mental performance in corporations and sports through neurofeedback-based mental training.",
   icons: {
-    icon: "/favicon-brain.png",
-    shortcut: "/favicon-brain.png",
-    apple: "/favicon-brain.png",
+    icon: { url: "/favicon-brain-transparent.png", type: "image/png" },
+    shortcut: { url: "/favicon-brain-transparent.png", type: "image/png" },
+    apple: { url: "/favicon-brain-transparent.png", type: "image/png" },
   },
 };
 
