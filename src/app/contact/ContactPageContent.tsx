@@ -74,7 +74,7 @@ export function ContactPageContent() {
                         {t.contact.addressLabel}
                       </p>
                       <p className="mt-1 max-w-sm text-lg leading-relaxed text-foreground">
-                        {CONTACT_INFO.address}
+                        {t.contact.address}
                       </p>
                     </div>
                   </li>

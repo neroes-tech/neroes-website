@@ -1,7 +1,7 @@
 export const CONTACT_INFO = {
   email: "info@neroes.tech",
   phone: "+351 914 796 058",
-  address: "TecLabs, Faculty of Sciences of the University of Lisbon, Campo Grande, 1749-106 Lisbon",
+  address: "Rua da Prata 80, 5º andar, Lisboa, Portugal",
   social: {
     linkedin: "https://www.linkedin.com/company/neroes/",
     instagram: "https://www.instagram.com/neroes.tech/",

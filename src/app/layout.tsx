@@ -36,9 +36,8 @@ const organizationSchema = {
   ],
   address: {
     "@type": "PostalAddress",
-    streetAddress: CONTACT_INFO.address,
+    streetAddress: "Rua da Prata 80, 5º andar",
     addressLocality: "Lisbon",
-    postalCode: "1749-106",
     addressCountry: "PT",
   },
 } as const;

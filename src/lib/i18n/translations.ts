@@ -85,6 +85,7 @@ export interface Translations {
     emailLabel: string;
     phoneLabel: string;
     addressLabel: string;
+    address: string;
     privacyPolicy: string;
     termsConditions: string;
     copyright: string;
@@ -144,6 +145,7 @@ export interface Translations {
     emailLabel: string;
     phoneLabel: string;
     addressLabel: string;
+    address: string;
     form: {
       nameLabel: string;
       emailLabel: string;
@@ -319,6 +321,7 @@ export const translations: Record<Locale, Translations> = {
       emailLabel: "Email",
       phoneLabel: "Telefone",
       addressLabel: "Morada",
+      address: "Rua da Prata 80, 5º andar, Lisboa, Portugal",
       privacyPolicy: "Política de Privacidade",
       termsConditions: "Termos e Condições",
       copyright: "Todos os direitos reservados.",
@@ -416,6 +419,7 @@ export const translations: Record<Locale, Translations> = {
       emailLabel: "Email",
       phoneLabel: "Telefone",
       addressLabel: "Sede",
+      address: "Rua da Prata 80, 5º andar, Lisboa, Portugal",
       form: {
         nameLabel: "Nome *",
         emailLabel: "Email *",
@@ -608,6 +612,7 @@ export const translations: Record<Locale, Translations> = {
       emailLabel: "Email",
       phoneLabel: "Phone",
       addressLabel: "Address",
+      address: "Rua da Prata 80, 5th floor, Lisbon, Portugal",
       privacyPolicy: "Privacy Policy",
       termsConditions: "Terms and Conditions",
       copyright: "All rights reserved.",
@@ -705,6 +710,7 @@ export const translations: Record<Locale, Translations> = {
       emailLabel: "Email",
       phoneLabel: "Phone",
       addressLabel: "Headquarters",
+      address: "Rua da Prata 80, 5th floor, Lisbon, Portugal",
       form: {
         nameLabel: "Name *",
         emailLabel: "Email *",

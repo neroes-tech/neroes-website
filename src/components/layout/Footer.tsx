@@ -131,7 +131,7 @@ export function Footer() {
               </li>
               <li className="flex flex-col gap-1">
                 <span className="font-exo font-medium text-primary-foreground">{t.footer.addressLabel}</span>
-                <span className="leading-relaxed">{CONTACT_INFO.address}</span>
+                <span className="leading-relaxed">{t.footer.address}</span>
               </li>
             </ul>
           </div>
