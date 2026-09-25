@@ -12,38 +12,8 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { useSegment } from "@/lib/segment/SegmentProvider";
 import { CALENDLY_URL } from "@/lib/constants";
+import { NEROES_LOCKUP } from "@/lib/brand";
 import { cn } from "@/lib/utils";
-
-// Corporate source file (public/neroes-brand-mark.png — the official brand
-// asset, updated directly in place when the design team supplies a new
-// export) is a single portrait PNG (icon stacked over a "neroes corporate"
-// wordmark) — too tall to scale down to navbar height without shrinking the
-// icon into an unreadable smudge. Only the icon (top ~62% of the file,
-// measured against the source art) is cropped via a fixed-height
-// overflow-hidden box, and the wordmark is real text set alongside it so it
-// stays crisp at any size. The file ships fully opaque (alpha=255
-// everywhere, verified by sampling pixel data) with an off-white/grayish
-// background baked in, not true transparency — mix-blend-multiply alone
-// can't hide that, since it only fully disappears against a *pure* white
-// background. Background is stripped in place via a flood fill anchored to
-// a fixed near-white reference (not chained pixel-to-pixel, which would
-// bleed through the icon's own color gradients) whenever the source file is
-// replaced — see scratchpad/pw/clean-in-place.js; re-run it if the design
-// team supplies another update.
-// max-w-none cancels Tailwind's preflight `img { max-width: 100% }` reset:
-// as a flex item (the parent Link is `flex flex-row`) this image's width is
-// auto/indeterminate, and that reset's percentage can't resolve against an
-// indeterminate container — it collapses the image to 0px instead of
-// falling back to its natural aspect ratio. With max-w-none gone, w-auto
-// correctly derives width from height × the image's own aspect ratio.
-const SEGMENT_ICON = {
-  corporate: {
-    src: "/neroes-brand-mark.png",
-    width: 295,
-    height: 382,
-    imgClassName: "h-[58px] w-auto max-w-none mix-blend-multiply md:h-[65px]",
-  },
-} as const;
 
 // Sports uses the official pre-composed horizontal lockup (icon + "neroes
 // sports" wordmark already laid out side by side, unlike the Corporate
@@ -76,9 +46,6 @@ export function Navbar() {
 
   const navLinks = [
     { href: "/", label: t.nav.home },
-    { href: "/services", label: t.nav.services },
-    { href: "/brain-experience", label: t.nav.brainExperience },
-    { href: "/mental-health-calculator", label: t.nav.calculator },
     { href: "/science", label: t.nav.science },
   ];
 
@@ -86,8 +53,6 @@ export function Navbar() {
     { href: "/about", label: t.nav.about },
     { href: "/contact", label: t.nav.contact },
   ];
-
-  const segmentIcon = segment === "corporate" ? SEGMENT_ICON.corporate : null;
 
   const linkClass = (href: string) =>
     cn(
@@ -114,8 +79,8 @@ export function Navbar() {
           {segment === "sports" ? (
             // Pre-composed lockup, genuinely transparent — no crop, no
             // separate text (the file already contains "neroes sports").
-            // max-w-none: see note above SEGMENT_ICON on the flex/preflight
-            // 0-width bug this avoids.
+            // max-w-none: cancels preflight's img max-width:100%, which
+            // collapses a flex-item image with auto width to 0px.
             <Image
               src={SPORTS_LOGO.src}
               alt="Neroes Sports"
@@ -124,46 +89,13 @@ export function Navbar() {
               className="h-11 w-auto max-w-none object-contain mix-blend-multiply md:h-12"
               priority
             />
-          ) : segmentIcon ? (
-            <>
-              <div className="relative h-9 shrink-0 overflow-hidden px-[3px] md:h-10">
-                {/* The source art's circuit nodes sit flush against the
-                    canvas edge with no built-in margin — px-[3px] insets the
-                    image a few px from the crop box so they don't read as
-                    clipped. */}
-                <Image
-                  src={segmentIcon.src}
-                  alt=""
-                  width={segmentIcon.width}
-                  height={segmentIcon.height}
-                  className={segmentIcon.imgClassName}
-                  priority
-                />
-              </div>
-              <span className="flex flex-col gap-0 leading-[1.05]">
-                <span className="font-exo text-base font-bold leading-[1.05] text-[#0B1C31] md:text-lg">
-                  neroes
-                </span>
-                <span className="font-exo text-base font-bold leading-[1.05] text-[#0F9CAC] md:text-lg">
-                  corporate
-                </span>
-              </span>
-            </>
           ) : (
             <Image
-              src="/horizontal.png"
+              src={NEROES_LOCKUP.src}
               alt="Neroes"
-              width={406}
-              height={136}
-              // max-w-none cancels Tailwind's preflight `img { max-width:
-              // 100% }` reset. Now that the parent Link is a flex row (for
-              // the Corporate/Sports icon+text layout), this Image is a flex
-              // item with an indeterminate auto width — the percentage in
-              // that reset can't resolve against an indeterminate container,
-              // which collapses the image to 0px instead of falling back to
-              // its natural aspect ratio. w-auto works correctly again once
-              // the percentage constraint is gone.
-              className="h-14 w-auto max-w-none object-contain mix-blend-multiply md:h-16"
+              width={NEROES_LOCKUP.width}
+              height={NEROES_LOCKUP.height}
+              className="h-10 w-auto max-w-none object-contain md:h-11"
               priority
             />
           )}

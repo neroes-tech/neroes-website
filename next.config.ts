@@ -5,6 +5,15 @@ const nextConfig: NextConfig = {
   eslint: {
     dirs: ["src"],
   },
+  // Pages removed from the site (2026-09): send old links/bookmarks home
+  // instead of a 404. Temporary (307) in case any of them comes back.
+  async redirects() {
+    return ["/services", "/brain-experience", "/mental-health-calculator"].map((source) => ({
+      source,
+      destination: "/",
+      permanent: false,
+    }));
+  },
   async headers() {
     return [
       {

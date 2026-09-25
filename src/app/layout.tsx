@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Roboto_Condensed } from "next/font/google";
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -7,6 +8,17 @@ import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { SegmentProvider } from "@/lib/segment/SegmentProvider";
 import { CONTACT_INFO, SITE_URL } from "@/lib/constants";
 import "./globals.css";
+
+// Brand manual (06 Tipografia): Roboto Condensed Regular for text, Bold for
+// titles. Self-hosted via next/font: no render-blocking CSS @import and no
+// font-swap layout shift.
+const robotoCondensed = Roboto_Condensed({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
+  variable: "--font-roboto-condensed",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -44,7 +56,7 @@ const organizationSchema = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={robotoCondensed.variable}>
       <body className="flex min-h-screen flex-col">
         <script
           type="application/ld+json"

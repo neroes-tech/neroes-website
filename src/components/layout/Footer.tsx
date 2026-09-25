@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { NEROES_LOCKUP } from "@/lib/brand";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { CONTACT_INFO } from "@/lib/constants";
 
@@ -27,10 +28,7 @@ export function Footer() {
   const { t } = useLanguage();
 
   const navItems = [
-    { href: "/", label: t.nav.home },
-    { href: "/services", label: t.nav.services },
-    { href: "/brain-experience", label: t.nav.brainExperience },
-    { href: "/mental-health-calculator", label: t.nav.calculator },
+    { href: "/", label: t.nav.home },
     { href: "/science", label: t.nav.science },
     { href: "/about", label: t.nav.about },
     { href: "/contact", label: t.nav.contact },
@@ -53,11 +51,11 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:gap-12">
           <div className="flex flex-col">
             <Image
-              src="/horizontal.png"
-              alt="Neroes Corporate"
-              width={406}
-              height={136}
-              className="h-10 w-auto self-start object-contain mix-blend-multiply md:h-12"
+              src={NEROES_LOCKUP.src}
+              alt="Neroes"
+              width={NEROES_LOCKUP.width}
+              height={NEROES_LOCKUP.height}
+              className="h-10 w-auto max-w-none self-start object-contain md:h-12"
             />
             <p className="mt-6 max-w-xs font-exo text-lg font-medium leading-snug">{t.footer.tagline}</p>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-primary-foreground/70">
