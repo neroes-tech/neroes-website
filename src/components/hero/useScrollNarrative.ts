@@ -31,6 +31,9 @@ export interface ScrollNarrative {
 // ── Ato boundaries, in scroll progress (0..1) ──────────────────────────
 const ACT_BOUNDARIES: readonly [number, number, number, number, number] = [0, 0.22, 0.55, 0.85, 1];
 const LERP_FACTOR = 0.04;
+// Scrolling back up settles faster: at 0.04 a quick return to the top left
+// the Hero black (brain still mid-dissolve) for 1–2s before it re-formed.
+const LERP_FACTOR_BACK = 0.1;
 const REACT_STATE_THROTTLE_MS = 100;
 
 function lerp(a: number, b: number, t: number): number {
@@ -95,7 +98,9 @@ export function useScrollNarrative(sectionRef?: RefObject<HTMLElement | null>): 
     window.addEventListener("resize", onScrollOrResize);
 
     const tick = (now: number) => {
-      progressRef.current = lerp(progressRef.current, targetRef.current, LERP_FACTOR);
+      const target = targetRef.current;
+      const factor = target < progressRef.current ? LERP_FACTOR_BACK : LERP_FACTOR;
+      progressRef.current = lerp(progressRef.current, target, factor);
 
       if (now - lastStateFlush >= REACT_STATE_THROTTLE_MS) {
         lastStateFlush = now;

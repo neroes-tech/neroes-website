@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { useReducedMotion } from "framer-motion";
 import * as THREE from "three";
 
 import { DISPLACEMENT_GLSL, SIMPLEX_NOISE_GLSL } from "@/components/hero/displacementShader";
+import { HEART_RED_RGB, HEARTBEAT_BLINK_DECAY, heartbeatPhase } from "@/components/hero/heartbeat";
 import { useMouseParallax } from "@/components/hero/useMouseParallax";
 
 type BrainData = {
@@ -13,17 +14,33 @@ type BrainData = {
   sizes: Float32Array;
   glow: Float32Array;
   phase: Float32Array;
+  /** Particles [0, cerebrumCount) are the cerebrum's folded cortex surface. */
+  cerebrumCount: number;
 };
 
-// Sourced directly from the brand manual's "Referências Cromáticas" table
-// (Web hex column) — not approximated. Strictly cold tones: teal/blue form
-// the surface gradient (matching the logo icon's own teal-to-blue hemisphere
-// gradient); glow hubs tint toward the manual's vivid blue, not the amber
-// swatch used here previously — mixed with the teal/blue base, amber read as
-// a muddy brown rather than a clean highlight.
-const C_BLUE = new THREE.Color("#1270B0");
-const C_TEAL = new THREE.Color("#0F9CAC");
-const C_VIOLET = new THREE.Color("#00A5E9");
+// "Deep tech" palette for the dark Hero: electric cyan → royal blue surface
+// gradient, glow hubs pushed toward a near-neon cyan. Rendered with additive
+// blending (see pointMat) so dense regions bloom on the dark background.
+const C_BLUE = new THREE.Color("#3B82F6");
+const C_TEAL = new THREE.Color("#22D3EE");
+const C_CYAN = new THREE.Color("#00F0FF");
+
+// Neural-connection graph: a subset of glow hubs linked to their nearest
+// same-hemisphere neighbours (see buildConnections).
+const LINK_MAX_DIST = 0.24;
+const LINK_MAX_DEGREE = 3;
+
+// Vital-sign spot: a handful of the brain's own surface points on the upper
+// front of the frontal lobe, turned heart-red and blinking on the shared
+// heartbeat clock — the brain-side echo of the ECG in the Hero's HUD card.
+// The anchor blinks first; the signal then travels along red edges to the
+// neighbours, each blinking as it arrives.
+const VITAL_NEIGHBOURS = 4; // extra points around the anchor (0 = a single red point)
+const VITAL_SPREAD = 0.26; // max distance of a neighbour from the anchor (world units)
+const VITAL_MIN_GAP = 0.07; // keeps the constellation spread out rather than clumped
+const VITAL_DELAY_PER_UNIT = 0.35; // signal travel time, in beat fractions per world unit
+const VITAL_ANCHOR_SIZE = 5.5;
+const VITAL_NEIGHBOUR_SIZE = 3.0;
 
 // ── Act boundaries (scroll progress 0..1) ──────────────────────────────
 const ACT2_START = 0.22;
@@ -51,6 +68,11 @@ const ORBIT_RADIUS = 4.3;
 // back) keeps the point cloud proportionally smaller on mobile instead.
 const MOBILE_ORBIT_RADIUS = 5.6;
 const ORBIT_PHASE = Math.PI / 2;
+// The brain itself is turned 80° to the right of that pure profile (Duarte's
+// call), so the frontal lobe — and the red vital spot on it — faces the
+// viewer instead of sitting on the silhouette's edge. The hemisphere split
+// then also reads as a visible left/right opening rather than along depth.
+const BRAIN_YAW = THREE.MathUtils.degToRad(80);
 // Closest the camera ever dollies in to — kept positive and well clear of
 // zero so it never crosses through the point cloud's origin (crossing zero
 // flips the camera to the opposite side, which read as a sudden pirouette).
@@ -179,7 +201,7 @@ function buildBrain(count: number): BrainData {
     // depth pass.
     const isGlow = Math.random() < 0.2;
     if (isGlow) {
-      tmp.lerp(C_VIOLET, 0.55);
+      tmp.lerp(C_CYAN, 0.6);
       glow[i] = 1;
       sizes[i] = 1.5 + Math.random() * 1.2;
     } else {
@@ -193,7 +215,163 @@ function buildBrain(count: number): BrainData {
     phase[i] = Math.random() * Math.PI * 2;
   }
 
-  return { positions, colors, sizes, glow, phase };
+  return { positions, colors, sizes, glow, phase, cerebrumCount: nCerebrum };
+}
+
+type VitalSpot = {
+  /** Brain particle indices, anchor first. */
+  nodes: number[];
+  /** Blink delay per node, as a fraction of the beat (0 for the anchor). */
+  delays: number[];
+  /** Signal-carrying edges as [from, to] positions in `nodes`, oriented away from the anchor. */
+  edges: [number, number][];
+};
+
+/**
+ * Picks the vital-sign spot (see VITAL_* above) among the cerebrum's glow
+ * hubs on the +x hemisphere — the side BRAIN_YAW turns toward the camera.
+ * Must run before buildConnections: the caller zeroes these points' glow,
+ * which keeps them out of the cyan hub graph.
+ */
+function pickVitalSpot(brain: BrainData): VitalSpot {
+  const p = brain.positions;
+  const dist = (a: number, b: number) =>
+    Math.hypot(p[a * 3]! - p[b * 3]!, p[a * 3 + 1]! - p[b * 3 + 1]!, p[a * 3 + 2]! - p[b * 3 + 2]!);
+
+  const pool: number[] = [];
+  for (let i = 0; i < brain.cerebrumCount; i++) {
+    if (brain.glow[i] === 1 && p[i * 3]! > 0) pool.push(i);
+  }
+
+  // Anchor: upper front of the frontal lobe. +z is the front, +y up; a
+  // slight lateral (+x) bias keeps it on the visible face instead of down in
+  // the longitudinal fissure between the hemispheres.
+  let anchor = pool[0] ?? 0;
+  let best = -Infinity;
+  for (const i of pool) {
+    const score = p[i * 3 + 2]! + 0.5 * p[i * 3 + 1]! + 0.3 * p[i * 3]!;
+    if (score > best) {
+      best = score;
+      anchor = i;
+    }
+  }
+
+  // Neighbours: farthest-point sampling within VITAL_SPREAD of the anchor, so
+  // the few red points form an even little constellation.
+  const near = pool.filter((i) => i !== anchor && dist(i, anchor) <= VITAL_SPREAD);
+  const nodes = [anchor];
+  while (nodes.length < 1 + VITAL_NEIGHBOURS) {
+    let pick = -1;
+    let pickGap = VITAL_MIN_GAP;
+    for (const i of near) {
+      const gap = Math.min(...nodes.map((n) => dist(i, n)));
+      if (gap > pickGap) {
+        pickGap = gap;
+        pick = i;
+      }
+    }
+    if (pick < 0) break;
+    nodes.push(pick);
+  }
+
+  // Minimum spanning tree grown from the anchor (Prim) — each point's delay
+  // is the signal's travel time along the tree, so it blinks on arrival.
+  const delays = nodes.map(() => 0);
+  const edges: [number, number][] = [];
+  const inTree = [0];
+  while (inTree.length < nodes.length) {
+    let from = -1;
+    let to = -1;
+    let shortest = Infinity;
+    for (const a of inTree) {
+      for (let b = 0; b < nodes.length; b++) {
+        if (inTree.includes(b)) continue;
+        const d = dist(nodes[a]!, nodes[b]!);
+        if (d < shortest) {
+          shortest = d;
+          from = a;
+          to = b;
+        }
+      }
+    }
+    inTree.push(to);
+    edges.push([from, to]);
+    delays[to] = delays[from]! + shortest * VITAL_DELAY_PER_UNIT;
+  }
+
+  return { nodes, delays, edges };
+}
+
+/**
+ * Links up to `maxHubs` glow hubs to their nearest neighbours (same
+ * hemisphere only — cross-hemisphere edges would stretch across the gap as
+ * the hemispheres open), then appends the vital spot's red edges. Each edge
+ * carries a 0/1 end marker (for the travelling pulse), a stable random
+ * phase, and — vital edges only — `vital` = 1 + the upstream point's delay
+ * and `travel` = the beat fraction the signal takes to cross it (both 0 on
+ * regular edges).
+ */
+function buildConnections(brain: BrainData, maxHubs: number, spot: VitalSpot) {
+  const hubs: number[] = [];
+  const total = brain.glow.length;
+  for (let i = 0; i < total && hubs.length < maxHubs; i++) {
+    if (brain.glow[i] === 1) hubs.push(i);
+  }
+
+  const p = brain.positions;
+  const degree = new Uint8Array(hubs.length);
+  const verts: number[] = [];
+  const ends: number[] = [];
+  const phases: number[] = [];
+  const vital: number[] = [];
+  const travel: number[] = [];
+  const maxD2 = LINK_MAX_DIST * LINK_MAX_DIST;
+
+  for (let a = 0; a < hubs.length; a++) {
+    if (degree[a]! >= LINK_MAX_DEGREE) continue;
+    const ia = hubs[a]! * 3;
+    const ax = p[ia]!;
+    const ay = p[ia + 1]!;
+    const az = p[ia + 2]!;
+    for (let b = a + 1; b < hubs.length && degree[a]! < LINK_MAX_DEGREE; b++) {
+      if (degree[b]! >= LINK_MAX_DEGREE) continue;
+      const ib = hubs[b]! * 3;
+      const bx = p[ib]!;
+      if (Math.sign(ax) !== Math.sign(bx)) continue;
+      const dx = ax - bx;
+      const dy = ay - p[ib + 1]!;
+      const dz = az - p[ib + 2]!;
+      if (dx * dx + dy * dy + dz * dz > maxD2) continue;
+      verts.push(ax, ay, az, bx, p[ib + 1]!, p[ib + 2]!);
+      ends.push(0, 1);
+      const ph = Math.random();
+      phases.push(ph, ph);
+      vital.push(0, 0);
+      travel.push(0, 0);
+      degree[a] = degree[a]! + 1;
+      degree[b] = degree[b]! + 1;
+    }
+  }
+
+  for (const [from, to] of spot.edges) {
+    const ia = spot.nodes[from]! * 3;
+    const ib = spot.nodes[to]! * 3;
+    verts.push(p[ia]!, p[ia + 1]!, p[ia + 2]!, p[ib]!, p[ib + 1]!, p[ib + 2]!);
+    ends.push(0, 1);
+    phases.push(0, 0);
+    const start = spot.delays[from]!;
+    const duration = Math.max(spot.delays[to]! - start, 0.02);
+    vital.push(1 + start, 1 + start);
+    travel.push(duration, duration);
+  }
+
+  return {
+    positions: new Float32Array(verts),
+    ends: new Float32Array(ends),
+    phases: new Float32Array(phases),
+    vital: new Float32Array(vital),
+    travel: new Float32Array(travel),
+  };
 }
 
 // Fully radial in 3D (was XY-radial + a flat, unconditional +Z push) — the
@@ -237,14 +415,19 @@ const POINT_VERT = `
   uniform float uHemisphereSplit;
   uniform vec2 uCursorNDC;
   uniform float uCursorActive;
+  uniform float uBeatPhase;
   attribute vec3 aColor;
   attribute float aSize;
   attribute float aGlow;
   attribute float aPhase;
+  attribute float aVital;
   varying vec3 vColor;
   varying float vGlow;
   varying float vPhase;
   varying float vCursorBoost;
+  varying float vSpark;
+  varying float vVital;
+  varying float vBlink;
   ${DISPERSE_GLSL}
   ${HEMISPHERE_SPLIT_GLSL}
   ${SIMPLEX_NOISE_GLSL}
@@ -255,8 +438,28 @@ const POINT_VERT = `
     p = displace(p, uDisplace, uTime);
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     float pulse = 0.5 + 0.5 * sin(uTime * 0.9 + aPhase);
-    float size = aSize * (1.0 + aGlow * pulse * 0.35);
-    gl_PointSize = clamp(size * uPixelRatio * (4.6 / -mv.z), 1.1, 15.0);
+
+    // Synaptic activity: (1) an EEG-like wave front sweeping front→back
+    // along the brain's long axis (z), with a slower secondary wave along y;
+    // (2) sparse, sharp per-neuron "firing" spikes on the glow hubs.
+    float wave = pow(0.5 + 0.5 * sin(position.z * 3.2 - uTime * 2.1), 14.0);
+    float wave2 = pow(0.5 + 0.5 * sin(position.y * 4.0 + uTime * 1.3), 20.0) * 0.5;
+    float fire = pow(0.5 + 0.5 * sin(uTime * 1.9 + aPhase * 7.0), 48.0) * aGlow;
+    vSpark = clamp(max(max(wave, wave2) * 0.75, fire), 0.0, 1.0);
+
+    // Vital-sign points (aVital = 1 + delay, see pickVitalSpot): blink on the
+    // shared heartbeat clock, offset by the signal's travel time from the
+    // anchor; the cyan EEG sparks skip them so they stay clean red.
+    float isVital = step(0.5, aVital);
+    float beatLocal = fract(uBeatPhase - max(aVital - 1.0, 0.0));
+    vBlink = exp(-beatLocal / ${HEARTBEAT_BLINK_DECAY.toFixed(3)}) * isVital;
+    vVital = isVital;
+    vSpark *= 1.0 - isVital;
+
+    float size = aSize * (1.0 + aGlow * pulse * 0.35 + vSpark * 0.6);
+    size = mix(size, aSize * (1.2 + vBlink * 1.4), isVital);
+    // Vital points get a higher cap (in CSS px) so they stay bold on retina too.
+    gl_PointSize = clamp(size * uPixelRatio * (4.6 / -mv.z), 1.1, mix(18.0, 40.0 * uPixelRatio, isVital));
     gl_Position = projectionMatrix * mv;
     vColor = aColor;
     vGlow = aGlow * pulse;
@@ -279,19 +482,120 @@ const POINT_FRAG = `
   varying float vGlow;
   varying float vPhase;
   varying float vCursorBoost;
+  varying float vSpark;
+  varying float vVital;
+  varying float vBlink;
   void main() {
     if (vPhase < uDissolve) discard;
     vec2 uv = gl_PointCoord - 0.5;
     float d = length(uv);
     if (d > 0.5) discard;
-    float alpha = 1.0 - smoothstep(0.42, 0.48, d);
-    // vec3(0.0, 0.647, 0.914) = #00A5E9, the brand manual's vivid-blue
-    // swatch — cold, not the amber this used to be (which muddied toward
-    // brown when mixed with the teal/blue base).
-    vec3 col = mix(vColor, vec3(0.0, 0.647, 0.914), vGlow * 0.6);
-    col = mix(col, vec3(1.0), uBloom * 0.35 * (1.0 - d * 1.6));
+    // Bright core + soft halo — reads as emissive light under additive
+    // blending rather than a flat disc.
+    float core = 1.0 - smoothstep(0.18, 0.34, d);
+    float halo = pow(1.0 - d * 2.0, 2.0);
+    float shape = max(core, halo * 0.55);
+    // vec3(0.0, 0.941, 1.0) = #00F0FF electric cyan.
+    vec3 col = mix(vColor, vec3(0.0, 0.941, 1.0), vGlow * 0.6);
+    col = mix(col, vec3(0.75, 0.98, 1.0), vSpark * 0.7);
+    // Ato II bloom whitens the cloud; vital points keep most of their red.
+    col = mix(col, vec3(1.0), uBloom * 0.35 * (1.0 - d * 1.6) * (1.0 - vVital * 0.8));
     col += vCursorBoost;
-    gl_FragColor = vec4(col, alpha * (0.9 + vGlow * 0.1));
+    // Vital points flash hot pink-white at the centre on each beat.
+    col = mix(col, vec3(1.0, 0.85, 0.88), vBlink * 0.5 * core);
+    float alpha = shape * (0.5 + vGlow * 0.3 + vSpark * 0.5);
+    alpha = mix(alpha, shape * (0.8 + vBlink * 0.2), vVital);
+    gl_FragColor = vec4(col * 1.15 * (1.0 + vBlink * 0.5), alpha);
+  }
+`;
+
+// ── Neural connections: thin edges between nearby hubs. Same position
+// pipeline as the points (split → disperse → displace) so edges stay
+// attached to their nodes through every act. Opacity breathes per edge, and
+// on a random ~40% of cycles a bright pulse travels along the edge (aEnd
+// 0 → 1), reading as a signal firing across a synapse. The vital spot's
+// edges (aVital > 0) are red instead, and their pulse is timed to the
+// heartbeat: it leaves the upstream point as that point blinks and arrives
+// (after aVitalTravel) as the downstream point blinks.
+const LINE_VERT = `
+  uniform float uTime;
+  uniform float uFly;
+  uniform float uDisplace;
+  uniform float uHemisphereSplit;
+  uniform float uBeatPhase;
+  attribute float aEnd;
+  attribute float aEdgePhase;
+  attribute float aVital;
+  attribute float aVitalTravel;
+  varying float vEnd;
+  varying float vEdgePhase;
+  varying float vVital;
+  varying float vVitalHead;
+  varying float vVitalGlow;
+  ${DISPERSE_GLSL}
+  ${HEMISPHERE_SPLIT_GLSL}
+  ${SIMPLEX_NOISE_GLSL}
+  ${DISPLACEMENT_GLSL}
+  void main() {
+    vec3 p = splitHemispheres(position, uHemisphereSplit);
+    p = disperse(p, uFly);
+    p = displace(p, uDisplace, uTime);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+    vEnd = aEnd;
+    vEdgePhase = aEdgePhase;
+    // Same value on both vertices of an edge, so these stay constant along it.
+    vVital = step(0.5, aVital);
+    float beatLocal = fract(uBeatPhase - max(aVital - 1.0, 0.0));
+    vVitalHead = beatLocal / max(aVitalTravel, 0.001);
+    vVitalGlow = exp(-beatLocal / 0.2);
+  }
+`;
+
+const LINE_FRAG = `
+  uniform float uTime;
+  uniform float uLineFade;
+  varying float vEnd;
+  varying float vEdgePhase;
+  varying float vVital;
+  varying float vVitalHead;
+  varying float vVitalGlow;
+  void main() {
+    if (vVital > 0.5) {
+      float signal = exp(-pow((vEnd - vVitalHead) * 7.0, 2.0)) * (1.0 - step(1.15, vVitalHead));
+      vec3 red = vec3(${HEART_RED_RGB.map((c) => c.toFixed(3)).join(", ")});
+      vec3 vitalCol = mix(red, vec3(1.0, 0.8, 0.85), signal * 0.5);
+      gl_FragColor = vec4(vitalCol, (0.34 + vVitalGlow * 0.3 + signal * 0.75) * uLineFade);
+      return;
+    }
+    float breathe = 0.07 + 0.06 * (0.5 + 0.5 * sin(uTime * 1.4 + vEdgePhase * 6.2831853));
+    float cycle = uTime * 0.45 + vEdgePhase;
+    float head = fract(cycle);
+    float gate = step(0.6, fract(sin(floor(cycle) * 12.9898 + vEdgePhase * 78.233) * 43758.5453));
+    float pulse = exp(-pow((vEnd - head) * 8.0, 2.0)) * gate;
+    vec3 col = mix(vec3(0.231, 0.51, 0.965), vec3(0.0, 0.941, 1.0), 0.4 + pulse * 0.6);
+    gl_FragColor = vec4(col, (breathe + pulse * 0.75) * uLineFade);
+  }
+`;
+
+// ── Vital overlay: the vital points drawn a second time, on top of the cloud
+// with normal (not additive) blending, as a solid anti-aliased red disc.
+// Additive blending alone lets the dense cyan cloud behind wash the red out
+// toward pink-white; the opaque disc keeps it reading as clean heart-red
+// wherever it sits, while the additive pass underneath still supplies the
+// soft red glow around it. Shares POINT_VERT, so size and position match
+// the additive pass exactly.
+const VITAL_FRAG = `
+  uniform float uDissolve;
+  varying float vPhase;
+  varying float vBlink;
+  void main() {
+    if (vPhase < uDissolve) discard;
+    float d = length(gl_PointCoord - 0.5);
+    float disc = 1.0 - smoothstep(0.3, 0.4, d);
+    if (disc <= 0.0) discard;
+    vec3 red = vec3(${HEART_RED_RGB.map((c) => c.toFixed(3)).join(", ")});
+    vec3 col = mix(red, vec3(1.0, 0.85, 0.88), vBlink * 0.55 * (1.0 - smoothstep(0.0, 0.22, d)));
+    gl_FragColor = vec4(col, disc);
   }
 `;
 
@@ -326,6 +630,8 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
   const prefersReducedMotion = useReducedMotion();
   const reduced = prefersReducedMotion ?? false;
   const parallax = useMouseParallax(mountRef);
+  // Bumped when a lost WebGL context is restored, to rebuild the scene.
+  const [glEpoch, setGlEpoch] = useState(0);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -340,7 +646,8 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     // its longest (rz=1.42 vs rx=1.15, ry=0.92 in buildBrain), so viewing
     // along world +X reads that length as the horizontal silhouette —
     // frontal lobe curve on one side, cerebellum/brainstem on the other —
-    // instead of the symmetric, mirrored left/right hemisphere view. Starts
+    // instead of the symmetric, mirrored left/right hemisphere view (the
+    // brain is then turned by BRAIN_YAW to bring the frontal lobe forward). Starts
     // at full viewing distance (orbitStart) — clarity and impact first;
     // the render loop dives in from here as the user scrolls.
     camera.position.set(orbitStart, 0, 0);
@@ -351,6 +658,29 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     renderer.setPixelRatio(pixelRatio);
     mount.appendChild(renderer.domElement);
 
+    // ── WebGL context loss (GPU reset, driver hiccup, the browser's context
+    // cap): three.js can't recover on its own, so the canvas would stay blank
+    // and the Hero would read as "all black". preventDefault lets the browser
+    // restore the context; on restore the whole scene is rebuilt (glEpoch).
+    const canvas = renderer.domElement;
+    let stopLoop = () => {};
+    const onContextLost = (event: Event) => {
+      event.preventDefault();
+      stopLoop();
+    };
+    const onContextRestored = () => setGlEpoch((n) => n + 1);
+    canvas.addEventListener("webglcontextlost", onContextLost);
+    canvas.addEventListener("webglcontextrestored", onContextRestored);
+    // dispose() alone leaves the GPU context alive until garbage collection;
+    // across remounts (route changes, dev reloads) those pile up toward the
+    // browser's cap, so the context is released explicitly.
+    const releaseRenderer = () => {
+      canvas.removeEventListener("webglcontextlost", onContextLost);
+      canvas.removeEventListener("webglcontextrestored", onContextRestored);
+      renderer.dispose();
+      renderer.forceContextLoss();
+    };
+
     // ── Density bumped ~2.8x on desktop (~2.4x on mobile, kept a bit more
     // conservative to protect frame rate on lower-power devices) so the
     // hollow surface shell still reads as a dense, detailed silhouette
@@ -360,12 +690,25 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     const COUNT = isMobile ? 12000 : 25000;
     const brain = buildBrain(COUNT);
 
+    // ── Vital-sign spot: recolour the chosen surface points heart-red, take
+    // them out of the cyan hub graph (glow = 0) and flag them for the blink
+    // via aVital = 1 + their delay (0 = regular point).
+    const vital = pickVitalSpot(brain);
+    const vitalAttr = new Float32Array(COUNT);
+    vital.nodes.forEach((index, n) => {
+      vitalAttr[index] = 1 + vital.delays[n]!;
+      brain.colors.set(HEART_RED_RGB, index * 3);
+      brain.glow[index] = 0;
+      brain.sizes[index] = n === 0 ? VITAL_ANCHOR_SIZE : VITAL_NEIGHBOUR_SIZE;
+    });
+
     const geom = new THREE.BufferGeometry();
     geom.setAttribute("position", new THREE.BufferAttribute(brain.positions, 3));
     geom.setAttribute("aColor", new THREE.BufferAttribute(brain.colors, 3));
     geom.setAttribute("aSize", new THREE.BufferAttribute(brain.sizes, 1));
     geom.setAttribute("aGlow", new THREE.BufferAttribute(brain.glow, 1));
     geom.setAttribute("aPhase", new THREE.BufferAttribute(brain.phase, 1));
+    geom.setAttribute("aVital", new THREE.BufferAttribute(vitalAttr, 1));
 
     const pointMat = new THREE.ShaderMaterial({
       uniforms: {
@@ -378,19 +721,74 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
         uHemisphereSplit: { value: 0 },
         uCursorNDC: { value: new THREE.Vector2(0, 0) },
         uCursorActive: { value: 0 },
+        uBeatPhase: { value: 0 },
       },
       vertexShader: POINT_VERT,
       fragmentShader: POINT_FRAG,
       transparent: true,
       depthWrite: false,
-      blending: THREE.NormalBlending,
+      blending: THREE.AdditiveBlending,
     });
 
-    // Clean point-cloud only — no connecting lines/synapse graph, no
-    // internal mesh or "aurora" volume. The brain's silhouette is defined
-    // purely by these points.
     const points = new THREE.Points(geom, pointMat);
+    points.rotation.y = BRAIN_YAW; // the reduced-motion static frame uses this pose too
     scene.add(points);
+
+    // ── Neural connections — child of `points`, so it inherits the same
+    // rotation/tremor; uniforms shared by reference with pointMat.
+    const links = buildConnections(brain, isMobile ? 700 : 1600, vital);
+    const lineGeom = new THREE.BufferGeometry();
+    lineGeom.setAttribute("position", new THREE.BufferAttribute(links.positions, 3));
+    lineGeom.setAttribute("aEnd", new THREE.BufferAttribute(links.ends, 1));
+    lineGeom.setAttribute("aEdgePhase", new THREE.BufferAttribute(links.phases, 1));
+    lineGeom.setAttribute("aVital", new THREE.BufferAttribute(links.vital, 1));
+    lineGeom.setAttribute("aVitalTravel", new THREE.BufferAttribute(links.travel, 1));
+    const lineMat = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: pointMat.uniforms.uTime!,
+        uFly: pointMat.uniforms.uFly!,
+        uDisplace: pointMat.uniforms.uDisplace!,
+        uHemisphereSplit: pointMat.uniforms.uHemisphereSplit!,
+        uBeatPhase: pointMat.uniforms.uBeatPhase!,
+        uLineFade: { value: 1 },
+      },
+      vertexShader: LINE_VERT,
+      fragmentShader: LINE_FRAG,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+    points.add(new THREE.LineSegments(lineGeom, lineMat));
+
+    // ── Vital overlay (see VITAL_FRAG) — a tiny geometry holding just the
+    // vital points, with the same attributes the additive pass reads, drawn
+    // last with the same uniforms so it tracks every act exactly.
+    const pickVital = (src: Float32Array, stride: number) => {
+      const out = new Float32Array(vital.nodes.length * stride);
+      vital.nodes.forEach((index, n) => out.set(src.subarray(index * stride, (index + 1) * stride), n * stride));
+      return out;
+    };
+    const vitalGeom = new THREE.BufferGeometry();
+    vitalGeom.setAttribute("position", new THREE.BufferAttribute(pickVital(brain.positions, 3), 3));
+    vitalGeom.setAttribute("aColor", new THREE.BufferAttribute(pickVital(brain.colors, 3), 3));
+    vitalGeom.setAttribute("aSize", new THREE.BufferAttribute(pickVital(brain.sizes, 1), 1));
+    vitalGeom.setAttribute("aGlow", new THREE.BufferAttribute(pickVital(brain.glow, 1), 1));
+    vitalGeom.setAttribute("aPhase", new THREE.BufferAttribute(pickVital(brain.phase, 1), 1));
+    vitalGeom.setAttribute("aVital", new THREE.BufferAttribute(pickVital(vitalAttr, 1), 1));
+    const vitalMat = new THREE.ShaderMaterial({
+      uniforms: pointMat.uniforms,
+      vertexShader: POINT_VERT,
+      fragmentShader: VITAL_FRAG,
+      transparent: true,
+      depthWrite: false,
+      depthTest: false,
+      blending: THREE.NormalBlending,
+    });
+    const vitalPoints = new THREE.Points(vitalGeom, vitalMat);
+    vitalPoints.renderOrder = 1; // after the additive cloud and its edges
+    vitalPoints.frustumCulled = false; // shader-displaced; 5 points cost nothing
+    points.add(vitalPoints);
+
 
     // ── Chromatic-aberration post pass setup (desktop only) ───────────────
     let renderTarget = isMobile
@@ -442,9 +840,13 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
         window.removeEventListener("resize", resize);
         geom.dispose();
         pointMat.dispose();
+        lineGeom.dispose();
+        lineMat.dispose();
+        vitalGeom.dispose();
+        vitalMat.dispose();
         renderTarget?.dispose();
         postMat.dispose();
-        renderer.dispose();
+        releaseRenderer();
         if (renderer.domElement.parentNode === mount) mount.removeChild(renderer.domElement);
       };
     }
@@ -452,20 +854,15 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     const clock = new THREE.Clock();
     let raf = 0;
     let running = true;
-    // Accumulated idle-spin angle (see render() below) — kept outside the
-    // render loop so it persists frame-to-frame without depending on the
-    // clock's raw elapsed time.
-    let idleAngle = 0;
+    stopLoop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
     const render = () => {
-      // THREE.Clock.getElapsedTime() calls getDelta() internally — calling
-      // both would double-consume the clock's timer, so getDelta() is
-      // called once and its return value (this frame's dt) is reused both
-      // directly and via clock.elapsedTime below.
-      const dt = clock.getDelta();
-      const t = clock.elapsedTime;
+      const t = clock.getElapsedTime();
       const progress = progressRef?.current ?? 0;
 
       // ── ATO I (0–0.22): revelação — quase parado, cérebro a assentar ──
@@ -486,6 +883,11 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       pointMat.uniforms.uHemisphereSplit!.value = hemisphereOpen * HEMISPHERE_SPLIT_MAX;
       pointMat.uniforms.uCursorNDC!.value.set(parallax.xRef.current, -parallax.yRef.current);
       pointMat.uniforms.uCursorActive!.value = 1;
+      // Page clock, not the three.js clock: the Hero's ECG card reads the
+      // same phase, so the red points flash as its R spike crosses centre.
+      pointMat.uniforms.uBeatPhase!.value = heartbeatPhase(performance.now());
+      // Edges fade out as the cloud explodes (Ato III) and dissolves (Ato IV).
+      lineMat.uniforms.uLineFade!.value = (1 - act3 * 0.85) * (1 - act4);
 
       // Micro-tremor idle (±0.4px equivalent, ~0.6Hz) on the core when the
       // narrative is resting (Ato I) and the pointer parallax is near zero —
@@ -494,28 +896,19 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       const tremorX = Math.sin(t * 0.6 * Math.PI * 2) * idleTremor;
       const tremorY = Math.cos(t * 0.51 * Math.PI * 2) * idleTremor;
 
-      // Continuous idle spin while resting at the very top (time-driven, not
-      // scroll-driven) — hands off fast (within the first 5% of scroll) to
-      // the scroll-driven hemisphere opening, instead of the two competing.
-      // Accumulated as a per-frame increment (rate × dt × fade) rather than
-      // (elapsed-time × fade): the latter multiplies an ever-growing clock
-      // value by a shrinking fade factor, so the longer the brain idles at
-      // the top before the user scrolls, the harder that product snaps
-      // toward zero as fade collapses — reading as a sudden "spinning top"
-      // flick right as scrolling starts (reported by Duarte). Accumulating
-      // the rate instead means the increment itself shrinks to zero with
-      // fade, so idle duration no longer affects how hard the handoff snaps.
-      const idleSpinFade = 1 - smoothstep(0.0, 0.05, progress);
-      idleAngle += 0.18 * dt * idleSpinFade;
-
-      points.rotation.y = parallax.xRef.current * 0.25 + idleAngle;
+      // No idle spin (dropped at Duarte's request): the brain holds its
+      // BRAIN_YAW pose so the red vital spot on the frontal lobe always
+      // faces the viewer — a spinning brain would carry it round to the back.
+      // Only the pointer parallax tilts it, ±0.25 rad at most, which keeps
+      // the spot on the visible face.
+      points.rotation.y = BRAIN_YAW + parallax.xRef.current * 0.25;
       points.rotation.x = parallax.yRef.current * 0.15;
       points.position.set(tremorX, tremorY, 0);
       points.updateMatrixWorld();
 
       // ── Camera: holds the fixed lateral/profile angle (ORBIT_PHASE) for the
-      // entire scroll journey — no rotation, no orbit. The brain itself
-      // idle-spins in place at rest (see idleSpin above); scroll drives only
+      // entire scroll journey — no rotation, no orbit (and the brain itself
+      // no longer spins, see above); scroll drives only
       // a straight dolly-in from orbitStart toward CAMERA_MIN_RADIUS, read
       // as a clean, direct expansion/zoom with no swirl or pirouette.
       const zoomIn = smoothstep(0.0, 0.9, progress);
@@ -547,9 +940,12 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     // Pause the RAF loop entirely once the visual scrolls out of view.
     const observer = new IntersectionObserver(
       ([entry]) => {
-        running = !!entry?.isIntersecting;
+        const visible = !!entry?.isIntersecting;
+        // The observer also fires once on observe() — while the loop is
+        // already running — which used to start a second, parallel loop.
+        if (visible === running) return;
+        running = visible;
         if (running) {
-          clock.getDelta(); // avoid a big dt jump after being paused
           raf = requestAnimationFrame(render);
         } else {
           cancelAnimationFrame(raf);
@@ -568,14 +964,18 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       window.removeEventListener("resize", resize);
       geom.dispose();
       pointMat.dispose();
+      lineGeom.dispose();
+      lineMat.dispose();
+      vitalGeom.dispose();
+      vitalMat.dispose();
       renderTarget?.dispose();
       postMat.dispose();
-      renderer.dispose();
+      releaseRenderer();
       if (renderer.domElement.parentNode === mount) {
         mount.removeChild(renderer.domElement);
       }
     };
-  }, [reduced, progressRef, parallax.xRef, parallax.yRef]);
+  }, [reduced, progressRef, parallax.xRef, parallax.yRef, glEpoch]);
 
   return (
     <div

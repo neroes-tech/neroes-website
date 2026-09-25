@@ -67,6 +67,9 @@ export interface Translations {
     featuresHeading: string;
     features: [NamedItem, NamedItem, NamedItem];
     heroKpiLabels: [string, string, string];
+    heroHudBiosignals: string;
+    heroHudActive: string;
+    heroHudAnxiety: string;
     evidenceEyebrow: string;
     statsLabels: [string, string, string, string];
     finalCtaHeading: string;
@@ -303,6 +306,9 @@ export const translations: Record<Locale, Translations> = {
       ],
       evidenceEyebrow: "03 — A Evidência",
       heroKpiLabels: ["Controlo emocional", "Velocidade de decisão", "Ansiedade"],
+      heroHudBiosignals: "Biossinais em tempo real",
+      heroHudActive: "Ativo",
+      heroHudAnxiety: "Taxa de redução de ansiedade",
       statsLabels: ["Controlo emocional", "Velocidade de decisão", "Autoconfiança", "Ansiedade"],
       finalCtaHeading: "Pronto para treinar a tua mente?",
       finalCtaBody:
@@ -594,6 +600,9 @@ export const translations: Record<Locale, Translations> = {
       ],
       evidenceEyebrow: "03 — The Evidence",
       heroKpiLabels: ["Emotional control", "Decision speed", "Anxiety"],
+      heroHudBiosignals: "Real-time Biosignals",
+      heroHudActive: "Active",
+      heroHudAnxiety: "Anxiety reduction rate",
       statsLabels: ["Emotional control", "Decision speed", "Self-confidence", "Anxiety"],
       finalCtaHeading: "Ready to train your mind?",
       finalCtaBody:

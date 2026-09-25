@@ -4,8 +4,17 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ArrowRight, ChevronDown } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useAnimationFrame, useMotionValue, useReducedMotion } from "framer-motion";
 
+import {
+  ECG_HEIGHT_PX,
+  ECG_PATH,
+  ECG_PERIOD_PX,
+  ECG_SYNC_OFFSET_PX,
+  HEART_RED,
+  heartbeatBlink,
+  heartbeatPhase,
+} from "@/components/hero/heartbeat";
 import { useScrollNarrative } from "@/components/hero/useScrollNarrative";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
@@ -76,13 +85,113 @@ function KpiTicker({
 }) {
   const formatted = useCountUp(kpi.target, kpi.decimals, active);
   return (
-    <div className="rounded-2xl border border-border bg-card/70 px-4 py-3 backdrop-blur-sm">
-      <p className="font-exo text-2xl font-bold text-brand-blue">
+    <div className="rounded-2xl border border-white/10 bg-[#0B1424]/80 px-4 py-3">
+      <p className="font-exo text-2xl font-bold text-[#22D3EE]">
         {kpi.prefix}
         {formatted}
         {kpi.suffix}
       </p>
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-slate-300">{label}</p>
+    </div>
+  );
+}
+
+// Deep-tech backdrop: lit navy centre falling off to near-black edges.
+const HERO_BG = "radial-gradient(ellipse 80% 70% at 50% 45%, #0D1B2A 0%, #0A192F 35%, #040711 100%)";
+// Subtle 48px tech grid, masked so it fades out toward the edges.
+const GRID_STYLE: CSSProperties = {
+  backgroundImage:
+    "linear-gradient(rgba(34,211,238,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.07) 1px, transparent 1px)",
+  backgroundSize: "48px 48px",
+  maskImage: "radial-gradient(ellipse 70% 60% at 50% 50%, black 30%, transparent 100%)",
+  WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 50% 50%, black 30%, transparent 100%)",
+};
+
+// Shown in the HUD card; see the flag in the summary — the verified figure
+// in docs/content-inventory.md is -14.2% (10 sessions).
+const ANXIETY_REDUCTION = "−42%";
+
+// No backdrop-filter on these (or the KPI tickers): in Chrome, backdrop-blur
+// over the WebGL canvas inside the sticky Hero, combined with the float
+// animation, can leave the cards blank after they scroll out and back in.
+// A near-opaque fill reads the same over the dark backdrop.
+const HUD_CARD =
+  "absolute hidden rounded-xl border border-white/10 bg-[#0B1424]/85 p-3 shadow-2xl lg:block";
+
+/** Decorative "live lab monitoring" HUD cards floating beside the brain. */
+function HudCards({ reduced }: { reduced: boolean }) {
+  const { t } = useLanguage();
+
+  // ECG scroll + status-dot blink read the shared heartbeat clock
+  // (heartbeat.ts), the same one the brain's red vital points blink on —
+  // the R spike crosses the trace's centre line as those points flash.
+  const ecgX = useMotionValue(ECG_SYNC_OFFSET_PX);
+  const dotOpacity = useMotionValue(1);
+  useAnimationFrame(() => {
+    if (reduced) return;
+    const phase = heartbeatPhase(performance.now());
+    ecgX.set(ECG_SYNC_OFFSET_PX - ECG_PERIOD_PX * phase);
+    dotOpacity.set(0.3 + 0.7 * heartbeatBlink(phase));
+  });
+
+  const float = (delay: number) =>
+    reduced
+      ? {}
+      : {
+          animate: { y: [0, -10, 0] },
+          transition: { duration: 6, repeat: Infinity, ease: "easeInOut" as const, delay },
+        };
+
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10">
+      {/* Heartbeat monitor — red dotted ECG, in lockstep with the brain's red vital points */}
+      <motion.div className={`${HUD_CARD} left-[6%] top-[20%] w-56`} {...float(0)}>
+        <div className="relative h-8 overflow-hidden">
+          <motion.svg
+            viewBox={`0 0 ${ECG_PERIOD_PX * 2} ${ECG_HEIGHT_PX}`}
+            width={ECG_PERIOD_PX * 2}
+            height={ECG_HEIGHT_PX}
+            className="max-w-none"
+            fill="none"
+            style={{ x: ecgX }}
+          >
+            {/* faint continuous trace + particle dots on top, echoing the brain's point cloud */}
+            <path d={ECG_PATH} stroke={HEART_RED} strokeOpacity="0.25" strokeWidth="1" strokeLinejoin="round" />
+            <path
+              d={ECG_PATH}
+              stroke={HEART_RED}
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeDasharray="0.1 4.5"
+              style={{ filter: "drop-shadow(0 0 3px rgba(255,59,92,0.9))" }}
+            />
+          </motion.svg>
+          {/* centre "read head": the beat lands here */}
+          <div className="absolute inset-y-0 left-1/2 w-px bg-white/15" />
+          {/* fade the trace in/out at the card edges */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0B1424] via-transparent to-[#0B1424] opacity-80" />
+        </div>
+        <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-slate-200">
+          <motion.span
+            className="inline-block h-1.5 w-1.5 rounded-full bg-[#FF3B5C]"
+            style={{ opacity: dotOpacity }}
+          />
+          {t.home.heroHudBiosignals}: <span className="text-[#FF6B84]">{t.home.heroHudActive}</span>
+        </p>
+      </motion.div>
+
+      <motion.div className={`${HUD_CARD} bottom-[18%] right-[6%]`} {...float(1.5)}>
+        <div className="flex items-center gap-3">
+          <span className="relative flex h-3 w-3">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-[#22D3EE] opacity-75 motion-safe:animate-ping" />
+            <span className="relative inline-flex h-3 w-3 rounded-full bg-[#22D3EE]" />
+          </span>
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-slate-300">{t.home.heroHudAnxiety}</p>
+            <p className="font-exo text-lg font-bold text-white">{ANXIETY_REDUCTION}</p>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }
@@ -129,25 +238,39 @@ export function Hero() {
     <section
       ref={sectionRef}
       aria-label="Introdução Neroes — inteligência neural viva"
-      className="relative w-full bg-background"
+      className="relative w-full bg-[#040711]"
       style={{ height: reduced ? undefined : "320vh" }}
     >
-      <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden">
+      <div
+        className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden"
+        style={{ background: HERO_BG }}
+      >
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={GRID_STYLE} />
         <BrainHero progressRef={progressRef} />
+        <HudCards reduced={reduced} />
+
+        {/* Readability scrim behind the copy — keeps white text ≥ AA over the brightest particles. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-10"
+          style={{ background: "radial-gradient(ellipse 45% 35% at 50% 50%, rgba(4,7,17,0.55), transparent 75%)" }}
+        />
 
         <div className="pointer-events-none relative z-20 mx-auto max-w-4xl px-4 text-center md:px-6">
           {/* Headline — fades/rises in as the brain's hemispheres open (scroll 0 → 0.32) */}
           <h1
-            className="font-exo text-5xl font-bold leading-tight tracking-tight text-foreground md:text-7xl"
+            className="font-exo text-5xl font-bold leading-tight tracking-tight text-white md:text-7xl"
             style={revealStyle(headlineReveal, reduced)}
           >
             <span className="block">{t.home.heroHeadlineLine1}</span>
-            <span className="block text-brand-blue">{t.home.heroHeadlineLine2}</span>
+            <span className="block bg-gradient-to-r from-[#00F0FF] via-[#22D3EE] to-[#60A5FA] bg-clip-text text-transparent drop-shadow-[0_0_24px_rgba(34,211,238,0.35)]">
+              {t.home.heroHeadlineLine2}
+            </span>
           </h1>
 
           {/* Subtitle — follows the headline (scroll 0.08 → 0.4) */}
           <p
-            className="mx-auto mt-6 max-w-3xl text-xl leading-relaxed text-muted-foreground md:text-2xl"
+            className="mx-auto mt-6 max-w-3xl text-xl leading-relaxed text-slate-300 md:text-2xl"
             style={revealStyle(subtitleReveal, reduced)}
           >
             {t.home.heroSubtitle}
@@ -166,7 +289,7 @@ export function Hero() {
               <Button
                 asChild
                 size="lg"
-                className="group h-14 rounded-full bg-secondary px-8 text-lg font-semibold text-secondary-foreground transition-shadow hover:bg-secondary/90 hover:shadow-glow-secondary"
+                className="group h-14 rounded-full bg-[#22D3EE] px-8 text-lg font-semibold text-[#040711] transition-shadow hover:bg-[#67E8F9] hover:shadow-[0_0_32px_-4px_rgba(34,211,238,0.6)] focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#040711]"
               >
                 <Link href="/contact">
                   {t.home.heroPrimaryCta}
@@ -186,7 +309,7 @@ export function Hero() {
                 asChild
                 size="lg"
                 variant="outline"
-                className="h-14 rounded-full border-primary px-8 text-lg text-primary hover:bg-primary/5"
+                className="h-14 rounded-full border-white/40 bg-transparent px-8 text-lg text-white hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#040711]"
               >
                 <Link href="/science">{t.home.heroSecondaryCta}</Link>
               </Button>
@@ -214,17 +337,31 @@ export function Hero() {
           style={{ opacity: reduced || act === 1 ? 1 : 0 }}
         >
           {reduced ? (
-            <ChevronDown className="h-6 w-6 text-muted-foreground/60" />
+            <ChevronDown className="h-6 w-6 text-white/60" />
           ) : (
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             >
-              <ChevronDown className="h-6 w-6 text-muted-foreground/60" />
+              <ChevronDown className="h-6 w-6 text-white/60" />
             </motion.div>
           )}
         </div>
       </div>
+
+      {/* Soft hand-off from the dark Hero into the light sections below. With
+          the scroll narrative, the sticky viewport stays pinned until the
+          section's very end, so the fade has to overlay its bottom edge (a
+          block after it would sit hidden behind the pinned viewport); without
+          it (reduced motion) a plain block below the Hero does the job. */}
+      {reduced ? (
+        <div aria-hidden="true" className="h-40 w-full bg-gradient-to-b from-[#040711] to-background" />
+      ) : (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-30 h-40 bg-gradient-to-b from-transparent to-background"
+        />
+      )}
     </section>
   );
 }
