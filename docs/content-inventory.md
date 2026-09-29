@@ -260,3 +260,9 @@ Fonte: gravação de ecrã do protótipo `Neroes.dc.html` (claude.ai/design, ace
 - **Morada:** não publicar por agora (só "Lisboa, Portugal").
 - O protótipo apresenta um único fundador; o site mantém os dois cofundadores (Pedro Pestana e Hugo Ferreira), como no inventário original — confirmar.
 - Não usado: email `pedro.pestana@neroes.tech` (o contacto canónico é `info@neroes.tech`) e o formulário de newsletter "Follow the journey" (precisa de backend e consentimento RGPD).
+
+**Revisão da versão 3 (29 set. 2026, feedback do Wendell):**
+- A Início passa a ter **só o conteúdo do protótipo do Pedro** (secções 02–07 + fecho) e o vídeo do headset. Saíram da Início: a secção "01 — O problema" (custo do stress, do site antigo), "O que a plataforma inclui", os testemunhos de clientes (o componente e os dados continuam no código para reutilizar), o Hugo Ferreira (continua em Sobre) e os CTAs/links que não estavam no protótipo. A gravação do Pedro começa na secção 02 — a hero e uma eventual 01 dele não foram vistas.
+- Fundador na Início: só Pedro Pestana, "Fundador", como no protótipo (sem foto — pedir uma ao Pedro).
+- **Sem dourado na interface:** o registo "acreditado/visão" passa a itálico no azul da marca; o dourado fica só no logótipo.
+- Hero como na versão 2: o cérebro sozinho com o batimento (caixas de biossinais e −41%) e o texto, centrado, a entrar com o scroll; no fim, +21,7% / +18,8% / +9,4% (estudos do protótipo).

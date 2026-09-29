@@ -1,8 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
-import { Button } from "@/components/ui/button";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Rich } from "@/components/ui/Rich";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -17,14 +14,12 @@ import { cn } from "@/lib/utils";
 export function Evidence({
   headingOverride,
   numbered = true,
-  showScienceLink = false,
   className,
 }: {
   /** Science page uses its own heading; the Home uses the evidence title. */
   headingOverride?: string;
   /** false drops the Home's section index ("03 — ") from the eyebrow. */
   numbered?: boolean;
-  showScienceLink?: boolean;
   className?: string;
 }) {
   const { t } = useLanguage();
@@ -96,18 +91,6 @@ export function Evidence({
               <Rich text={ev.liveBody} />
             </p>
           </div>
-        </div>
-
-        <div className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-4">
-          <p className="text-lg font-medium text-foreground">{ev.ctaText}</p>
-          <Button asChild variant="outline">
-            <Link href="/contact">{ev.ctaButton}</Link>
-          </Button>
-          {showScienceLink && (
-            <Link href="/science" className="font-medium text-secondary underline-offset-4 hover:underline">
-              {ev.scienceLink} →
-            </Link>
-          )}
         </div>
       </div>
     </section>

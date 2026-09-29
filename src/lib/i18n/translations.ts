@@ -5,10 +5,10 @@ interface NamedItem {
   desc: string;
 }
 
-interface ProblemFact {
-  title: string;
-  stat: string;
-  detail: string;
+/** A figure shown as the Hero's brain dissolves into data (Ato IV). */
+interface HeroKpi {
+  value: string;
+  label: string;
 }
 
 /** A step in the sense → train → measure loop. */
@@ -54,23 +54,17 @@ export interface Translations {
     closeMenu: string;
   };
   home: {
-    heroEyebrow: string;
     heroHeadlineLine1: string;
     heroHeadlineLine2: string;
     heroSubtitle: string;
     heroPrimaryCta: string;
     heroSecondaryCta: string;
-    heroHudSignal: string;
+    heroHudBiosignals: string;
+    heroHudActive: string;
     heroHudAnxiety: string;
     heroHudAnxietySource: string;
-    /** Figure label for the illustrative brain model. */
-    heroFigure: string;
-    /** Hero spec block: the loop, one short line per platform step. */
-    heroLoopLabel: string;
-    heroLoopDetail: [string, string, string];
-    problemEyebrow: string;
-    problemTitle: string;
-    problemSubtitle: string;
+    heroKpis: [HeroKpi, HeroKpi, HeroKpi];
+    heroScrollHint: string;
     platform: {
       eyebrow: string;
       title: string;
@@ -86,8 +80,6 @@ export interface Translations {
       videoResume: string;
       videoFallback: string;
       beyond: string;
-      includesTitle: string;
-      includes: NamedItem[];
     };
     where: {
       eyebrow: string;
@@ -113,23 +105,21 @@ export interface Translations {
     founders: {
       eyebrow: string;
       title: string;
+      pedroRole: string;
       pedroMission: string;
       pedroPersonal: string;
-      viewTeamLink: string;
     };
     neurorights: {
       eyebrow: string;
       title: string;
       body: string;
       rights: [Right, Right, Right, Right];
-      privacyLink: string;
     };
     closing: {
       ground: string;
       sky: string;
       body: string;
       primary: string;
-      secondary: string;
     };
   };
   footer: {
@@ -147,7 +137,6 @@ export interface Translations {
     copyright: string;
   };
   shared: {
-    problemFacts: [ProblemFact, ProblemFact, ProblemFact];
     clientsLoveHeading: string;
     goToTestimonial: string;
     partnersHeading: string;
@@ -163,10 +152,13 @@ export interface Translations {
       honestBody: string;
       liveTitle: string;
       liveBody: string;
-      ctaText: string;
-      ctaButton: string;
-      scienceLink: string;
     };
+  };
+  /** src/app/error.tsx — shown when a page fails to render. */
+  errorPage: {
+    title: string;
+    body: string;
+    retry: string;
   };
   science: {
     eyebrow: string;
@@ -235,22 +227,22 @@ export const translations: Record<Locale, Translations> = {
       closeMenu: "Fechar menu",
     },
     home: {
-      heroEyebrow: "Neurotecnologia · Treino mental por EEG",
       heroHeadlineLine1: "Treinamos o cérebro",
       heroHeadlineLine2: "como treinas o corpo.",
       heroSubtitle:
         "Um headset EEG lê as tuas ondas cerebrais enquanto jogas um jogo que só se ganha mantendo a calma e a concentração — treinando foco, controlo emocional e resiliência, sessão após sessão.",
       heroPrimaryCta: "Ver a evidência",
       heroSecondaryCta: "Falar connosco",
-      heroHudSignal: "Sinal vital · ilustrativo",
+      heroHudBiosignals: "Biossinais em tempo real",
+      heroHudActive: "Ativo",
       heroHudAnxiety: "Redução média da ansiedade",
-      heroHudAnxietySource: "Média de 3 clientes · 8+ sessões · 30 min de treino por semana",
-      heroFigure: "Fig. 01 — Cérebro · modelo ilustrativo",
-      heroLoopLabel: "O circuito",
-      heroLoopDetail: ["EEG e biossensores", "Jogo e IA adaptativa", "Biomarcadores objetivos"],
-      problemEyebrow: "01 — O problema",
-      problemTitle: "O custo real do stress no trabalho",
-      problemSubtitle: "Stress e ansiedade não geridos têm um custo mensurável para as organizações.",
+      heroHudAnxietySource: "3 clientes · 8+ sessões",
+      heroKpis: [
+        { value: "+21,7%", label: "Processamento de informação" },
+        { value: "+18,8%", label: "Tomada de decisão" },
+        { value: "+9,4%", label: "Autoconfiança" },
+      ],
+      heroScrollHint: "Desliza para ver",
       platform: {
         eyebrow: "02 — A plataforma",
         title: "Um circuito fechado entre o teu cérebro e um jogo.",
@@ -273,32 +265,13 @@ export const translations: Record<Locale, Translations> = {
         techLabel: "Tecnologia",
         tech: ["Sensores e biomarcadores", "BCI", "IA adaptativa", "Jogos controlados pelo cérebro", "Respiração e estímulos audiovisuais"],
         techNote: "+ investigação protegida em neuromodulação, descrita apenas em termos gerais",
-        videoCaption: "Fig. 02 — Headset EEG Neroes · não invasivo",
+        videoCaption: "Headset Neroes",
         videoPlayLabel: "Ver com som, em ecrã inteiro",
         videoPause: "Pausar",
         videoResume: "Reproduzir",
         videoFallback: "O teu navegador não suporta vídeo HTML5.",
         beyond:
           "O mesmo circuito vai além da ansiedade — incluindo investigação em fase inicial sobre declínio cognitivo e envelhecimento saudável. **Não é um produto, nem um resultado comprovado:** é uma linha de investigação séria.",
-        includesTitle: "O que a plataforma inclui",
-        includes: [
-          {
-            title: "Protocolos progressivos",
-            desc: "Sessões desenhadas a partir da neurociência, organizadas em etapas que constroem resultados ao longo do tempo.",
-          },
-          {
-            title: "Métricas sessão a sessão",
-            desc: "Foco, controlo emocional e resiliência registados em cada sessão, com evolução comparável.",
-          },
-          {
-            title: "Programa individual",
-            desc: "Cada programa parte do ponto de partida e do objetivo de cada pessoa, e ajusta-se à medida que evolui.",
-          },
-          {
-            title: "Várias equipas",
-            desc: "Para organizações e clubes: várias equipas e perfis na mesma plataforma, com visão agregada e individual.",
-          },
-        ],
       },
       where: {
         eyebrow: "04 — Contextos",
@@ -359,13 +332,13 @@ export const translations: Record<Locale, Translations> = {
         ],
       },
       founders: {
-        eyebrow: "06 — Fundadores",
+        eyebrow: "06 — Fundador",
         title: "Neurotecnologia rigorosa numa mão. As profundezas da mente na outra.",
+        pedroRole: "Fundador",
         pedroMission:
           "A missão do Pedro, nas suas palavras, é **despoletar a excelência** — uma carreira a juntar neurofeedback, IA, interfaces cérebro-computador, EEG e ciência de dados para potenciar a mente humana, com três startups fundadas antes desta.",
         pedroPersonal:
           "E é pessoal: pratica meditação e visualização todos os dias e estuda a consciência há toda a vida. **A Neroes é onde as duas linhas se encontram.**",
-        viewTeamLink: "Conhecer a equipa",
       },
       neurorights: {
         eyebrow: "07 — Neurodireitos",
@@ -377,14 +350,12 @@ export const translations: Record<Locale, Translations> = {
           { code: "R.03", title: "Propriedade dos dados", desc: "Os teus dados cerebrais são teus — acede-lhes e apaga-os." },
           { code: "R.04", title: "Sem venda de dados neurais", desc: "Nunca. A confiança é o produto." },
         ],
-        privacyLink: "Ler a política de privacidade",
       },
       closing: {
         ground: "A evidência é o chão.",
         sky: "A visão é o céu.",
         body: "Não pedimos a ninguém que acredite. Medimos — e o que isso significa é teu.",
         primary: "Falar connosco",
-        secondary: "Ver a ciência",
       },
     },
     footer: {
@@ -402,23 +373,6 @@ export const translations: Record<Locale, Translations> = {
       copyright: "Todos os direitos reservados.",
     },
     shared: {
-      problemFacts: [
-        {
-          title: "Presenteísmo",
-          stat: "57 dias de trabalho perdidos/ano",
-          detail: "60% dos colaboradores afetados",
-        },
-        {
-          title: "Absenteísmo",
-          stat: "17.5% das baixas médicas devido à saúde mental",
-          detail: "43.3 dias/ano em média",
-        },
-        {
-          title: "Rotatividade (Turnover)",
-          stat: "Custa até 2.3x mais que prestar apoio",
-          detail: "Redução de turnover até 60%",
-        },
-      ],
       clientsLoveHeading: "O que dizem clientes e atletas",
       goToTestimonial: "Ir para o testemunho de {name}",
       partnersHeading: "Com o apoio de",
@@ -451,10 +405,12 @@ export const translations: Record<Locale, Translations> = {
         liveTitle: "E demonstrável, ao vivo",
         liveBody:
           "Numa sessão, vês o teu próprio sinal de regulação a mexer à medida que acalmas a mente. **Um avião no ar, não uma promessa.**",
-        ctaText: "Queres que te expliquemos os estudos?",
-        ctaButton: "Falar connosco",
-        scienceLink: "Ver a página de ciência",
       },
+    },
+    errorPage: {
+      title: "Algo correu mal ao abrir esta página.",
+      body: "Tenta outra vez. Se o problema continuar, escreve-nos para info@neroes.tech.",
+      retry: "Tentar outra vez",
     },
     science: {
       eyebrow: "Ciência",
@@ -539,22 +495,22 @@ export const translations: Record<Locale, Translations> = {
       closeMenu: "Close menu",
     },
     home: {
-      heroEyebrow: "Neurotechnology · EEG mental training",
       heroHeadlineLine1: "We train the brain",
       heroHeadlineLine2: "like you train the body.",
       heroSubtitle:
         "An EEG headset reads your brainwaves while you play a game that's only won by staying calm and focused — training focus, emotional control, and resilience, session after session.",
       heroPrimaryCta: "See the evidence",
       heroSecondaryCta: "Talk to us",
-      heroHudSignal: "Vital sign · illustrative",
+      heroHudBiosignals: "Real-time biosignals",
+      heroHudActive: "Active",
       heroHudAnxiety: "Average anxiety reduction",
-      heroHudAnxietySource: "Average of 3 clients · 8+ sessions · 30 min of training a week",
-      heroFigure: "Fig. 01 — Brain · illustrative model",
-      heroLoopLabel: "The loop",
-      heroLoopDetail: ["EEG and biosensors", "Game and adaptive AI", "Objective biomarkers"],
-      problemEyebrow: "01 — The problem",
-      problemTitle: "The real cost of workplace stress",
-      problemSubtitle: "Unmanaged stress and anxiety carry a measurable cost for organisations.",
+      heroHudAnxietySource: "3 clients · 8+ sessions",
+      heroKpis: [
+        { value: "+21.7%", label: "Information processing" },
+        { value: "+18.8%", label: "Decision-making" },
+        { value: "+9.4%", label: "Self-confidence" },
+      ],
+      heroScrollHint: "Scroll to explore",
       platform: {
         eyebrow: "02 — The platform",
         title: "A closed loop between your brain and a game.",
@@ -577,29 +533,13 @@ export const translations: Record<Locale, Translations> = {
         techLabel: "Technology",
         tech: ["Sensing & biomarkers", "BCI", "Adaptive AI", "Brain-driven games", "Breathing & audiovisual aids"],
         techNote: "+ protected neuromodulation research, described in general terms only",
-        videoCaption: "Fig. 02 — Neroes EEG headset · non-invasive",
+        videoCaption: "The Neroes headset",
         videoPlayLabel: "Watch with sound, full screen",
         videoPause: "Pause",
         videoResume: "Play",
         videoFallback: "Your browser doesn't support HTML5 video.",
         beyond:
           "The same loop reaches beyond anxiety — including early-stage research into cognitive decline and healthy aging. **Not a product, and not a proven outcome:** a direction of serious research.",
-        includesTitle: "What the platform includes",
-        includes: [
-          { title: "Progressive protocols", desc: "Neuroscience-based sessions, organised in stages that build results over time." },
-          {
-            title: "Session-by-session metrics",
-            desc: "Focus, emotional control and resilience recorded every session, with comparable progress.",
-          },
-          {
-            title: "Individual programme",
-            desc: "Each programme starts from a person's baseline and goal, and adapts as they progress.",
-          },
-          {
-            title: "Multiple teams",
-            desc: "For organisations and clubs: several teams and profiles on one platform, with aggregate and individual views.",
-          },
-        ],
       },
       where: {
         eyebrow: "04 — Contexts",
@@ -657,13 +597,13 @@ export const translations: Record<Locale, Translations> = {
         ],
       },
       founders: {
-        eyebrow: "06 — Founders",
+        eyebrow: "06 — Founder",
         title: "Rigorous neurotechnology in one hand. The depths of the mind in the other.",
+        pedroRole: "Founder",
         pedroMission:
           "Pedro's mission, in his own words, is **to trigger excellence** — a career spent merging neurofeedback, AI, brain-computer interfaces, EEG, and data science to enhance the human mind, with three startups founded before this one.",
         pedroPersonal:
           "And it's personal: a daily practitioner of meditation and visualisation, a lifelong student of consciousness. **Neroes is where the two threads meet.**",
-        viewTeamLink: "Meet the team",
       },
       neurorights: {
         eyebrow: "07 — Neurorights",
@@ -675,14 +615,12 @@ export const translations: Record<Locale, Translations> = {
           { code: "R.03", title: "Data ownership", desc: "Your brain data is yours — access it, delete it." },
           { code: "R.04", title: "No sale of neural data", desc: "Ever. Trust is the product." },
         ],
-        privacyLink: "Read the privacy policy",
       },
       closing: {
         ground: "The evidence is the ground.",
         sky: "The vision is the sky.",
         body: "We don't ask anyone to believe it. We measure it — and what it means is yours.",
         primary: "Talk to us",
-        secondary: "See the science",
       },
     },
     footer: {
@@ -700,23 +638,6 @@ export const translations: Record<Locale, Translations> = {
       copyright: "All rights reserved.",
     },
     shared: {
-      problemFacts: [
-        {
-          title: "Presenteeism",
-          stat: "57 work days lost/year",
-          detail: "60% of employees affected",
-        },
-        {
-          title: "Absenteeism",
-          stat: "17.5% of sick leaves due to mental health",
-          detail: "43.3 days/year on average",
-        },
-        {
-          title: "Turnover",
-          stat: "Costs up to 2.3x more than providing support",
-          detail: "Turnover reduction up to 60%",
-        },
-      ],
       clientsLoveHeading: "What clients and athletes say",
       goToTestimonial: "Go to {name}'s testimonial",
       partnersHeading: "Supported by",
@@ -748,10 +669,12 @@ export const translations: Record<Locale, Translations> = {
           "Early-stage evidence: small samples, pilots, single-subject cases. Larger controlled and longitudinal trials are underway, on a path toward clinical certification. **Today, Neroes is a training and research platform — not a medical treatment.**",
         liveTitle: "And demonstrable, live",
         liveBody: "In a session you watch your own regulation signal move as you calm your mind. **A plane in the air, not a promise.**",
-        ctaText: "Want the studies walked through?",
-        ctaButton: "Talk to us",
-        scienceLink: "See the science page",
       },
+    },
+    errorPage: {
+      title: "Something went wrong opening this page.",
+      body: "Please try again. If it keeps happening, write to us at info@neroes.tech.",
+      retry: "Try again",
     },
     science: {
       eyebrow: "Science",

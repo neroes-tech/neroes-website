@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { motion, useAnimationFrame, useMotionValue, useReducedMotion } from "framer-motion";
+import { ChevronDown } from "lucide-react";
+import { motion, useAnimationFrame, useMotionValue } from "framer-motion";
 
 import {
   ECG_HEIGHT_PX,
@@ -15,9 +16,11 @@ import {
   heartbeatBlink,
   heartbeatPhase,
 } from "@/components/hero/heartbeat";
+import { useScrollNarrative } from "@/components/hero/useScrollNarrative";
 import { Button } from "@/components/ui/button";
-import { Eyebrow } from "@/components/ui/Eyebrow";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { useReducedMotionSafe } from "@/lib/useReducedMotionSafe";
 import { cn } from "@/lib/utils";
 
 // The three.js brain is a non-critical visual — load it after first paint
@@ -30,22 +33,34 @@ const HERO_ACCENT = "text-[#00A5E9]";
 // Instrument labels on the ink background (white/60: 6.9:1).
 const LABEL = "font-mono text-[11px] uppercase tracking-[0.14em] text-white/60";
 
+// Flat, near-opaque cards: no blur (backdrop-filter over the WebGL canvas in
+// a sticky section left them blank after scrolling back in Chrome), no glow,
+// no float — they read as instrument readouts, not decoration.
+const HUD_CARD = "absolute rounded-md border border-white/15 bg-brand-ink/90 p-3";
+
+function smoothstep(edge0: number, edge1: number, x: number) {
+  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
+/** Scroll-coupled fade + rise: driven by scroll progress (0..1), not by time. */
+function revealStyle(revealed: number): CSSProperties {
+  return {
+    opacity: revealed,
+    transform: `translateY(${(1 - revealed) * 32}px)`,
+    transition: "opacity 150ms linear, transform 150ms linear",
+  };
+}
+
 /**
- * Opening screen, laid out like a specification sheet: small labels in the
- * top corners, the particle brain as the object on show, the headline
- * anchored low, and one ruled strip underneath with what it is, what to do
- * next and the two readouts. No scroll-jacking — the only scroll effect is
- * the camera easing toward the brain as the Hero leaves the screen.
- *
- * On small screens the same content stacks: labels, headline, text and
- * buttons, then the brain as its own band, then the readouts beneath it.
+ * The two readouts beside the brain, visible from the first frame. They sit
+ * in the bottom corners, level with the scroll hint, so the centred headline
+ * never runs into them; below 1280px there is no room beside it, so (as on
+ * phones) the brain carries the heartbeat alone.
  */
-export function Hero() {
+function HudCards({ reduced }: { reduced: boolean }) {
   const { t } = useLanguage();
   const h = t.home;
-  const reduced = useReducedMotion() ?? false;
-  const sectionRef = useRef<HTMLElement>(null);
-  const dollyRef = useRef(0);
 
   // Same page clock as the brain's red points (heartbeat.ts): the R spike
   // crosses the trace's centre line as those points flash.
@@ -55,126 +70,185 @@ export function Hero() {
     if (reduced) return;
     const phase = heartbeatPhase(performance.now());
     ecgX.set(ECG_SYNC_OFFSET_PX - ECG_PERIOD_PX * phase);
-    dotOpacity.set(0.35 + 0.65 * heartbeatBlink(phase));
+    dotOpacity.set(0.3 + 0.7 * heartbeatBlink(phase));
   });
 
-  // 0 while the Hero sits at the top, 1 once it has scrolled off: feeds the
-  // brain's camera dolly. Passive listener, at most one read per frame.
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (reduced || !section) return;
-    let frame = 0;
-    const measure = () => {
-      frame = 0;
-      const { top, height } = section.getBoundingClientRect();
-      dollyRef.current = Math.min(Math.max(-top / Math.max(height, 1), 0), 1);
-    };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(measure);
-    };
-    measure();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(frame);
-    };
-  }, [reduced]);
-
   return (
-    <section ref={sectionRef} aria-labelledby="hero-heading" className="relative overflow-hidden bg-brand-ink text-white">
-      {/* Deliberately not positioned: on desktop the brain inside it is placed
-          against the section, edge to edge, while the text stays on the grid. */}
-      <div className="container mx-auto flex flex-col px-4 md:px-6 lg:min-h-[calc(100svh-4rem)]">
-        <div className="z-10 flex items-start justify-between gap-6 pt-10 lg:order-1 lg:pt-8">
-          <Eyebrow tone="inverse">{h.heroEyebrow}</Eyebrow>
-          <p aria-hidden="true" className={cn(LABEL, "hidden lg:block")}>
-            {h.heroFigure}
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 hidden xl:block">
+      <div className="container relative mx-auto h-full px-6">
+        {/* Heartbeat monitor, in lockstep with the brain's red vital points */}
+        <div className={cn(HUD_CARD, "bottom-[9%] left-6")}>
+          <div className="relative h-8 overflow-hidden" style={{ width: ECG_WINDOW_PX, maxWidth: "100%" }}>
+            <motion.svg
+              viewBox={`0 0 ${ECG_PERIOD_PX * 2} ${ECG_HEIGHT_PX}`}
+              width={ECG_PERIOD_PX * 2}
+              height={ECG_HEIGHT_PX}
+              className="max-w-none"
+              fill="none"
+              style={{ x: ecgX }}
+            >
+              <path d={ECG_PATH} stroke={HEART_RED} strokeOpacity="0.3" strokeWidth="1" strokeLinejoin="round" />
+              <path d={ECG_PATH} stroke={HEART_RED} strokeWidth="2.2" strokeLinecap="round" strokeDasharray="0.1 4.5" />
+            </motion.svg>
+            <div className="absolute inset-y-0 left-1/2 w-px bg-white/15" />
+          </div>
+          <p className={cn(LABEL, "mt-2 flex items-center gap-2 whitespace-nowrap")}>
+            <motion.span
+              className="h-1.5 w-1.5 shrink-0 rounded-full"
+              style={{ backgroundColor: HEART_RED, opacity: dotOpacity }}
+            />
+            <span>
+              {h.heroHudBiosignals}: <span className="text-[#FF6B84]">{h.heroHudActive}</span>
+            </span>
           </p>
         </div>
 
-        <h1
-          id="hero-heading"
-          className="z-10 mt-7 font-exo text-5xl font-bold leading-[1.02] tracking-tight md:text-7xl lg:order-3 lg:mt-0 lg:text-[4.5rem] 2xl:text-[5.25rem]"
+        {/* The headline result, with its source */}
+        <div className={cn(HUD_CARD, "bottom-[9%] right-6 min-w-56")}>
+          <p className={LABEL}>{h.heroHudAnxiety}</p>
+          <p className="mt-1.5 font-exo text-3xl font-bold leading-none tabular-nums text-white">
+            {t.shared.evidence.leadValue}
+          </p>
+          <p className="mt-1.5 text-xs text-white/60">{h.heroHudAnxietySource}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Opening screen, told by scrolling (as in version 2). The section is three
+ * screens tall with a pinned stage: first the brain on its own, with the
+ * heartbeat readouts; as the visitor scrolls, the camera dives in and the
+ * headline, text and buttons rise in, centred; at the end the brain breaks
+ * into points and the measured results appear. Scrolling back up plays it in
+ * reverse — the readouts never leave the screen.
+ *
+ * Reduced motion: no pinning and no scroll effects — one screen, everything
+ * visible, the brain as a still frame.
+ */
+export function Hero() {
+  const { t } = useLanguage();
+  const h = t.home;
+  // Hydration-safe: the pinned height and scroll-only elements depend on it.
+  const reduced = useReducedMotionSafe();
+
+  const sectionRef = useRef<HTMLElement>(null);
+  const { progressRef, act, progress } = useScrollNarrative(reduced ? undefined : sectionRef);
+
+  // Give the brain a beat on its own before any text can appear, even if
+  // the visitor scrolls straight away.
+  const [textReady, setTextReady] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setTextReady(true), 500);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  // Keyboard users can tab into the buttons before scrolling: show the whole
+  // block then, so focus never lands on something invisible (WCAG 2.4.7).
+  const [focusReveal, setFocusReveal] = useState(false);
+
+  const shown = reduced || focusReveal;
+  const gate = shown || textReady;
+  const reveal = (from: number, to: number) => (shown ? 1 : gate ? smoothstep(from, to, progress) : 0);
+  const headlineReveal = reveal(0.15, 0.45);
+  const subtitleReveal = reveal(0.2, 0.5);
+  const ctaReveal = reveal(0.25, 0.55);
+  const kpisShown = !reduced && act >= 4;
+
+  return (
+    <section
+      ref={sectionRef}
+      aria-labelledby="hero-heading"
+      className="relative bg-brand-ink text-white"
+      style={{ height: reduced ? undefined : "300vh" }}
+    >
+      <div
+        className={cn(
+          "flex h-[calc(100svh-4rem)] min-h-[560px] w-full items-center justify-center overflow-hidden",
+          !reduced && "sticky top-16",
+        )}
+      >
+        {/* A failing WebGL brain must never take the Hero down with it. */}
+        <ErrorBoundary label="BrainHero">
+          <BrainHero progressRef={progressRef} />
+        </ErrorBoundary>
+
+        <HudCards reduced={reduced} />
+
+        {/* Readability behind the copy over the brightest particles; it only
+            comes in with the text, so the brain opens unshaded. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-10"
+          style={{
+            background: "radial-gradient(ellipse 45% 38% at 50% 50%, rgba(14,22,36,0.72), transparent 75%)",
+            opacity: headlineReveal,
+          }}
+        />
+
+        <div
+          className="relative z-20 mx-auto max-w-4xl px-4 text-center md:px-6"
+          onFocus={() => setFocusReveal(true)}
         >
-          <span className="block">{h.heroHeadlineLine1}</span>{" "}
-          <span className={cn("block", HERO_ACCENT)}>{h.heroHeadlineLine2}</span>
-        </h1>
+          <h1
+            id="hero-heading"
+            className="font-exo text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl md:text-7xl"
+            style={revealStyle(headlineReveal)}
+          >
+            <span className="block">{h.heroHeadlineLine1}</span>{" "}
+            <span className={cn("block", HERO_ACCENT)}>{h.heroHeadlineLine2}</span>
+          </h1>
 
-        {/* Desktop only (the loop is spelled out in section 02 anyway): the
-            spec block in the free space left of the brain, shown above the
-            headline but read after it. Its auto margins also push the
-            headline down to the strip. */}
-        <div className="z-10 hidden lg:order-2 lg:my-auto lg:block lg:py-10">
-          <p className={LABEL}>{h.heroLoopLabel}</p>
-          <ol className="mt-4 space-y-2.5">
-            {h.platform.steps.map((step, i) => (
-              <li key={step.index} className={cn(LABEL, "grid grid-cols-[2.75rem_6.5rem_1fr] items-baseline")}>
-                <span className={HERO_ACCENT}>{step.index}</span>
-                <span className="text-white">{step.title}</span>
-                <span>{h.heroLoopDetail[i]}</span>
-              </li>
-            ))}
-          </ol>
+          <p
+            className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg md:mt-6 md:text-xl"
+            style={revealStyle(subtitleReveal)}
+          >
+            {h.heroSubtitle}
+          </p>
+
+          <div
+            className="mt-8 flex flex-wrap items-center justify-center gap-3 md:mt-10"
+            style={{ ...revealStyle(ctaReveal), pointerEvents: ctaReveal > 0.5 ? "auto" : "none" }}
+          >
+            <Button asChild size="lg" variant="inverse">
+              <Link href="#evidencia">{h.heroPrimaryCta}</Link>
+            </Button>
+            <Button asChild size="lg" variant="outlineInverse">
+              <Link href="/contact">{h.heroSecondaryCta}</Link>
+            </Button>
+          </div>
+
+          {/* Ato IV — the brain breaks into points and the results emerge */}
+          {!reduced && (
+            <dl
+              className="mx-auto mt-10 grid max-w-2xl grid-cols-3 divide-x divide-white/15 border-y border-white/15 transition-opacity duration-700 md:mt-12"
+              style={{ opacity: kpisShown ? 1 : 0 }}
+              aria-hidden={!kpisShown}
+            >
+              {h.heroKpis.map((kpi) => (
+                <div key={kpi.label} className="flex flex-col-reverse gap-1.5 px-3 py-4">
+                  <dt className={LABEL}>{kpi.label}</dt>
+                  <dd className="font-exo text-2xl font-bold tabular-nums text-white md:text-3xl">{kpi.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
         </div>
 
-        {/* No z-index on the strip itself: that would make it a stacking
-            context and lift the brain inside it over the headline. Its text
-            cells carry z-10 instead. */}
-        <div className="mt-8 grid grid-cols-2 gap-x-6 border-t border-white/15 pb-10 pt-6 lg:order-4 lg:mt-10 lg:grid-cols-12 lg:gap-x-0 lg:pb-8">
-          <div className="z-10 col-span-2 lg:col-span-6 lg:pr-10">
-            <p className="max-w-xl text-lg leading-relaxed text-white/75">{h.heroSubtitle}</p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Button asChild size="lg" variant="inverse">
-                <Link href="#evidencia">{h.heroPrimaryCta}</Link>
-              </Button>
-              <Button asChild size="lg" variant="outlineInverse">
-                <Link href="/contact">{h.heroSecondaryCta}</Link>
-              </Button>
-            </div>
+        {/* Scroll hint — only while the brain is on its own */}
+        {!reduced && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-1 transition-opacity duration-500"
+            style={{ opacity: act === 1 && headlineReveal < 0.05 ? 1 : 0 }}
+          >
+            <span className={LABEL}>{h.heroScrollHint}</span>
+            <motion.span animate={{ y: [0, 6, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+              <ChevronDown className="h-5 w-5 text-white/60" />
+            </motion.span>
           </div>
-
-          {/* The brain: a band of its own on small screens, the full-bleed
-              backdrop on desktop (drawn right of centre and raised, clear of
-              the headline). */}
-          <div className="relative col-span-2 -mx-4 mt-8 h-[46vh] min-h-[300px] md:-mx-6 lg:absolute lg:inset-0 lg:z-0 lg:m-0 lg:h-auto">
-            <BrainHero offsetRatio={0.2} offsetYRatio={0.12} dollyRef={dollyRef} />
-            <p aria-hidden="true" className={cn(LABEL, "absolute bottom-3 left-4 md:left-6 lg:hidden")}>
-              {h.heroFigure}
-            </p>
-          </div>
-
-          {/* Readouts: the illustrative vital-sign trace, and the headline result with its source */}
-          <div aria-hidden="true" className="z-10 mt-6 lg:col-span-3 lg:mt-0 lg:border-l lg:border-white/15 lg:px-8">
-            <p className={cn(LABEL, "flex items-center gap-2")}>
-              <motion.span
-                className="h-1.5 w-1.5 shrink-0 rounded-full"
-                style={{ backgroundColor: HEART_RED, opacity: dotOpacity }}
-              />
-              {h.heroHudSignal}
-            </p>
-            <div className="relative mt-4 h-8 overflow-hidden" style={{ width: ECG_WINDOW_PX, maxWidth: "100%" }}>
-              <motion.svg
-                viewBox={`0 0 ${ECG_PERIOD_PX * 2} ${ECG_HEIGHT_PX}`}
-                width={ECG_PERIOD_PX * 2}
-                height={ECG_HEIGHT_PX}
-                className="max-w-none"
-                fill="none"
-                style={{ x: ecgX }}
-              >
-                <path d={ECG_PATH} stroke={HEART_RED} strokeOpacity="0.3" strokeWidth="1" strokeLinejoin="round" />
-                <path d={ECG_PATH} stroke={HEART_RED} strokeWidth="2.2" strokeLinecap="round" strokeDasharray="0.1 4.5" />
-              </motion.svg>
-              <div className="absolute inset-y-0 left-1/2 w-px bg-white/15" />
-            </div>
-          </div>
-          <div className="z-10 mt-6 lg:col-span-3 lg:mt-0 lg:border-l lg:border-white/15 lg:pl-8">
-            <p className={LABEL}>{h.heroHudAnxiety}</p>
-            <p className="mt-2 font-exo text-5xl font-bold leading-none tabular-nums text-white">
-              {t.shared.evidence.leadValue}
-            </p>
-            <p className="mt-2 text-sm text-white/60">{h.heroHudAnxietySource}</p>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );

@@ -35,13 +35,13 @@
 
   /* Brand swatches — straight from the brand manual's "Referências
      Cromáticas" table (Web hex column) and the logo. Kept as fixed hexes
-     for the places that need the literal brand colour (logo-adjacent
-     accents, the dark Hero). brand-violet is a legacy alias of the vivid
-     blue — there is no violet in the brand. */
+     for the places that need the literal brand colour (the dark Hero).
+     brand-violet is a legacy alias of the vivid blue — there is no violet
+     in the brand. No gold anywhere in the interface: it only lives in the
+     logo artwork itself. */
   --color-brand-blue: #1270b0;
   --color-brand-teal: #0f9cac;
   --color-brand-violet: #00a5e9;
-  --color-brand-amber: #db9b1d;
   --color-brand-ink: #0e1624;
 
   --font-sans: var(--app-font-sans);
@@ -59,8 +59,8 @@
        Ink    #0E1624  218 44% 10%  text, dark surfaces, solid buttons (≈17:1 on paper)
        Blue   #1270B0  205 81% 38%  brand blue: links, labels, primary actions
                                      (5.3:1 on white — AA for body text)
-       Gold   #DB9B1D  40 77% 49%   the logo's "n": graphic accents only, never
-                                     body text (2.3:1 on white)
+       Vivid  #00A5E9  198 100% 46%  the logo's bright blue: graphic accents only
+                                     (rules, dots) — never text on paper (2.9:1)
      Neutrals
        Paper  #FAFAF7  45 30% 97%   page
        Muted  #EFEEE8  45 16% 93%   alternating section tint
@@ -79,7 +79,7 @@
   --secondary-foreground: 0 0% 100%;
   --muted: 45 16% 93%;
   --muted-foreground: 222 14% 34%;
-  --accent: 40 77% 49%;
+  --accent: 198 100% 46%;
   --accent-foreground: 218 44% 10%;
   --destructive: 0 72% 40%;
   --destructive-foreground: 0 0% 100%;
@@ -88,6 +88,15 @@
   --app-font-sans: var(--font-roboto-condensed), 'Roboto Condensed', 'Arial Narrow', sans-serif;
   --app-font-heading: var(--font-roboto-condensed), 'Roboto Condensed', 'Arial Narrow', sans-serif;
   --radius: 0.375rem;
+}
+
+/* One centred column on every screen. Tailwind v4's container steps its
+   max-width up with each breakpoint and tops out at 96rem — the same width
+   as its 2xl breakpoint — so on the very common 1536px viewport (a 1920×1080
+   screen at 125%) it had no side margins at all and every page hugged the
+   left edge. Capped at 75rem, fluid below. */
+@utility container {
+  max-width: 75rem;
 }
 
 @layer base {

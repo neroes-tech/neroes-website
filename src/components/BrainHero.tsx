@@ -25,8 +25,6 @@ type BrainData = {
 const C_BLUE = new THREE.Color("#1270B0");
 const C_TEAL = new THREE.Color("#0F9CAC");
 const C_CYAN = new THREE.Color("#00A5E9");
-// Viewport width from which the Hero puts text left and the brain right.
-const DESKTOP_LAYOUT_MIN = 1024;
 
 // Neural-connection graph: a subset of glow hubs linked to their nearest
 // same-hemisphere neighbours (see buildConnections).
@@ -80,9 +78,6 @@ const BRAIN_YAW = THREE.MathUtils.degToRad(80);
 // zero so it never crosses through the point cloud's origin (crossing zero
 // flips the camera to the opposite side, which read as a sudden pirouette).
 const CAMERA_MIN_RADIUS = 1.1;
-// Share of the camera travel (orbitStart → CAMERA_MIN_RADIUS) the Hero's
-// scroll-out dolly covers: ~15% closer by the time the Hero has left.
-const SCROLL_DOLLY_MAX = 0.18;
 
 function smoothstep(edge0: number, edge1: number, x: number) {
   const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
@@ -632,24 +627,7 @@ const POST_FRAG = `
   }
 `;
 
-export default function BrainHero({
-  progressRef,
-  dollyRef,
-  offsetRatio = 0,
-  offsetYRatio = 0,
-}: {
-  progressRef?: RefObject<number>;
-  /**
-   * 0 → 1 as the Hero scrolls away: the camera eases toward the brain by up
-   * to SCROLL_DOLLY_MAX of its travel. Camera only — no rotation (the red
-   * vital spot stays facing the viewer) and none of the narrative acts.
-   */
-  dollyRef?: RefObject<number>;
-  /** On wide screens, draw the brain this fraction of the width right of centre. */
-  offsetRatio?: number;
-  /** On wide screens, draw it this fraction of the height above centre. */
-  offsetYRatio?: number;
-}) {
+export default function BrainHero({ progressRef }: { progressRef?: RefObject<number> }) {
   const mountRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const reduced = prefersReducedMotion ?? false;
@@ -676,20 +654,16 @@ export default function BrainHero({
     // the render loop dives in from here as the user scrolls.
     camera.position.set(orbitStart, 0, 0);
 
-    // Wide screens: shift the rendered image right and up (a negative x
-    // offset moves the sub-view left, so the content lands right of centre;
-    // a positive y offset moves it down, so the content rises), clear of the
-    // Hero text. Narrow screens: centred.
-    const applyViewOffset = (w: number, h: number) => {
-      if ((offsetRatio || offsetYRatio) && w >= DESKTOP_LAYOUT_MIN) {
-        camera.setViewOffset(w, h, -w * offsetRatio, h * offsetYRatio, w, h);
-      } else {
-        camera.clearViewOffset();
-      }
-    };
-    applyViewOffset(mount.clientWidth, mount.clientHeight);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    // WebGL can be missing or refused (disabled in the browser, blocklisted
+    // GPU, a lost context that never came back): three.js throws here. The
+    // Hero reads fine without the brain, so skip it instead of breaking the page.
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch (error) {
+      console.warn("[BrainHero] WebGL unavailable — rendering the Hero without the brain.", error);
+      return;
+    }
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     const pixelRatio = Math.min(window.devicePixelRatio, 2);
     renderer.setPixelRatio(pixelRatio);
@@ -852,7 +826,6 @@ export default function BrainHero({
       const h = mount.clientHeight;
       camera.aspect = w / h || 1;
       camera.updateProjectionMatrix();
-      applyViewOffset(w, h);
       renderer.setSize(w, h);
       if (renderTarget) {
         renderTarget.dispose();
@@ -899,7 +872,7 @@ export default function BrainHero({
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-    const render = () => {
+    const drawFrame = () => {
       const t = clock.getElapsedTime();
       const progress = progressRef?.current ?? 0;
 
@@ -950,8 +923,7 @@ export default function BrainHero({
       // a straight dolly-in from orbitStart toward CAMERA_MIN_RADIUS, read
       // as a clean, direct expansion/zoom with no swirl or pirouette.
       const zoomIn = smoothstep(0.0, 0.9, progress);
-      const dolly = (dollyRef?.current ?? 0) * SCROLL_DOLLY_MAX;
-      const orbitRadius = lerp(orbitStart, CAMERA_MIN_RADIUS, Math.max(zoomIn, dolly));
+      const orbitRadius = lerp(orbitStart, CAMERA_MIN_RADIUS, zoomIn);
       camera.position.x = Math.sin(ORBIT_PHASE) * orbitRadius;
       camera.position.z = Math.cos(ORBIT_PHASE) * orbitRadius;
       camera.position.y = 0;
@@ -971,7 +943,20 @@ export default function BrainHero({
       } else {
         renderer.render(scene, camera);
       }
+    };
 
+    // A frame that throws would throw again on every tick; stop the loop,
+    // keep the last good frame on screen and never restart it.
+    let broken = false;
+    const render = () => {
+      try {
+        drawFrame();
+      } catch (error) {
+        broken = true;
+        stopLoop();
+        console.warn("[BrainHero] render loop stopped.", error);
+        return;
+      }
       if (running) raf = requestAnimationFrame(render);
     };
     raf = requestAnimationFrame(render);
@@ -982,7 +967,7 @@ export default function BrainHero({
         const visible = !!entry?.isIntersecting;
         // The observer also fires once on observe() — while the loop is
         // already running — which used to start a second, parallel loop.
-        if (visible === running) return;
+        if (broken || visible === running) return;
         running = visible;
         if (running) {
           raf = requestAnimationFrame(render);
@@ -1014,7 +999,7 @@ export default function BrainHero({
         mount.removeChild(renderer.domElement);
       }
     };
-  }, [reduced, progressRef, dollyRef, offsetRatio, offsetYRatio, parallax.xRef, parallax.yRef, glEpoch]);
+  }, [reduced, progressRef, parallax.xRef, parallax.yRef, glEpoch]);
 
   return (
     <div
