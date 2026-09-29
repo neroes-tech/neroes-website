@@ -9,7 +9,8 @@ export const metadata: Metadata = {
 
 export default function TermsConditionsPage() {
   return (
-    <>
+    // This page exists in English only, inside the Portuguese site chrome.
+    <div lang="en">
       <PageHero title="Terms and Conditions" size="compact" maxWidth="3xl" />
 
       <section className="bg-background pb-20 md:pb-24">
@@ -175,6 +176,6 @@ export default function TermsConditionsPage() {
           </article>
         </div>
       </section>
-    </>
+    </div>
   );
 }

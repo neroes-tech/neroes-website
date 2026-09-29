@@ -1,273 +1,331 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Activity,
-  ArrowRight,
-  BarChart3,
-  Brain,
-  Heart,
-  Moon,
-  Shield,
-  ShieldCheck,
-  SlidersHorizontal,
-  TrendingUp,
-  Users,
-} from "lucide-react";
 
 import { Hero } from "@/components/home/Hero";
-import { Reveal } from "@/components/home/Reveal";
 import { ClientTestimonials } from "@/components/sections/ClientTestimonials";
-import { HowItWorks } from "@/components/sections/HowItWorks";
-import { ProductShowcase } from "@/components/sections/ProductShowcase";
-import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
+import { Evidence } from "@/components/sections/Evidence";
+import { ProductVideo } from "@/components/sections/ProductVideo";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { Rich } from "@/components/ui/Rich";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { TEAM_BIOS, TEAM_MEMBERS } from "@/lib/constants";
+import { TEAM_MEMBERS, teamBios } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
-const PLATFORM_ICONS = [Brain, Activity, BarChart3, SlidersHorizontal, Users, ShieldCheck] as const;
-const BENEFITS_ICONS = [Users, TrendingUp, Heart] as const;
-const FEATURES_ICONS = [Shield, Activity, Moon] as const;
-const STATS_META = [
-  { prefix: "+", end: 111, suffix: "%", color: "text-primary" },
-  { prefix: "+", end: 21, suffix: ".7%", color: "text-primary" },
-  { prefix: "+", end: 9, suffix: ".4%", color: "text-primary" },
-  { prefix: "-", end: 14, suffix: ".2%", color: "text-secondary" },
-] as const;
+// 720p muted loop (6.6 MB) for everyone; the 1080p cut with sound (19 MB)
+// only on request. Re-encoded from the 60 MB 1080p master.
+const HEADSET_VIDEO = {
+  loop: "/media/neroes-headset-720.mp4",
+  full: "/media/neroes-headset-1080.mp4",
+  poster: "/media/neroes-headset-poster.webp",
+} as const;
 
-// Only the two co-founders (per docs/content-inventory.md and the Sport
-// About page: "Neroes started as an idea developed by Pedro Pestana and
-// Hugo Ferreira") — real bios from TEAM_BIOS, not fabricated.
-const FOUNDERS = TEAM_MEMBERS.filter((m) => m.role.includes("Co-Founder"));
+// Dark bronze of the logo's gold — the "believed / vision" register. The
+// logo gold itself (#DB9B1D) is too light for text on paper; this shade
+// keeps the hue and clears 4.5:1.
+const VISION_TEXT = "text-[#8A5A0A]";
 
-function SectionEyebrow({ children }: { children: string }) {
+const STAGE_DOT = ["bg-secondary", "bg-foreground", "bg-accent"] as const;
+
+// The two co-founders (docs/content-inventory.md: "Neroes started as an idea
+// developed by Pedro Pestana and Hugo Ferreira").
+const PEDRO = TEAM_MEMBERS.find((m) => m.name === "Pedro Pestana");
+const HUGO = TEAM_MEMBERS.find((m) => m.name === "Hugo Ferreira");
+
+/** Standard section shell: 1px top rule, generous vertical rhythm. */
+function Section({
+  id,
+  labelledBy,
+  tone = "paper",
+  className,
+  children,
+}: {
+  id?: string;
+  labelledBy: string;
+  tone?: "paper" | "muted";
+  className?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <p className="text-center font-mono text-sm font-medium uppercase tracking-widest text-secondary">
-      {children}
-    </p>
+    <section
+      id={id}
+      aria-labelledby={labelledBy}
+      className={cn(
+        "scroll-mt-24 border-t border-border py-20 md:py-28",
+        tone === "muted" ? "bg-muted" : "bg-background",
+        className,
+      )}
+    >
+      <div className="container mx-auto px-4 md:px-6">{children}</div>
+    </section>
   );
 }
 
 export function HomeContent() {
   const { t, locale } = useLanguage();
+  const h = t.home;
 
   return (
-    <div lang={locale === "pt" ? "pt-PT" : "en"}>
+    <>
       <Hero />
 
-      {/* 01 — THE PROBLEM: real workplace mental-health cost data */}
-      <section className="border-b border-border bg-muted py-24 md:py-32" aria-labelledby="problem-heading">
+      {/* 01 — The problem */}
+      <Section labelledBy="problem-heading">
+        <SectionHeading id="problem-heading" eyebrow={h.problemEyebrow} title={h.problemTitle} intro={h.problemSubtitle} />
+        <div className="grid gap-10 sm:grid-cols-3 sm:gap-8">
+          {t.shared.problemFacts.map(({ title, stat, detail }) => (
+            <div key={title} className="border-t border-foreground/15 pt-5">
+              <h3 className="font-mono text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">{title}</h3>
+              <p className="mt-3 text-2xl font-bold leading-tight text-foreground">{stat}</p>
+              <p className="mt-2 text-muted-foreground">{detail}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* 02 — The platform: the device edge to edge, then the sense → train → measure loop */}
+      <section
+        id="plataforma"
+        aria-labelledby="platform-heading"
+        className="scroll-mt-24 border-t border-border bg-background pt-20 md:pt-28"
+      >
         <div className="container mx-auto px-4 md:px-6">
-          <Reveal className="mb-16 text-center">
-            <SectionEyebrow>{t.home.problemEyebrow}</SectionEyebrow>
-            <h2 id="problem-heading" className="mt-3 font-exo text-3xl font-bold text-primary md:text-5xl">
-              {t.home.problemTitle}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">{t.home.problemSubtitle}</p>
-          </Reveal>
-          <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-3">
-            {t.shared.problemFacts.map(({ title, stat, detail }, i) => (
-              <Reveal key={title} delay={i * 0.08} className="h-full">
-                <Card className="h-full border-border bg-card">
-                  <CardContent className="space-y-3 pt-8 text-center">
-                    <p className="font-exo text-lg font-bold text-foreground">{title}</p>
-                    <p className="leading-relaxed text-muted-foreground">
-                      <strong>{stat}</strong>
-                      <br />
-                      {detail}
-                    </p>
-                  </CardContent>
-                </Card>
-              </Reveal>
+          <SectionHeading
+            id="platform-heading"
+            eyebrow={h.platform.eyebrow}
+            title={h.platform.title}
+            intro={<Rich text={h.platform.lead} />}
+          />
+        </div>
+
+        <ProductVideo
+          src={HEADSET_VIDEO.loop}
+          fullSrc={HEADSET_VIDEO.full}
+          poster={HEADSET_VIDEO.poster}
+          caption={h.platform.videoCaption}
+          soundLabel={h.platform.videoPlayLabel}
+          pauseLabel={h.platform.videoPause}
+          resumeLabel={h.platform.videoResume}
+          fallback={h.platform.videoFallback}
+        />
+
+        <div className="container mx-auto px-4 pb-20 pt-16 md:px-6 md:pb-28 md:pt-20">
+          <ol className="grid border-y border-border md:grid-cols-3 md:divide-x md:divide-border">
+            {h.platform.steps.map((step) => (
+              <li key={step.index} className="border-b border-border py-7 last:border-b-0 md:border-b-0 md:px-7 md:first:pl-0">
+                <span className="font-mono text-sm text-secondary">{step.index}</span>
+                <h3 className="mt-2 text-2xl font-bold text-foreground">{step.title}</h3>
+                <p className="mt-2 leading-relaxed text-muted-foreground">{step.desc}</p>
+              </li>
             ))}
-          </div>
-        </div>
-      </section>
+          </ol>
 
-      {/* 02 — THE PLATFORM: how it works + feature set + benefits */}
-      <div className="pt-24 md:pt-32">
-        <Reveal>
-          <SectionEyebrow>{t.home.platformEyebrow}</SectionEyebrow>
-        </Reveal>
-      </div>
-      <HowItWorks />
-
-      <section className="relative overflow-hidden bg-muted py-24 md:py-32">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-24 top-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute right-0 top-20 h-64 w-64 rounded-full bg-secondary/10 blur-3xl" />
-          <div className="absolute bottom-0 left-1/3 h-56 w-56 rounded-full bg-decorative-violet-soft blur-3xl" />
-          <div className="bg-neural-grid absolute inset-0 text-primary/[0.05]" />
-        </div>
-        <div className="container relative mx-auto px-4 md:px-6">
-          <Reveal className="mb-16 text-center">
-            <h2 className="mb-4 font-exo text-3xl font-bold text-primary md:text-5xl">
-              {t.home.platformHeading}
-            </h2>
-            <p className="mx-auto max-w-2xl text-lg text-muted-foreground">{t.home.platformSubtitle}</p>
-          </Reveal>
-          <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {PLATFORM_ICONS.map((Icon, i) => (
-              <Reveal key={t.home.platformFeatures[i]!.title} delay={i * 0.08} className="h-full">
-                <Card className="h-full border-border bg-card transition-all hover:-translate-y-1 hover:shadow-glow-primary">
-                  <CardContent className="space-y-4 pt-8">
-                    <div className="inline-flex rounded-xl bg-secondary/10 p-3">
-                      <Icon className="h-7 w-7 text-secondary" aria-hidden="true" />
-                    </div>
-                    <h3 className="font-exo text-xl font-bold text-foreground">
-                      {t.home.platformFeatures[i]!.title}
-                    </h3>
-                    <p className="leading-relaxed text-muted-foreground">{t.home.platformFeatures[i]!.desc}</p>
-                  </CardContent>
-                </Card>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-background py-24 md:py-32">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="mx-auto grid max-w-6xl gap-16 lg:grid-cols-2">
-            <Reveal className="space-y-8">
-              <h2 className="font-exo text-4xl font-bold text-primary">{t.home.benefitsHeading}</h2>
-              <div className="space-y-6">
-                {BENEFITS_ICONS.map((Icon, i) => (
-                  <div key={t.home.benefits[i]!.title} className="flex items-start gap-4">
-                    <div className="rounded-xl bg-secondary/10 p-3">
-                      <Icon className="h-6 w-6 text-secondary" aria-hidden="true" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-foreground">{t.home.benefits[i]!.title}</h3>
-                      <p className="mt-1 text-muted-foreground">{t.home.benefits[i]!.desc}</p>
-                    </div>
-                  </div>
-                ))}
+          <div className="mt-12 grid gap-10 lg:grid-cols-12 lg:gap-12">
+            <div className="lg:col-span-7">
+              <p className="text-xl leading-relaxed text-muted-foreground">
+                <Rich text={h.platform.networks} />
+              </p>
+              <div className="mt-8 border-l-2 border-accent pl-5">
+                <p className="leading-relaxed text-muted-foreground">
+                  <Rich text={h.platform.beyond} />
+                </p>
               </div>
-            </Reveal>
-            <Reveal className="space-y-8" delay={0.1}>
-              <h2 className="font-exo text-4xl font-bold text-primary">{t.home.featuresHeading}</h2>
-              <div className="space-y-6">
-                {FEATURES_ICONS.map((Icon, i) => (
-                  <div key={t.home.features[i]!.title} className="flex items-start gap-4">
-                    <div className="rounded-xl bg-accent/10 p-3">
-                      <Icon className="h-6 w-6 text-accent" aria-hidden="true" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-foreground">{t.home.features[i]!.title}</h3>
-                      <p className="mt-1 text-muted-foreground">{t.home.features[i]!.desc}</p>
-                    </div>
-                  </div>
+            </div>
+            <div className="lg:col-span-5">
+              <Eyebrow tone="muted">{h.platform.techLabel}</Eyebrow>
+              <ul className="mt-4 divide-y divide-border border-y border-border">
+                {h.platform.tech.map((item) => (
+                  <li key={item} className="py-2.5 text-foreground">
+                    {item}
+                  </li>
                 ))}
-              </div>
-            </Reveal>
+              </ul>
+              <p className="mt-3 text-sm text-muted-foreground">{h.platform.techNote}</p>
+            </div>
           </div>
-        </div>
-      </section>
 
-      {/* Equipment / headset demo video */}
-      <ProductShowcase />
-
-      {/* 03 — THE EVIDENCE & TESTIMONIALS: verified outcome stats + real client quotes */}
-      <div className="border-t border-border pt-24 md:pt-32">
-        <Reveal>
-          <SectionEyebrow>{t.home.evidenceEyebrow}</SectionEyebrow>
-        </Reveal>
-      </div>
-      <section className="bg-muted pb-24 pt-8 md:pb-32">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 text-center md:grid-cols-4">
-            {STATS_META.map(({ prefix, end, suffix, color }, i) => (
-              <Reveal key={t.home.statsLabels[i]} delay={i * 0.08} className="space-y-2">
-                <div className={`font-exo text-5xl font-bold md:text-6xl ${color}`}>
-                  <AnimatedCounter prefix={prefix} end={end} suffix={suffix} />
+          <div className="mt-16">
+            <h3 className="text-xl font-bold text-foreground">{h.platform.includesTitle}</h3>
+            <dl className="mt-6 grid gap-x-12 sm:grid-cols-2">
+              {h.platform.includes.map((item) => (
+                <div key={item.title} className="border-t border-border py-5">
+                  <dt className="font-bold text-foreground">{item.title}</dt>
+                  <dd className="mt-1 leading-relaxed text-muted-foreground">{item.desc}</dd>
                 </div>
-                <p className="text-lg font-medium text-muted-foreground">{t.home.statsLabels[i]}</p>
-              </Reveal>
-            ))}
+              ))}
+            </dl>
           </div>
         </div>
       </section>
+
+      {/* 03 — The evidence (shared with the Science page) */}
+      <Evidence showScienceLink />
+
+      {/* 04 — Where it works today */}
+      <Section labelledBy="where-heading">
+        <SectionHeading id="where-heading" eyebrow={h.where.eyebrow} title={h.where.title} />
+        <div className="grid gap-10 md:grid-cols-3 md:gap-8">
+          {h.where.items.map((item) => (
+            <div key={item.title} className="border-t-2 border-foreground pt-5">
+              <h3 className="text-3xl font-bold text-foreground">{item.title}</h3>
+              <p className="mt-3 text-lg leading-relaxed text-muted-foreground">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* 05 — The journey */}
+      <Section labelledBy="journey-heading">
+        <SectionHeading id="journey-heading" eyebrow={h.journey.eyebrow} title={h.journey.title} />
+        <ol>
+          {h.journey.stages.map((stage, i) => (
+            <li
+              key={stage.title}
+              className="grid gap-3 border-t border-border py-7 md:grid-cols-12 md:items-baseline md:gap-8"
+            >
+              {/* Block text (not flex) so its baseline lines up with the stage title's. */}
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground md:col-span-3">
+                <span
+                  aria-hidden="true"
+                  className={cn("mr-2.5 inline-block h-2 w-2 -translate-y-px rounded-full align-middle", STAGE_DOT[i])}
+                />
+                {stage.label}
+              </p>
+              <h3 className={cn("text-4xl font-bold text-foreground md:col-span-4", i === 2 && VISION_TEXT)}>
+                {stage.title}
+              </h3>
+              <p className="text-lg leading-relaxed text-muted-foreground md:col-span-5">{stage.desc}</p>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      {/* Register shift — measured above, believed below; then the vision */}
+      <Section labelledBy="vision-heading" tone="muted">
+        <div className="max-w-4xl">
+          <p className="text-3xl font-bold leading-tight text-foreground md:text-5xl">{h.vision.measured}</p>
+          <div className="my-6 flex items-center gap-4" aria-hidden="true">
+            <span className="h-px flex-1 bg-foreground/30" />
+            <span className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">{h.vision.shiftLabel}</span>
+            <span className="h-px flex-1 bg-foreground/30" />
+          </div>
+          <p className={cn("text-3xl font-bold italic leading-tight md:text-5xl", VISION_TEXT)}>{h.vision.believed}</p>
+          <Eyebrow tone="muted" className="mt-6">
+            {h.vision.note}
+          </Eyebrow>
+        </div>
+
+        <div className="mt-20 grid gap-10 lg:grid-cols-12 lg:gap-12">
+          <div className="lg:col-span-6">
+            <h2 id="vision-heading" className="text-3xl font-bold leading-[1.1] tracking-tight text-foreground md:text-[2.75rem]">
+              {h.vision.title}
+            </h2>
+            <p className="mt-6 text-lg leading-relaxed text-muted-foreground">{h.vision.body}</p>
+          </div>
+          <figure className="border-l-2 border-accent pl-6 lg:col-span-6 lg:mt-2">
+            <blockquote className={cn("text-2xl italic leading-snug", VISION_TEXT)}>“{h.vision.quote}”</blockquote>
+            <figcaption className="mt-4 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              {h.vision.quoteCaption}
+            </figcaption>
+          </figure>
+        </div>
+
+        <div className="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
+          {h.vision.pillars.map((pillar) => (
+            <div key={pillar.title} className="border-t border-foreground/15 pt-5">
+              <h3 className={cn("text-xl font-bold italic", VISION_TEXT)}>{pillar.title}</h3>
+              <p className="mt-2 leading-relaxed text-muted-foreground">{pillar.desc}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
 
       <ClientTestimonials />
 
-      {/* Final CTA */}
-      <section className="relative overflow-hidden border-t border-border bg-card py-24 md:py-32">
-        <div
-          aria-hidden="true"
-          className="bg-neural-grid pointer-events-none absolute inset-0 text-primary/10"
-        />
-        <div className="container relative mx-auto px-4 md:px-6">
-          <Reveal className="mx-auto max-w-3xl text-center">
-            <h2 className="font-exo text-4xl font-bold tracking-tight text-foreground md:text-5xl">
-              {t.home.finalCtaHeading}
-            </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-              {t.home.finalCtaBody}
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button
-                asChild
-                size="lg"
-                className="group h-14 rounded-full bg-secondary px-8 text-lg font-semibold text-secondary-foreground transition-shadow hover:bg-secondary/90 hover:shadow-glow-secondary"
-              >
-                <Link href="/contact">
-                  {t.home.finalCtaPrimary}
-                  <ArrowRight
-                    className="h-5 w-5 transition-transform group-hover:translate-x-1"
-                    aria-hidden="true"
-                  />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="h-14 rounded-full border-primary px-8 text-lg text-primary hover:bg-primary/5"
-              >
-                <Link href="/science">{t.home.finalCtaSecondary}</Link>
-              </Button>
-            </div>
-          </Reveal>
+      {/* 06 — Founders */}
+      <Section labelledBy="founders-heading">
+        <SectionHeading id="founders-heading" eyebrow={h.founders.eyebrow} title={h.founders.title} />
+        <div className="grid gap-12 lg:grid-cols-12">
+          {PEDRO && (
+            <article className="border-t-2 border-foreground pt-6 lg:col-span-7">
+              <h3 className="text-2xl font-bold text-foreground">{PEDRO.name}</h3>
+              <p className="mt-1 font-mono text-xs uppercase tracking-[0.14em] text-secondary">{PEDRO.role}</p>
+              <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+                <Rich text={h.founders.pedroMission} />
+              </p>
+              <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+                <Rich text={h.founders.pedroPersonal} />
+              </p>
+            </article>
+          )}
+          {HUGO && (
+            <article className="border-t-2 border-foreground pt-6 lg:col-span-5">
+              <h3 className="text-2xl font-bold text-foreground">{HUGO.name}</h3>
+              <p className="mt-1 font-mono text-xs uppercase tracking-[0.14em] text-secondary">{HUGO.role}</p>
+              <ul className="mt-5 divide-y divide-border border-y border-border">
+                {(teamBios(locale)[HUGO.name] ?? []).map((line) => (
+                  <li key={line} className="py-2.5 text-muted-foreground">
+                    {line}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          )}
         </div>
-      </section>
+        <p className="mt-10">
+          <Link href="/about" className="font-medium text-secondary underline-offset-4 hover:underline">
+            {h.founders.viewTeamLink} →
+          </Link>
+        </p>
+      </Section>
 
-      {/* Founder spotlight — real bios from TEAM_BIOS, closing section before the
-          global partners bar (rendered in layout.tsx, after every page). */}
-      <section className="border-t border-border bg-background py-24 md:py-32" aria-labelledby="founders-heading">
-        <div className="container mx-auto px-4 md:px-6">
-          <Reveal className="mb-14 text-center">
-            <h2 id="founders-heading" className="font-exo text-3xl font-bold text-primary md:text-4xl">
-              {t.home.foundersHeading}
-            </h2>
-          </Reveal>
-          <div className="mx-auto grid max-w-3xl gap-8 sm:grid-cols-2">
-            {FOUNDERS.map(({ name, role }, i) => (
-              <Reveal key={name} delay={i * 0.08}>
-                <Card className="h-full border-border bg-card">
-                  <CardContent className="space-y-3 pt-8">
-                    <p className="font-exo text-xl font-bold text-foreground">{name}</p>
-                    <p className="text-sm font-medium text-secondary">{role}</p>
-                    <ul className="space-y-1 pt-2 text-sm text-muted-foreground">
-                      {(TEAM_BIOS[name] ?? []).map((line) => (
-                        <li key={line} lang="en">
-                          {line}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              </Reveal>
-            ))}
-          </div>
-          <p className="mt-10 text-center">
-            <Link href="/about" className="font-medium text-secondary hover:underline">
-              {t.home.viewTeamLink}
-            </Link>
-          </p>
+      {/* 07 — Neurorights */}
+      <Section labelledBy="neurorights-heading">
+        <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
+          <SectionHeading
+            id="neurorights-heading"
+            eyebrow={h.neurorights.eyebrow}
+            title={h.neurorights.title}
+            className="mb-0 lg:col-span-6"
+          />
+          <p className="text-lg leading-relaxed text-muted-foreground lg:col-span-6 lg:pt-10">{h.neurorights.body}</p>
         </div>
-      </section>
-    </div>
+        <ul className="mt-12 grid border-t border-border sm:grid-cols-2 lg:grid-cols-4 lg:divide-x lg:divide-border">
+          {h.neurorights.rights.map((right) => (
+            <li key={right.code} className="border-b border-border py-6 lg:border-b-0 lg:px-6 lg:first:pl-0">
+              <span className="font-mono text-xs text-secondary">{right.code}</span>
+              <h3 className="mt-2 text-xl font-bold text-foreground">{right.title}</h3>
+              <p className="mt-2 leading-relaxed text-muted-foreground">{right.desc}</p>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-8">
+          <Link href="/privacy-policy" className="font-medium text-secondary underline-offset-4 hover:underline">
+            {h.neurorights.privacyLink} →
+          </Link>
+        </p>
+      </Section>
+
+      {/* Closing */}
+      <Section labelledBy="closing-heading">
+        <div className="max-w-4xl">
+          <h2 id="closing-heading" className="text-4xl font-bold leading-[1.05] tracking-tight text-foreground md:text-6xl">
+            {h.closing.ground}
+            <span className={cn("block italic", VISION_TEXT)}>{h.closing.sky}</span>
+          </h2>
+          <p className="mt-6 max-w-2xl text-xl leading-relaxed text-muted-foreground">{h.closing.body}</p>
+          <div className="mt-10 flex flex-wrap gap-3">
+            <Button asChild size="lg">
+              <Link href="/contact">{h.closing.primary}</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link href="/science">{h.closing.secondary}</Link>
+            </Button>
+          </div>
+        </div>
+      </Section>
+    </>
   );
 }

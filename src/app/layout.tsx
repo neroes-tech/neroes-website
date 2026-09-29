@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { Roboto_Condensed } from "next/font/google";
+import { Roboto_Condensed, Roboto_Mono } from "next/font/google";
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PartnersBar } from "@/components/layout/PartnersBar";
+import { SkipLink } from "@/components/layout/SkipLink";
 import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
 import { SegmentProvider } from "@/lib/segment/SegmentProvider";
 import { CONTACT_INFO, SITE_URL } from "@/lib/constants";
@@ -20,14 +21,23 @@ const robotoCondensed = Roboto_Condensed({
   variable: "--font-roboto-condensed",
 });
 
+// Monospace for instrument-style labels only (section indices, study
+// methodology, data captions) — never for running text.
+const robotoMono = Roboto_Mono({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500"],
+  display: "swap",
+  variable: "--font-roboto-mono",
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Neroes — Mental Training Platform",
+    default: "Neroes — Plataforma de treino mental",
     template: "%s — Neroes",
   },
   description:
-    "Neroes improves mental performance in corporations and sports through neurofeedback-based mental training.",
+    "Neroes: treino mental com neurofeedback por EEG — um circuito fechado entre o teu cérebro e um jogo, com biomarcadores objetivos a registar a mudança. Uma plataforma de treino e investigação para clínica, desporto e trabalho.",
   icons: {
     icon: { url: "/favicon-brain-transparent.png", type: "image/png" },
     shortcut: { url: "/favicon-brain-transparent.png", type: "image/png" },
@@ -46,9 +56,9 @@ const organizationSchema = {
     CONTACT_INFO.social.instagram,
     CONTACT_INFO.social.facebook,
   ],
+  // City only: the street address is not published for now.
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Rua da Prata 80, 5º andar",
     addressLocality: "Lisbon",
     addressCountry: "PT",
   },
@@ -56,20 +66,17 @@ const organizationSchema = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={robotoCondensed.variable}>
+    // Portuguese is what the server renders; LanguageProvider keeps this in
+    // step when a visitor switches to English.
+    <html lang="pt-PT" className={`${robotoCondensed.variable} ${robotoMono.variable}`}>
       <body className="flex min-h-screen flex-col">
         <script
           type="application/ld+json"
           // Safe: serialized from a fully static, locally-defined object.
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
-        >
-          Skip to main content
-        </a>
         <LanguageProvider>
+          <SkipLink />
           <SegmentProvider>
             <Navbar />
             <main id="main-content" className="flex-1">

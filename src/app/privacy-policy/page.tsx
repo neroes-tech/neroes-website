@@ -20,7 +20,8 @@ const COOKIES = [
 
 export default function PrivacyPolicyPage() {
   return (
-    <>
+    // This page exists in English only, inside the Portuguese site chrome.
+    <div lang="en">
       <PageHero title="Privacy and Security Policy" size="compact" maxWidth="3xl" />
 
       <section className="bg-background pb-20 md:pb-24">
@@ -492,6 +493,6 @@ export default function PrivacyPolicyPage() {
           </article>
         </div>
       </section>
-    </>
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { Eyebrow } from "@/components/ui/Eyebrow";
 import { cn } from "@/lib/utils";
 
 interface SectionHeadingProps {
@@ -7,9 +8,12 @@ interface SectionHeadingProps {
   /** Rendered as H2 — never use for a page's H1. */
   title: string;
   intro?: ReactNode;
+  /** Left by default: centred headings everywhere read as a template. */
   align?: "left" | "center";
   /** "inverted" is for sections on a dark (bg-primary) background. */
   tone?: "default" | "inverted";
+  /** id for the H2, so the section can point aria-labelledby at it. */
+  id?: string;
   className?: string;
 }
 
@@ -17,40 +21,31 @@ export function SectionHeading({
   eyebrow,
   title,
   intro,
-  align = "center",
+  align = "left",
   tone = "default",
+  id,
   className,
 }: SectionHeadingProps) {
   const inverted = tone === "inverted";
 
   return (
-    <div
-      className={cn(
-        "mx-auto mb-12",
-        align === "center" ? "max-w-2xl text-center" : "max-w-2xl",
-        className,
-      )}
-    >
+    <div className={cn("mb-12 max-w-3xl", align === "center" && "mx-auto text-center", className)}>
       {eyebrow && (
-        <p
-          className={cn(
-            "mb-3 text-sm font-medium uppercase tracking-widest",
-            inverted ? "text-primary-foreground/70" : "text-secondary",
-          )}
-        >
+        <Eyebrow tone={inverted ? "inverse" : "brand"} className="mb-4">
           {eyebrow}
-        </p>
+        </Eyebrow>
       )}
       <h2
+        id={id}
         className={cn(
-          "font-exo text-3xl font-bold tracking-tight md:text-4xl",
-          inverted ? "text-primary-foreground" : "text-primary",
+          "font-exo text-3xl font-bold leading-[1.1] tracking-tight md:text-[2.75rem]",
+          inverted ? "text-white" : "text-foreground",
         )}
       >
         {title}
       </h2>
       {intro && (
-        <p className={cn("mt-4 text-lg leading-relaxed", inverted ? "text-primary-foreground/80" : "text-muted-foreground")}>
+        <p className={cn("mt-5 text-lg leading-relaxed", inverted ? "text-white/75" : "text-muted-foreground")}>
           {intro}
         </p>
       )}

@@ -240,3 +240,23 @@ Antes de fixar o conteúdo definitivo no redesign:
 - Conseguir fotografias reais da equipa para `/team/`.
 - Confirmar as estatísticas divergentes (redução de lesão: 14% vs. 7,5%) junto de quem as produziu.
 - Se "Schedule a meeting" se mantiver, decidir se passa a ter calendário real (Calendly/Cal.com).
+
+## 6. Conteúdo do design do Pedro Pestana (set. 2026)
+
+Fonte: gravação de ecrã do protótipo `Neroes.dc.html` (claude.ai/design, acesso com login), secções 02–07 + fecho + rodapé. **Só o conteúdo foi usado — não o design.** Aplicado na versão 3 (Início e Ciência), em PT-PT (tradução) e EN (texto original).
+
+- **02 — The Platform:** "A closed loop between your brain and a game." · Non-invasive, adaptive; steer your own state — calmer, sharper, more balanced — while objective biomarkers record the change. Passos: I Sense (EEG + biosensores) · II Train (jogo reage em tempo real, IA adaptativa) · III Measure (sinais objetivos ao longo do tempo). Redes para calm, focus ou performance. Tecnologia: sensing & biomarkers · BCI · adaptive AI · brain-driven games · breathing & audiovisual aids + protected neuromodulation research (termos gerais). Nota: "reaches beyond anxiety — early-stage research into cognitive decline and healthy aging. Not a product, and not a proven outcome."
+- **03 — The Evidence:** "We don't describe results. We measure them." · +21.7% information processing e +9.4% self-confidence (equipa desportiva profissional; N=32 · BAI, CSAI-2, Tower of London, D2 · Wilcoxon & Kruskal-Wallis) · +18.8% decision-making, 25% more optimal decisions (piloto desporto de elite; N=10 · 30 sessões) · −62% anxiety, +10.6% attention accuracy, 31% fewer wasted movements (atleta olímpico, caso individual). "Stated honestly": evidência em fase inicial; hoje a Neroes é plataforma de treino e investigação — não tratamento médico. "Demonstrable, live."
+- **04 — Where it works today:** Clinic · Sport · Work.
+- **05 — The Journey:** "Each stage earns the next." Today: Relieve · Next: Enhance · The frontier (held as vision): Explore.
+- **Vision:** "Everything above this line is measured. Everything below it is believed." (vision and philosophy — never clinical claims) · "Our north star is human consciousness." · citação sobre medir estados de calma profunda / autotranscendência · Expanded states · Meaning and connection · Human potential.
+- **06 — Founder:** Pedro Pestana — "Rigorous neurotechnology in one hand. The depths of the mind in the other."; missão "to trigger excellence"; três startups anteriores; meditação e visualização diárias.
+- **07 — Neurorights:** "The mind is the most private place there is." · padrão ético da UNESCO · R.01 Mental privacy · R.02 Explicit consent · R.03 Data ownership · R.04 No sale of neural data.
+- **Fecho:** "The evidence is the ground. The vision is the sky." · Rodapé: "Neroes is a training and research platform — not a medical treatment."
+
+**Decisões da equipa (set. 2026):**
+- **−41%** é o valor de ansiedade a usar sempre: impacto médio em 3 clientes (CCA Law Firm, Metro Lisboa, Bayer), 8+ sessões, 30 min de treino por semana. ⚠️ O protótipo do Pedro descreve o −41% como "estudo controlado, N=20, Beck Anxiety Inventory, ~3 h de treino" — alinhar a descrição com o Pedro.
+- Substitui os números do site antigo na Início e na Ciência (+111% controlo emocional, −14,2% ansiedade). As páginas `/sport/*` (legado, sem ligação no menu) ainda mostram os números antigos ("até 14% em 10 sessões").
+- **Morada:** não publicar por agora (só "Lisboa, Portugal").
+- O protótipo apresenta um único fundador; o site mantém os dois cofundadores (Pedro Pestana e Hugo Ferreira), como no inventário original — confirmar.
+- Não usado: email `pedro.pestana@neroes.tech` (o contacto canónico é `info@neroes.tech`) e o formulário de newsletter "Follow the journey" (precisa de backend e consentimento RGPD).

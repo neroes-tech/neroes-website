@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import { SciencePageContent } from "./SciencePageContent";
 
 export const metadata: Metadata = {
-  title: "Science",
+  title: "Ciência",
   description:
-    "The neuroscience behind the Neroes Mental Training Platform: EEG-based neurofeedback for measurable improvements in emotional control and decision-making.",
+    "A neurociência por detrás da plataforma Neroes: neurofeedback por EEG, os resultados medidos até agora e como foram obtidos.",
 };
 
 export default function SciencePage() {

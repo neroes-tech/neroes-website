@@ -14,7 +14,8 @@ export const metadata: Metadata = {
 
 export default function SportServicesPage() {
   return (
-    <>
+    // This page exists in English only, inside the Portuguese site chrome.
+    <div lang="en">
       <PageHero
         eyebrow="Sport services"
         title="We merged scientific knowledge with the possibilities of smart algorithms"
@@ -43,11 +44,7 @@ export default function SportServicesPage() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden border-t border-border bg-card py-24">
-        <div
-          aria-hidden="true"
-          className="bg-neural-grid pointer-events-none absolute inset-0 text-primary/10"
-        />
+      <section className="border-t border-border bg-card py-24">
         <div className="container relative mx-auto max-w-2xl px-4 text-center md:px-6">
           <Reveal>
             <SectionHeading
@@ -65,7 +62,6 @@ export default function SportServicesPage() {
               <Button
                 asChild
                 size="lg"
-                className="h-14 rounded-full bg-secondary px-8 text-lg font-semibold text-secondary-foreground transition-shadow hover:bg-secondary/90 hover:shadow-glow-secondary"
               >
                 <Link href="/contact">Talk to us!</Link>
               </Button>
@@ -73,7 +69,6 @@ export default function SportServicesPage() {
                 asChild
                 size="lg"
                 variant="outline"
-                className="h-14 rounded-full border-primary px-8 text-lg text-primary hover:bg-primary/5"
               >
                 <Link href="/sport/science">See the results</Link>
               </Button>
@@ -81,6 +76,6 @@ export default function SportServicesPage() {
           </Reveal>
         </div>
       </section>
-    </>
+    </div>
   );
 }

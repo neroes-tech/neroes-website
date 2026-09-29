@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
 const inputClasses =
-  "w-full rounded-xl border border-input bg-background px-4 outline-none transition-shadow focus:border-ring focus:ring-2 focus:ring-ring/30";
+  "w-full rounded-md border border-input bg-background px-4 outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30";
 
 export function ContactForm() {
   const { t } = useLanguage();
@@ -61,12 +61,12 @@ export function ContactForm() {
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm md:p-10">
+    <div className="rounded-md border border-border bg-card p-6 md:p-8">
       <div aria-live="polite" className="mb-6">
         {status === "success" && (
           <div
             role="status"
-            className="rounded-xl border border-secondary/40 bg-secondary/10 p-4 font-medium text-secondary"
+            className="rounded-md border border-secondary/40 bg-secondary/10 p-4 font-medium text-secondary"
           >
             {statusMessage}
           </div>
@@ -74,7 +74,7 @@ export function ContactForm() {
         {status === "error" && (
           <div
             role="alert"
-            className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 font-medium text-destructive"
+            className="rounded-md border border-destructive/40 bg-destructive/10 p-4 font-medium text-destructive"
           >
             {statusMessage}
           </div>
@@ -175,7 +175,7 @@ export function ContactForm() {
         <Button
           type="submit"
           disabled={status === "submitting"}
-          className="h-12 w-full rounded-full bg-secondary text-base font-semibold text-secondary-foreground transition-shadow hover:bg-secondary/90 hover:shadow-glow-secondary"
+          className="h-12 w-full rounded-md bg-primary text-base font-medium text-primary-foreground transition-colors hover:bg-secondary"
         >
           {status === "submitting" ? t.contact.form.submittingLabel : t.contact.form.submitLabel}
         </Button>

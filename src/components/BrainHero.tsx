@@ -18,12 +18,15 @@ type BrainData = {
   cerebrumCount: number;
 };
 
-// "Deep tech" palette for the dark Hero: electric cyan → royal blue surface
-// gradient, glow hubs pushed toward a near-neon cyan. Rendered with additive
-// blending (see pointMat) so dense regions bloom on the dark background.
-const C_BLUE = new THREE.Color("#3B82F6");
-const C_TEAL = new THREE.Color("#22D3EE");
-const C_CYAN = new THREE.Color("#00F0FF");
+// Brand palette only (brand manual "Referências Cromáticas" + logo): teal →
+// blue across the surface, glow hubs toward the logo's vivid blue. No neon
+// cyan. Additive blending (see pointMat) still lets dense regions read as
+// light on the dark Hero.
+const C_BLUE = new THREE.Color("#1270B0");
+const C_TEAL = new THREE.Color("#0F9CAC");
+const C_CYAN = new THREE.Color("#00A5E9");
+// Viewport width from which the Hero puts text left and the brain right.
+const DESKTOP_LAYOUT_MIN = 1024;
 
 // Neural-connection graph: a subset of glow hubs linked to their nearest
 // same-hemisphere neighbours (see buildConnections).
@@ -77,6 +80,9 @@ const BRAIN_YAW = THREE.MathUtils.degToRad(80);
 // zero so it never crosses through the point cloud's origin (crossing zero
 // flips the camera to the opposite side, which read as a sudden pirouette).
 const CAMERA_MIN_RADIUS = 1.1;
+// Share of the camera travel (orbitStart → CAMERA_MIN_RADIUS) the Hero's
+// scroll-out dolly covers: ~15% closer by the time the Hero has left.
+const SCROLL_DOLLY_MAX = 0.18;
 
 function smoothstep(edge0: number, edge1: number, x: number) {
   const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
@@ -495,9 +501,9 @@ const POINT_FRAG = `
     float core = 1.0 - smoothstep(0.18, 0.34, d);
     float halo = pow(1.0 - d * 2.0, 2.0);
     float shape = max(core, halo * 0.55);
-    // vec3(0.0, 0.941, 1.0) = #00F0FF electric cyan.
-    vec3 col = mix(vColor, vec3(0.0, 0.941, 1.0), vGlow * 0.6);
-    col = mix(col, vec3(0.75, 0.98, 1.0), vSpark * 0.7);
+    // vec3(0.0, 0.647, 0.914) = #00A5E9, the logo's vivid blue.
+    vec3 col = mix(vColor, vec3(0.0, 0.647, 0.914), vGlow * 0.6);
+    col = mix(col, vec3(0.72, 0.88, 1.0), vSpark * 0.6);
     // Ato II bloom whitens the cloud; vital points keep most of their red.
     col = mix(col, vec3(1.0), uBloom * 0.35 * (1.0 - d * 1.6) * (1.0 - vVital * 0.8));
     col += vCursorBoost;
@@ -572,7 +578,8 @@ const LINE_FRAG = `
     float head = fract(cycle);
     float gate = step(0.6, fract(sin(floor(cycle) * 12.9898 + vEdgePhase * 78.233) * 43758.5453));
     float pulse = exp(-pow((vEnd - head) * 8.0, 2.0)) * gate;
-    vec3 col = mix(vec3(0.231, 0.51, 0.965), vec3(0.0, 0.941, 1.0), 0.4 + pulse * 0.6);
+    // #1270B0 brand blue → #00A5E9 vivid blue as a pulse passes.
+    vec3 col = mix(vec3(0.071, 0.439, 0.69), vec3(0.0, 0.647, 0.914), 0.4 + pulse * 0.6);
     gl_FragColor = vec4(col, (breathe + pulse * 0.75) * uLineFade);
   }
 `;
@@ -625,7 +632,24 @@ const POST_FRAG = `
   }
 `;
 
-export default function BrainHero({ progressRef }: { progressRef?: RefObject<number> }) {
+export default function BrainHero({
+  progressRef,
+  dollyRef,
+  offsetRatio = 0,
+  offsetYRatio = 0,
+}: {
+  progressRef?: RefObject<number>;
+  /**
+   * 0 → 1 as the Hero scrolls away: the camera eases toward the brain by up
+   * to SCROLL_DOLLY_MAX of its travel. Camera only — no rotation (the red
+   * vital spot stays facing the viewer) and none of the narrative acts.
+   */
+  dollyRef?: RefObject<number>;
+  /** On wide screens, draw the brain this fraction of the width right of centre. */
+  offsetRatio?: number;
+  /** On wide screens, draw it this fraction of the height above centre. */
+  offsetYRatio?: number;
+}) {
   const mountRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const reduced = prefersReducedMotion ?? false;
@@ -651,6 +675,19 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     // at full viewing distance (orbitStart) — clarity and impact first;
     // the render loop dives in from here as the user scrolls.
     camera.position.set(orbitStart, 0, 0);
+
+    // Wide screens: shift the rendered image right and up (a negative x
+    // offset moves the sub-view left, so the content lands right of centre;
+    // a positive y offset moves it down, so the content rises), clear of the
+    // Hero text. Narrow screens: centred.
+    const applyViewOffset = (w: number, h: number) => {
+      if ((offsetRatio || offsetYRatio) && w >= DESKTOP_LAYOUT_MIN) {
+        camera.setViewOffset(w, h, -w * offsetRatio, h * offsetYRatio, w, h);
+      } else {
+        camera.clearViewOffset();
+      }
+    };
+    applyViewOffset(mount.clientWidth, mount.clientHeight);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(mount.clientWidth, mount.clientHeight);
@@ -815,6 +852,7 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       const h = mount.clientHeight;
       camera.aspect = w / h || 1;
       camera.updateProjectionMatrix();
+      applyViewOffset(w, h);
       renderer.setSize(w, h);
       if (renderTarget) {
         renderTarget.dispose();
@@ -912,7 +950,8 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       // a straight dolly-in from orbitStart toward CAMERA_MIN_RADIUS, read
       // as a clean, direct expansion/zoom with no swirl or pirouette.
       const zoomIn = smoothstep(0.0, 0.9, progress);
-      const orbitRadius = lerp(orbitStart, CAMERA_MIN_RADIUS, zoomIn);
+      const dolly = (dollyRef?.current ?? 0) * SCROLL_DOLLY_MAX;
+      const orbitRadius = lerp(orbitStart, CAMERA_MIN_RADIUS, Math.max(zoomIn, dolly));
       camera.position.x = Math.sin(ORBIT_PHASE) * orbitRadius;
       camera.position.z = Math.cos(ORBIT_PHASE) * orbitRadius;
       camera.position.y = 0;
@@ -975,7 +1014,7 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
         mount.removeChild(renderer.domElement);
       }
     };
-  }, [reduced, progressRef, parallax.xRef, parallax.yRef, glEpoch]);
+  }, [reduced, progressRef, dollyRef, offsetRatio, offsetYRatio, parallax.xRef, parallax.yRef, glEpoch]);
 
   return (
     <div

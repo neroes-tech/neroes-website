@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 import { Reveal } from "@/components/home/Reveal";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
@@ -24,7 +23,8 @@ const RESULTS = [
 
 export default function SportSciencePage() {
   return (
-    <>
+    // This page exists in English only, inside the Portuguese site chrome.
+    <div lang="en">
       <PageHero
         eyebrow="Sport science"
         title="There's a whole body of science behind what we do"
@@ -73,12 +73,7 @@ export default function SportSciencePage() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-muted py-24 md:py-32">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-24 top-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 h-56 w-56 rounded-full bg-decorative-violet-soft blur-3xl" />
-          <div className="bg-neural-grid absolute inset-0 text-primary/[0.05]" />
-        </div>
+      <section className="bg-muted py-24 md:py-32">
         <div className="container relative mx-auto max-w-5xl px-4 md:px-6">
           <Reveal>
             <SectionHeading title="The results are visible" />
@@ -119,20 +114,15 @@ export default function SportSciencePage() {
               <Button
                 asChild
                 size="lg"
-                className="group h-14 rounded-full bg-secondary px-8 text-lg font-semibold text-secondary-foreground transition-shadow hover:bg-secondary/90 hover:shadow-glow-secondary"
               >
                 <Link href="/contact">
                   Talk to us!
-                  <ArrowRight
-                    className="h-5 w-5 transition-transform group-hover:translate-x-1"
-                    aria-hidden="true"
-                  />
                 </Link>
               </Button>
             </div>
           </Reveal>
         </div>
       </section>
-    </>
+    </div>
   );
 }

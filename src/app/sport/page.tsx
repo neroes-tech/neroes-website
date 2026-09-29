@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 import { Reveal } from "@/components/home/Reveal";
 import { Button } from "@/components/ui/button";
@@ -57,7 +56,8 @@ const CLUB_BENEFITS = [
 
 export default function SportPage() {
   return (
-    <>
+    // This page exists in English only, inside the Portuguese site chrome.
+    <div lang="en">
       <PageHero
         eyebrow="Sport"
         title="We all come across athletes that crack under pressure"
@@ -76,7 +76,7 @@ export default function SportPage() {
           <div className="grid gap-6 sm:grid-cols-3">
             {HOW_IT_WORKS.map((item, i) => (
               <Reveal key={item.title} delay={i * 0.08} className="h-full">
-                <Card className="h-full border-border bg-card shadow-sm transition-shadow duration-300 hover:shadow-glow-primary">
+                <Card className="h-full border-border bg-card">
                   <CardContent className="space-y-2 pt-6 text-center">
                     <h3 className="font-exo font-bold uppercase tracking-wide text-secondary">
                       {item.title}
@@ -117,7 +117,6 @@ export default function SportPage() {
               asChild
               size="lg"
               variant="outline"
-              className="h-14 rounded-full border-primary px-8 text-lg text-primary hover:bg-primary/5"
             >
               <Link href="/sport/science">The technology of Neroes MTP&trade;</Link>
             </Button>
@@ -125,12 +124,7 @@ export default function SportPage() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-muted py-24 md:py-32">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-          <div className="absolute -right-24 top-0 h-72 w-72 rounded-full bg-secondary/10 blur-3xl" />
-          <div className="absolute bottom-0 left-1/4 h-56 w-56 rounded-full bg-decorative-violet-soft blur-3xl" />
-          <div className="bg-neural-grid absolute inset-0 text-primary/[0.05]" />
-        </div>
+      <section className="bg-muted py-24 md:py-32">
         <div className="container relative mx-auto max-w-6xl px-4 md:px-6">
           <Reveal>
             <SectionHeading
@@ -141,7 +135,7 @@ export default function SportPage() {
           <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2">
             {RESULTS.map((item, i) => (
               <Reveal key={item.stat} delay={i * 0.08} className="h-full">
-                <Card className="h-full border-border bg-card transition-all hover:-translate-y-1 hover:shadow-glow-secondary">
+                <Card className="h-full border-border bg-card">
                   <CardContent className="space-y-2 pt-6">
                     <p className="font-exo text-2xl font-bold text-secondary">{item.stat}</p>
                     <p className="text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
@@ -207,11 +201,7 @@ export default function SportPage() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-primary py-24 text-primary-foreground md:py-32">
-        <div
-          aria-hidden="true"
-          className="bg-neural-grid pointer-events-none absolute inset-0 text-primary-foreground/10"
-        />
+      <section className="bg-primary py-24 text-primary-foreground md:py-32">
         <div className="container relative mx-auto max-w-2xl px-4 text-center md:px-6">
           <Reveal>
             <h2 className="font-exo text-3xl font-bold tracking-tight md:text-4xl">
@@ -224,20 +214,15 @@ export default function SportPage() {
               <Button
                 asChild
                 size="lg"
-                className="group h-14 rounded-full bg-secondary px-8 text-lg font-semibold text-secondary-foreground transition-shadow hover:bg-secondary/90 hover:shadow-glow-secondary"
               >
                 <Link href="/contact">
                   Talk to us!
-                  <ArrowRight
-                    className="h-5 w-5 transition-transform group-hover:translate-x-1"
-                    aria-hidden="true"
-                  />
                 </Link>
               </Button>
             </div>
           </Reveal>
         </div>
       </section>
-    </>
+    </div>
   );
 }

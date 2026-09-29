@@ -2,51 +2,42 @@
 
 import Image from "next/image";
 
-import { Reveal } from "@/components/home/Reveal";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { PARTNERS } from "@/lib/constants";
-import { cn } from "@/lib/utils";
 
 /**
- * Sits directly above the Footer, on every page — deliberately its own
- * light section (not inside the dark Footer) so the partner logos render
- * in their real colors, no invert/chip workaround needed.
+ * Sits directly above the Footer, on every page — its own light section so
+ * the partner logos render in their real colours on hover.
  */
 export function PartnersBar() {
   const { t } = useLanguage();
 
   return (
-    <section className="border-t border-border bg-[#FAFAF7] py-16" aria-label="Parceiros">
+    <section className="border-t border-border bg-background py-14" aria-labelledby="partners-heading">
       <div className="container mx-auto px-4 md:px-6">
-        <Reveal className="flex flex-col items-center text-center">
-          <p className="text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground">
-            {t.shared.partnersHeading}
-          </p>
-          <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-6 md:gap-x-16">
-            {PARTNERS.map((partner) => (
-              <li key={partner.name} className="flex items-center">
-                <a
-                  href={partner.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={partner.name}
-                  className="inline-block grayscale opacity-60 transition-all duration-300 hover:opacity-100 hover:grayscale-0"
-                >
-                  <Image
-                    src={partner.logo}
-                    alt={partner.name}
-                    width={partner.logoWidth}
-                    height={partner.sizeBoost ? 88 : 40}
-                    className={cn(
-                      "w-auto object-contain",
-                      partner.sizeBoost ? "h-20 min-w-[120px] md:h-24" : "h-8 md:h-10",
-                    )}
-                  />
-                </a>
-              </li>
-            ))}
-          </ul>
-        </Reveal>
+        <h2 id="partners-heading" className="font-mono text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          {t.shared.partnersHeading}
+        </h2>
+        <ul className="mt-8 flex flex-wrap items-center gap-x-12 gap-y-8 md:gap-x-16">
+          {PARTNERS.map((partner) => (
+            <li key={partner.name} className="flex items-center">
+              <a
+                href={partner.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block opacity-60 grayscale transition-[filter,opacity] duration-300 hover:opacity-100 hover:grayscale-0 focus-visible:opacity-100 focus-visible:grayscale-0"
+              >
+                <Image
+                  src={partner.logo}
+                  alt={partner.name}
+                  width={partner.width}
+                  height={partner.height}
+                  style={{ height: partner.height, width: "auto" }}
+                />
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

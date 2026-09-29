@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { ContactPageContent } from "./ContactPageContent";
 
 export const metadata: Metadata = {
-  title: "Contact",
-  description: "Get in touch with Neroes. We are happy to hear from you.",
+  title: "Contacto",
+  description: "Fala com a Neroes: email, telefone e formulário de contacto.",
 };
 
 export default function ContactPage() {

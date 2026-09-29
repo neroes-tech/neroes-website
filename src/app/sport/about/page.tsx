@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 import { Reveal } from "@/components/home/Reveal";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,8 @@ export const metadata: Metadata = {
 
 export default function SportAboutPage() {
   return (
-    <>
+    // This page exists in English only, inside the Portuguese site chrome.
+    <div lang="en">
       <PageHero
         eyebrow="Neroes Sport"
         title="We want to take sports performance and well-being to the cutting edge"
@@ -46,13 +46,7 @@ export default function SportAboutPage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {TEAM_MEMBERS.map((member, i) => (
               <Reveal key={member.name} delay={i * 0.06} className="h-full">
-                <div className="h-full rounded-xl border border-border bg-card p-8 text-center shadow-sm transition-shadow duration-300 hover:shadow-glow-primary">
-                  <div
-                    aria-hidden="true"
-                    className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 font-exo text-xl font-bold text-primary"
-                  >
-                    {member.name.charAt(0)}
-                  </div>
+                <div className="h-full rounded-md border border-border bg-card p-8 text-center">
                   <p className="font-exo text-lg font-bold text-foreground">{member.name}</p>
                   <p className="mt-1 text-sm text-secondary">{member.role}</p>
                 </div>
@@ -86,29 +80,20 @@ export default function SportAboutPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="relative overflow-hidden bg-background py-24 md:py-32">
-        <div
-          aria-hidden="true"
-          className="bg-neural-grid pointer-events-none absolute inset-0 text-primary/10"
-        />
+      <section className="bg-background py-24 md:py-32">
         <div className="container relative mx-auto px-4 text-center md:px-6">
           <Reveal>
             <Button
               asChild
               size="lg"
-              className="group h-14 rounded-full bg-secondary px-8 text-lg font-semibold text-secondary-foreground transition-shadow hover:bg-secondary/90 hover:shadow-glow-secondary"
             >
               <Link href="/contact">
                 Talk to us!
-                <ArrowRight
-                  className="h-5 w-5 transition-transform group-hover:translate-x-1"
-                  aria-hidden="true"
-                />
               </Link>
             </Button>
           </Reveal>
         </div>
       </section>
-    </>
+    </div>
   );
 }

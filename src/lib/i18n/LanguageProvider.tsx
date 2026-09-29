@@ -25,6 +25,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (stored === "pt" || stored === "en") setLocaleState(stored);
   }, []);
 
+  // The document language follows the one on screen (WCAG 3.1.1).
+  useEffect(() => {
+    document.documentElement.lang = locale === "pt" ? "pt-PT" : "en";
+  }, [locale]);
+
   const setLocale = (next: Locale) => {
     setLocaleState(next);
     window.localStorage.setItem(STORAGE_KEY, next);

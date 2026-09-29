@@ -1,7 +1,9 @@
+import type { Locale } from "@/lib/i18n/translations";
+
 export const CONTACT_INFO = {
   email: "info@neroes.tech",
   phone: "+351 914 796 058",
-  address: "Rua da Prata 80, 5º andar, Lisboa, Portugal",
+  address: "Lisboa, Portugal",
   social: {
     linkedin: "https://www.linkedin.com/company/neroes/",
     instagram: "https://www.instagram.com/neroes.tech/",
@@ -124,26 +126,66 @@ export const TEAM_BIOS: Record<string, string[]> = {
   ],
 };
 
-// Logo width is scaled to a shared height of 40 at each file's real aspect
-// ratio, so next/image doesn't distort them (object-contain also guards
-// against this, but matching the intrinsic ratio avoids a layout-shift
-// warning).
-//
-// `sizeBoost: true` flags logos whose visible mark occupies a much smaller
-// fraction of the source canvas than the others (portugal-ventures.png has
-// generous internal padding), so a shared height makes it read as noticeably
-// smaller/fainter next to the rest — this renders it larger to compensate.
+// Portuguese rendering of TEAM_BIOS, line for line, so PT pages don't show
+// English lists mid-page.
+export const TEAM_BIOS_PT: Record<string, string[]> = {
+  "Pedro Pestana": [
+    "Engenheiro biomédico",
+    "Experiência em várias startups",
+    "Desenvolvimento de algoritmos de neurofeedback",
+    "Cientista de dados",
+  ],
+  "Hugo Ferreira": [
+    "Licenciado em Medicina",
+    "Doutorado em Física",
+    "Fundador e CMO (área médica) da NeuropsyAi",
+    "Desenvolvimento de negócio",
+    "Atleta de judo",
+  ],
+  "Valter Costa": [
+    "Engenheiro de software",
+    "4 anos no CERN a desenvolver software com dados em tempo real",
+    "Programador de jogos",
+  ],
+  "Mafalda Neves": [
+    "Mestre em Ilustração Científica",
+    "Concept artist em 2D e 3D",
+    "Trabalho publicado em livros e jornais semanais",
+  ],
+  "Ana Monteiro": [
+    "Especialista em neuromodulação",
+    "Uma das maiores especialistas em neurofeedback em Portugal",
+    "Mestre em Psicologia",
+  ],
+  "Rafael Ramos": [
+    "Licenciado em Engenharia Biomédica",
+    "Experiência a desenvolver jogos e aplicações biomédicas em Unity",
+  ],
+};
+
+export function teamBios(locale: Locale): Record<string, string[]> {
+  return locale === "pt" ? TEAM_BIOS_PT : TEAM_BIOS;
+}
+
+// The logo files are trimmed to their visible mark (no built-in padding, no
+// white boxes), so sizes can be set directly. Heights are balanced by area,
+// not matched: a squarish mark (IBEB) at the same height as a wide wordmark
+// would read twice as heavy. Portugal Ventures gets a little extra for its
+// thin, light strokes. width/height are the rendered size (next/image builds
+// its 1x/2x sources from them); ratio = the file's own aspect ratio.
+const partner = (name: string, url: string, logo: string, height: number, ratio: number) => ({
+  name,
+  url,
+  logo,
+  width: Math.round(height * ratio),
+  height,
+});
+
 export const PARTNERS = [
-  { name: "KPMG", url: "https://home.kpmg/pt/pt/home.html", logo: "/partners/kpmg.png", logoWidth: 40 },
-  { name: "BGI", url: "http://bgi.pt/", logo: "/partners/bgi.png", logoWidth: 80 },
-  { name: "IPN", url: "https://www.ipn.pt/", logo: "/partners/ipn.png", logoWidth: 75 },
-  { name: "IBEB", url: "https://ibeb.ciencias.ulisboa.pt/", logo: "/partners/ibeb.jpg", logoWidth: 45 },
-  { name: "FCUL", url: "https://ciencias.ulisboa.pt/", logo: "/partners/fcul.png", logoWidth: 77 },
-  {
-    name: "Portugal Ventures",
-    url: "https://www.portugalventures.pt/en/",
-    logo: "/partners/portugal-ventures.png",
-    logoWidth: 123,
-    sizeBoost: true,
-  },
+  partner("KPMG", "https://home.kpmg/pt/pt/home.html", "/partners/kpmg-logo.png", 35, 2.181),
+  partner("BGI", "http://bgi.pt/", "/partners/bgi-logo.png", 37, 2.013),
+  partner("IPN", "https://www.ipn.pt/", "/partners/ipn-logo.png", 33, 2.45),
+  partner("IBEB", "https://ibeb.ciencias.ulisboa.pt/", "/partners/ibeb-logo.png", 47, 1.225),
+  partner("FCUL", "https://ciencias.ulisboa.pt/", "/partners/fcul-logo.png", 34, 2.313),
+  partner("Portugal Ventures", "https://www.portugalventures.pt/en/", "/partners/portugal-ventures-logo.png", 41, 2.106),
 ];

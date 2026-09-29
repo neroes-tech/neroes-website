@@ -5,15 +5,36 @@ interface NamedItem {
   desc: string;
 }
 
-interface Pillar {
-  title: string;
-  body: string;
-}
-
 interface ProblemFact {
   title: string;
   stat: string;
   detail: string;
+}
+
+/** A step in the sense → train → measure loop. */
+interface LoopStep {
+  index: string;
+  title: string;
+  desc: string;
+}
+
+/** A published result: the figure, what it measures, and how. Text may use **bold**. */
+interface Study {
+  value: string;
+  desc: string;
+  method: string;
+}
+
+interface Stage {
+  label: string;
+  title: string;
+  desc: string;
+}
+
+interface Right {
+  code: string;
+  title: string;
+  desc: string;
 }
 
 interface SciencePillar {
@@ -25,59 +46,91 @@ export interface Translations {
   nav: {
     home: string;
     science: string;
-    brainExperience: string;
-    services: string;
     about: string;
     contact: string;
-    calculator: string;
     schedule: string;
+    skipToContent: string;
     openMenu: string;
     closeMenu: string;
   };
-  services: {
-    eyebrow: string;
-    title: string;
-    sportTab: string;
-    corporateTab: string;
-    sportHeading: string;
-    sportBody: string;
-    sportTestimonialsHeading: string;
-    corporateHeading: string;
-    corporateBody: string;
-    testimonialsHeading: string;
-  };
   home: {
+    heroEyebrow: string;
     heroHeadlineLine1: string;
     heroHeadlineLine2: string;
     heroSubtitle: string;
     heroPrimaryCta: string;
     heroSecondaryCta: string;
+    heroHudSignal: string;
+    heroHudAnxiety: string;
+    heroHudAnxietySource: string;
+    /** Figure label for the illustrative brain model. */
+    heroFigure: string;
+    /** Hero spec block: the loop, one short line per platform step. */
+    heroLoopLabel: string;
+    heroLoopDetail: [string, string, string];
     problemEyebrow: string;
     problemTitle: string;
     problemSubtitle: string;
-    platformEyebrow: string;
-    howItWorksHeading: string;
-    howItWorksSubtitlePrefix: string;
-    pillars: [Pillar, Pillar, Pillar];
-    platformHeading: string;
-    platformSubtitle: string;
-    platformFeatures: [NamedItem, NamedItem, NamedItem, NamedItem, NamedItem, NamedItem];
-    benefitsHeading: string;
-    benefits: [NamedItem, NamedItem, NamedItem];
-    featuresHeading: string;
-    features: [NamedItem, NamedItem, NamedItem];
-    heroKpiLabels: [string, string, string];
-    heroHudBiosignals: string;
-    heroHudActive: string;
-    heroHudAnxiety: string;
-    evidenceEyebrow: string;
-    statsLabels: [string, string, string, string];
-    finalCtaHeading: string;
-    finalCtaBody: string;
-    finalCtaPrimary: string;
-    finalCtaSecondary: string;
-    foundersHeading: string;
-    viewTeamLink: string;
+    platform: {
+      eyebrow: string;
+      title: string;
+      lead: string;
+      steps: [LoopStep, LoopStep, LoopStep];
+      networks: string;
+      techLabel: string;
+      tech: string[];
+      techNote: string;
+      videoCaption: string;
+      videoPlayLabel: string;
+      videoPause: string;
+      videoResume: string;
+      videoFallback: string;
+      beyond: string;
+      includesTitle: string;
+      includes: NamedItem[];
+    };
+    where: {
+      eyebrow: string;
+      title: string;
+      items: [NamedItem, NamedItem, NamedItem];
+    };
+    journey: {
+      eyebrow: string;
+      title: string;
+      stages: [Stage, Stage, Stage];
+    };
+    vision: {
+      shiftLabel: string;
+      measured: string;
+      believed: string;
+      note: string;
+      title: string;
+      body: string;
+      quote: string;
+      quoteCaption: string;
+      pillars: [NamedItem, NamedItem, NamedItem];
+    };
+    founders: {
+      eyebrow: string;
+      title: string;
+      pedroMission: string;
+      pedroPersonal: string;
+      viewTeamLink: string;
+    };
+    neurorights: {
+      eyebrow: string;
+      title: string;
+      body: string;
+      rights: [Right, Right, Right, Right];
+      privacyLink: string;
+    };
+    closing: {
+      ground: string;
+      sky: string;
+      body: string;
+      primary: string;
+      secondary: string;
+    };
   };
   footer: {
     tagline: string;
@@ -93,18 +146,27 @@ export interface Translations {
     termsConditions: string;
     copyright: string;
   };
-  calculatorScience: {
-    heading: string;
-    point1: string;
-    point2: string;
-    point3: string;
-    ctaLabel: string;
-  };
   shared: {
     problemFacts: [ProblemFact, ProblemFact, ProblemFact];
     clientsLoveHeading: string;
     goToTestimonial: string;
     partnersHeading: string;
+    /** Shared by the Home and the Science page, so the figures never diverge. */
+    evidence: {
+      eyebrow: string;
+      title: string;
+      leadValue: string;
+      leadLabel: string;
+      leadSource: string;
+      studies: [Study, Study, Study];
+      honestTitle: string;
+      honestBody: string;
+      liveTitle: string;
+      liveBody: string;
+      ctaText: string;
+      ctaButton: string;
+      scienceLink: string;
+    };
   };
   science: {
     eyebrow: string;
@@ -112,17 +174,8 @@ export interface Translations {
     subtitle: string;
     pillars: [SciencePillar, SciencePillar, SciencePillar];
     statsHeading: string;
-    statsLabels: [string, string, string, string];
     sportCtaText: string;
     sportCtaButton: string;
-  };
-  brainExperience: {
-    title: string;
-    subtitleHeading: string;
-    description: string;
-    ctaButton: string;
-    videoHeading: string;
-    statsLabels: [string, string, string];
   };
   about: {
     eyebrow: string;
@@ -166,181 +219,187 @@ export interface Translations {
       gdprError: string;
     };
   };
-  mentalScore: {
-    badge: string;
-    heading: string;
-    description: string;
-    biomarkerLabels: [string, string, string, string];
-    weightPrefix: string;
-    weightMiddle: string;
-    scoreLabel: string;
-    disclaimer: string;
-  };
-  calculator: {
-    eyebrow: string;
-    title: string;
-    subtitle: string;
-    form: {
-      industryLabel: string;
-      industries: string[];
-      employeesLabel: string;
-      employeesError: string;
-      salaryLabel: string;
-      salaryHint: string;
-      submitLabel: string;
-      placeholderText: string;
-      totalHeading: string;
-      presenteeismLabel: string;
-      presenteeismDesc: string;
-      absenteeismLabel: string;
-      absenteeismDesc: string;
-      turnoverLabel: string;
-      turnoverDesc: string;
-    };
-    bottomQuote1: string;
-    bottomQuote1Author: string;
-    bottomQuote2: string;
-    bottomQuote2Author: string;
-    ctaButton1: string;
-    ctaButton2: string;
-  };
 }
 
-// Full-site PT/EN dictionary: Navbar, Footer, Home, Services, Science,
-// Brain Experience, About, Contact, and the Calculator flow.
+// Full-site PT/EN dictionary: Navbar, Footer, Home, Science, About and Contact.
 export const translations: Record<Locale, Translations> = {
   pt: {
     nav: {
       home: "Início",
       science: "Ciência",
-      brainExperience: "Brain Experience",
-      services: "Serviços",
       about: "Sobre",
       contact: "Contacto",
-      calculator: "Calculadora",
       schedule: "Marcar uma demonstração",
+      skipToContent: "Saltar para o conteúdo",
       openMenu: "Abrir menu",
       closeMenu: "Fechar menu",
     },
-    services: {
-      eyebrow: "Serviços",
-      title: "Uma plataforma, dois caminhos",
-      sportTab: "Desporto",
-      corporateTab: "Empresas",
-      sportHeading: "Neurotecnologia aplicada ao desporto de elite",
-      sportBody:
-        "Stress e ansiedade são as principais causas de quebra de rendimento sob pressão. O Neroes MTP™ treina o controlo emocional e a tomada de decisão dos atletas, sessão após sessão.",
-      sportTestimonialsHeading: "Casos de sucesso em alta competição",
-      corporateHeading: "Resiliência e liderança para equipas",
-      corporateBody:
-        "Presenteísmo, absentismo e turnover têm um custo real. O Neroes treina foco, controlo emocional e resiliência — reduzindo o burnout e reforçando a liderança das equipas.",
-      testimonialsHeading: "O que dizem",
-    },
     home: {
+      heroEyebrow: "Neurotecnologia · Treino mental por EEG",
       heroHeadlineLine1: "Treinamos o cérebro",
       heroHeadlineLine2: "como treinas o corpo.",
       heroSubtitle:
         "Um headset EEG lê as tuas ondas cerebrais enquanto jogas um jogo que só se ganha mantendo a calma e a concentração — treinando foco, controlo emocional e resiliência, sessão após sessão.",
-      heroPrimaryCta: "Marcar uma demonstração",
-      heroSecondaryCta: "Ver a ciência",
-      problemEyebrow: "01 — O Problema",
+      heroPrimaryCta: "Ver a evidência",
+      heroSecondaryCta: "Falar connosco",
+      heroHudSignal: "Sinal vital · ilustrativo",
+      heroHudAnxiety: "Redução média da ansiedade",
+      heroHudAnxietySource: "Média de 3 clientes · 8+ sessões · 30 min de treino por semana",
+      heroFigure: "Fig. 01 — Cérebro · modelo ilustrativo",
+      heroLoopLabel: "O circuito",
+      heroLoopDetail: ["EEG e biossensores", "Jogo e IA adaptativa", "Biomarcadores objetivos"],
+      problemEyebrow: "01 — O problema",
       problemTitle: "O custo real do stress no trabalho",
-      problemSubtitle:
-        "Stress e ansiedade não geridos têm um custo mensurável para as organizações — antes de olhar para a solução, os números do problema.",
-      platformEyebrow: "02 — A Plataforma",
-      howItWorksHeading: "Como funciona",
-      howItWorksSubtitlePrefix: "Treino de redes neurais focado em",
-      pillars: [
-        {
-          title: "Captação de sinal",
-          body: "Headsets EEG e biossensores leem o teu estado cerebral várias vezes por segundo — a mesma leitura em tempo real usada no headset Neroes.",
-        },
-        {
-          title: "Treino adaptativo",
-          body: "Um jogo orientado por IA ajusta o desafio em tempo real conforme os teus sinais: o objetivo é simples — mantém-te calmo e focado para avançar.",
-        },
-        {
-          title: "Evolução e métricas",
-          body: "Os sinais cerebrais são monitorizados sessão após sessão e transformados em métricas objetivas — a mesma visualização clínica que usamos para provar resultados reais.",
-        },
-      ],
-      platformHeading: "A plataforma",
-      platformSubtitle: "Um instrumento de precisão para a mente humana.",
-      platformFeatures: [
-        {
-          title: "Sessões neurocientíficas",
-          desc: "Protocolos de treino desenhados com base em neurociência, organizados em sessões progressivas que constroem resultados ao longo do tempo.",
-        },
-        {
-          title: "Biofeedback por EEG",
-          desc: "Um headset EEG lê as ondas cerebrais em tempo real e transforma-as em feedback imediato dentro do jogo — só ganhas se mantiveres a calma e o foco.",
-        },
-        {
-          title: "Analytics de performance",
-          desc: "Métricas objetivas de evolução, sessão a sessão: foco, controlo emocional e resiliência tornam-se dados que podes acompanhar.",
-        },
-        {
-          title: "Personalização",
-          desc: "Cada programa adapta-se ao ponto de partida e aos objetivos de cada pessoa — o treino evolui contigo.",
-        },
-        {
-          title: "Multi-equipa",
-          desc: "Pensado para organizações e clubes: acompanha várias equipas e perfis na mesma plataforma, com visão agregada e individual.",
-        },
-        {
-          title: "Privacidade clínica",
-          desc: "Os dados cerebrais são tratados com o rigor e a confidencialidade de dados clínicos, em conformidade com o RGPD.",
-        },
-      ],
-      benefitsHeading: "Benefícios",
-      benefits: [
-        { title: "Saúde organizacional", desc: "Equipas mais coesas e melhores dinâmicas de colaboração." },
-        { title: "Mais produtividade", desc: "Rendimento mais alto com redução significativa de erros." },
-        { title: "Desenvolvimento pessoal", desc: "Pessoas mais felizes e mais realizadas." },
-      ],
-      featuresHeading: "Funcionalidades",
-      features: [
-        { title: "Melhor comunicação", desc: "Reforço da liderança e das competências interpessoais." },
-        { title: "Melhor desempenho", desc: "Execução de alto nível sustentada sob pressão." },
-        { title: "Qualidade do sono", desc: "Melhoria do bem-estar geral e da recuperação." },
-      ],
-      evidenceEyebrow: "03 — A Evidência",
-      heroKpiLabels: ["Controlo emocional", "Velocidade de decisão", "Ansiedade"],
-      heroHudBiosignals: "Biossinais em tempo real",
-      heroHudActive: "Ativo",
-      heroHudAnxiety: "Taxa de redução de ansiedade",
-      statsLabels: ["Controlo emocional", "Velocidade de decisão", "Autoconfiança", "Ansiedade"],
-      finalCtaHeading: "Pronto para treinar a tua mente?",
-      finalCtaBody:
-        "Marca uma demonstração e experimenta o biofeedback por EEG ao vivo — vê em tempo real o que acontece quando aprendes a manter a calma e o foco.",
-      finalCtaPrimary: "Marcar uma demonstração",
-      finalCtaSecondary: "Ver a ciência",
-      foundersHeading: "Quem fundou a Neroes",
-      viewTeamLink: "Ver toda a equipa",
+      problemSubtitle: "Stress e ansiedade não geridos têm um custo mensurável para as organizações.",
+      platform: {
+        eyebrow: "02 — A plataforma",
+        title: "Um circuito fechado entre o teu cérebro e um jogo.",
+        lead: "Não invasivo. Adaptativo. Para jogares bem, aprendes a conduzir o teu próprio estado — **mais calmo, mais atento, mais equilibrado** — enquanto biomarcadores objetivos registam a mudança.",
+        steps: [
+          { index: "I", title: "Sentir", desc: "Um headset EEG e biossensores leem o teu estado várias vezes por segundo." },
+          {
+            index: "II",
+            title: "Treinar",
+            desc: "Um jogo reage ao teu cérebro em tempo real e uma IA adaptativa ajusta o desafio a ti. Regulares-te é a forma de ganhar.",
+          },
+          {
+            index: "III",
+            title: "Medir",
+            desc: "Sinais cerebrais objetivos acompanhados ao longo do tempo — uma evolução que tu e um clínico conseguem ver.",
+          },
+        ],
+        networks:
+          "Lê e treina as redes cerebrais mais relevantes para o teu objetivo — **calma, foco ou desempenho**. Nenhuma região isolada, nenhum marcador único.",
+        techLabel: "Tecnologia",
+        tech: ["Sensores e biomarcadores", "BCI", "IA adaptativa", "Jogos controlados pelo cérebro", "Respiração e estímulos audiovisuais"],
+        techNote: "+ investigação protegida em neuromodulação, descrita apenas em termos gerais",
+        videoCaption: "Fig. 02 — Headset EEG Neroes · não invasivo",
+        videoPlayLabel: "Ver com som, em ecrã inteiro",
+        videoPause: "Pausar",
+        videoResume: "Reproduzir",
+        videoFallback: "O teu navegador não suporta vídeo HTML5.",
+        beyond:
+          "O mesmo circuito vai além da ansiedade — incluindo investigação em fase inicial sobre declínio cognitivo e envelhecimento saudável. **Não é um produto, nem um resultado comprovado:** é uma linha de investigação séria.",
+        includesTitle: "O que a plataforma inclui",
+        includes: [
+          {
+            title: "Protocolos progressivos",
+            desc: "Sessões desenhadas a partir da neurociência, organizadas em etapas que constroem resultados ao longo do tempo.",
+          },
+          {
+            title: "Métricas sessão a sessão",
+            desc: "Foco, controlo emocional e resiliência registados em cada sessão, com evolução comparável.",
+          },
+          {
+            title: "Programa individual",
+            desc: "Cada programa parte do ponto de partida e do objetivo de cada pessoa, e ajusta-se à medida que evolui.",
+          },
+          {
+            title: "Várias equipas",
+            desc: "Para organizações e clubes: várias equipas e perfis na mesma plataforma, com visão agregada e individual.",
+          },
+        ],
+      },
+      where: {
+        eyebrow: "04 — Contextos",
+        title: "Onde funciona hoje",
+        items: [
+          {
+            title: "Clínica",
+            desc: "Treino sem medicação para a ansiedade e a regulação emocional — uma ferramenta de apoio, a par do acompanhamento clínico.",
+          },
+          {
+            title: "Desporto",
+            desc: "Tomada de decisão, velocidade de processamento e compostura — validado com atletas profissionais e de elite.",
+          },
+          {
+            title: "Trabalho",
+            desc: "Foco sustentado e resiliência para equipas sob grande exigência — feedback em vez de suposições.",
+          },
+        ],
+      },
+      journey: {
+        eyebrow: "05 — O percurso",
+        title: "Cada etapa conquista a seguinte.",
+        stages: [
+          {
+            label: "Hoje",
+            title: "Aliviar",
+            desc: "Ansiedade mensuravelmente mais baixa, equilíbrio restabelecido — a caminho da certificação clínica.",
+          },
+          {
+            label: "A seguir",
+            title: "Potenciar",
+            desc: "De recuperar uma linha de base a superá-la — foco, decisões, velocidade, resiliência.",
+          },
+          {
+            label: "A fronteira — assumida como visão",
+            title: "Explorar",
+            desc: "Os estados mais profundos da consciência humana — tornados mensuráveis e treináveis.",
+          },
+        ],
+      },
+      vision: {
+        shiftLabel: "Mudança de registo",
+        measured: "Tudo acima desta linha é medido.",
+        believed: "Tudo abaixo dela é aquilo em que acreditamos.",
+        note: "Visão e filosofia — nunca alegações clínicas",
+        title: "A nossa estrela-guia é a consciência humana.",
+        body: "A mesma tecnologia que acalma a ansiedade pode ajudar as pessoas a alcançar os estados de foco profundo, clareza e ligação que as tradições contemplativas descrevem há milhares de anos. Sem os reduzir a nada, sem os tornar místicos — tornando-os alcançáveis.",
+        quote:
+          "Conseguimos medir o estado cerebral de calma profunda ou de autotranscendência, e ajudar alguém a alcançá-lo de forma fiável. O que isso significa para cada pessoa é seu.",
+        quoteCaption: "A ponte honesta entre a nossa ciência e a nossa visão",
+        pillars: [
+          { title: "Estados expandidos", desc: "Meditação, flow e deslumbramento — medidos e treináveis quando precisas." },
+          { title: "Significado e ligação", desc: "A clareza e a ligação que se sentem nos limites da experiência comum." },
+          {
+            title: "Potencial humano",
+            desc: "Atenção, intuição, equanimidade — capacidades que a maioria de nós nunca treina, e poderia treinar.",
+          },
+        ],
+      },
+      founders: {
+        eyebrow: "06 — Fundadores",
+        title: "Neurotecnologia rigorosa numa mão. As profundezas da mente na outra.",
+        pedroMission:
+          "A missão do Pedro, nas suas palavras, é **despoletar a excelência** — uma carreira a juntar neurofeedback, IA, interfaces cérebro-computador, EEG e ciência de dados para potenciar a mente humana, com três startups fundadas antes desta.",
+        pedroPersonal:
+          "E é pessoal: pratica meditação e visualização todos os dias e estuda a consciência há toda a vida. **A Neroes é onde as duas linhas se encontram.**",
+        viewTeamLink: "Conhecer a equipa",
+      },
+      neurorights: {
+        eyebrow: "07 — Neurodireitos",
+        title: "A mente é o lugar mais privado que existe.",
+        body: "Os dados neurais são os dados mais sensíveis que existem. Construímos segundo o primeiro padrão ético global da neurotecnologia — o da UNESCO — desde a conceção, não como remendo.",
+        rights: [
+          { code: "R.01", title: "Privacidade mental", desc: "Protegida desde a conceção — nunca usada para criar perfis ou manipular." },
+          { code: "R.02", title: "Consentimento explícito", desc: "Decides o que é medido e porquê — em linguagem simples." },
+          { code: "R.03", title: "Propriedade dos dados", desc: "Os teus dados cerebrais são teus — acede-lhes e apaga-os." },
+          { code: "R.04", title: "Sem venda de dados neurais", desc: "Nunca. A confiança é o produto." },
+        ],
+        privacyLink: "Ler a política de privacidade",
+      },
+      closing: {
+        ground: "A evidência é o chão.",
+        sky: "A visão é o céu.",
+        body: "Não pedimos a ninguém que acredite. Medimos — e o que isso significa é teu.",
+        primary: "Falar connosco",
+        secondary: "Ver a ciência",
+      },
     },
     footer: {
-      tagline: "Um instrumento de precisão para a mente humana.",
-      subtagline: "Melhora o desempenho mental em empresas e no desporto.",
+      tagline: "Treino mental com neurofeedback por EEG, para clínica, desporto e trabalho.",
+      subtagline: "A Neroes é uma plataforma de treino e investigação — não um tratamento médico.",
       navigationHeading: "Navegação",
       legalHeading: "Legal",
       contactHeading: "Contacto",
       emailLabel: "Email",
       phoneLabel: "Telefone",
-      addressLabel: "Morada",
-      address: "Rua da Prata 80, 5º andar, Lisboa, Portugal",
+      addressLabel: "Localização",
+      address: "Lisboa, Portugal",
       privacyPolicy: "Política de Privacidade",
       termsConditions: "Termos e Condições",
       copyright: "Todos os direitos reservados.",
-    },
-    calculatorScience: {
-      heading: "Base Científica & Validação",
-      point1:
-        "Neurofeedback e leitura por EEG, em colaboração com o Instituto de Biofísica e Engenharia Biomédica (IBEB) e a Faculdade de Ciências da Universidade de Lisboa (FCUL).",
-      point2:
-        "Caso de estudo real de 4 meses com as equipas do Estoril Praia, com melhorias mensuráveis em controlo emocional e velocidade de decisão.",
-      point3:
-        "Testemunhos reais de atletas de alta competição e de líderes empresariais, já validados nesta plataforma.",
-      ctaLabel: "Saber mais sobre o método científico",
     },
     shared: {
       problemFacts: [
@@ -360,9 +419,42 @@ export const translations: Record<Locale, Translations> = {
           detail: "Redução de turnover até 60%",
         },
       ],
-      clientsLoveHeading: "Os nossos clientes adoram",
+      clientsLoveHeading: "O que dizem clientes e atletas",
       goToTestimonial: "Ir para o testemunho de {name}",
       partnersHeading: "Com o apoio de",
+      evidence: {
+        eyebrow: "03 — A evidência",
+        title: "Não descrevemos resultados. Medimo-los.",
+        leadValue: "−41%",
+        leadLabel: "redução média dos sintomas de ansiedade",
+        leadSource: "Média de 3 clientes — CCA Law Firm, Metro Lisboa e Bayer · 8+ sessões · 30 min de treino por semana",
+        studies: [
+          {
+            value: "+21,7%",
+            desc: "processamento de informação mais rápido e **+9,4% de autoconfiança** — equipa desportiva profissional, intervenção vs. controlo.",
+            method: "N=32 · BAI, CSAI-2, Torre de Londres, D2 · Wilcoxon e Kruskal-Wallis",
+          },
+          {
+            value: "+18,8%",
+            desc: "na tomada de decisão, com **25% mais decisões ótimas** — piloto em desporto de elite.",
+            method: "N=10 · 30 sessões",
+          },
+          {
+            value: "−62%",
+            desc: "de ansiedade, **+10,6% de precisão de atenção** e 31% menos movimentos desperdiçados — caso intensivo, atleta de elite olímpica.",
+            method: "Caso individual · EEG + avaliação psicológica",
+          },
+        ],
+        honestTitle: "Dito com honestidade",
+        honestBody:
+          "Evidência em fase inicial: amostras pequenas, pilotos, casos individuais. Estão em curso ensaios controlados e longitudinais maiores, a caminho da certificação clínica. **Hoje, a Neroes é uma plataforma de treino e investigação — não um tratamento médico.**",
+        liveTitle: "E demonstrável, ao vivo",
+        liveBody:
+          "Numa sessão, vês o teu próprio sinal de regulação a mexer à medida que acalmas a mente. **Um avião no ar, não uma promessa.**",
+        ctaText: "Queres que te expliquemos os estudos?",
+        ctaButton: "Falar connosco",
+        scienceLink: "Ver a página de ciência",
+      },
     },
     science: {
       eyebrow: "Ciência",
@@ -383,19 +475,9 @@ export const translations: Record<Locale, Translations> = {
           desc: "Algoritmos adaptativos acompanham a evolução de cada utilizador ao longo das sessões, tornando o treino mais exigente à medida que as competências melhoram.",
         },
       ],
-      statsHeading: "Resultados observados em equipas empresariais",
-      statsLabels: ["Controlo Emocional", "Velocidade de Decisão", "Autoconfiança", "Ansiedade"],
+      statsHeading: "Resultados medidos até agora",
       sportCtaText: "Tens curiosidade sobre como isto funciona em equipas de desporto de elite?",
       sportCtaButton: "Ver o caso de estudo de Ciência do Desporto",
-    },
-    brainExperience: {
-      title: "THE BRAIN EXPERIENCE™",
-      subtitleHeading: "Evento de 1 Dia de Saúde Mental para Empresas",
-      description:
-        "Este evento corporativo de 1 dia permite que até 20 colaboradores tenham uma experiência individual de 30 minutos. Cada experiência é composta por 2 partes: Conduzir com a Mente / Demonstração de Treino Cerebral.",
-      ctaButton: "Agendar Brain Experience",
-      videoHeading: "Até a Rock in Rio quis experimentar!",
-      statsLabels: ["Pessoas que já experienciaram", "Empresas", "Net Promoter Score"],
     },
     about: {
       eyebrow: "Quem Somos",
@@ -424,8 +506,8 @@ export const translations: Record<Locale, Translations> = {
       infoHeading: "Informações de Contacto",
       emailLabel: "Email",
       phoneLabel: "Telefone",
-      addressLabel: "Sede",
-      address: "Rua da Prata 80, 5º andar, Lisboa, Portugal",
+      addressLabel: "Localização",
+      address: "Lisboa, Portugal",
       form: {
         nameLabel: "Nome *",
         emailLabel: "Email *",
@@ -444,197 +526,178 @@ export const translations: Record<Locale, Translations> = {
         gdprError: "Tem de aceitar a política de privacidade",
       },
     },
-    calculator: {
-      eyebrow: "Calculadora",
-      title: "Economia da Saúde Mental - Calculadora Corporativa",
-      subtitle: "Descubra os custos ocultos da falta de saúde mental na sua empresa.",
-      form: {
-        industryLabel: "Setor / Indústria",
-        industries: [
-          "Saúde",
-          "Finanças",
-          "Tecnologia",
-          "Retalho",
-          "Indústria Transformadora",
-          "Educação",
-          "Governo",
-          "Hotelaria",
-          "Jurídico",
-          "Media e Entretenimento",
-          "Transportes",
-          "Construção",
-          "Energia e Utilities",
-          "Serviços Profissionais",
-          "Outro",
-        ],
-        employeesLabel: "Número de Colaboradores",
-        employeesError: "Tem de ter pelo menos 1 colaborador",
-        salaryLabel: "Salário Médio Anual em EUR (opcional)",
-        salaryHint: "Assume €35.000 se deixado em branco",
-        submitLabel: "Calcular Custo",
-        placeholderText:
-          "Insira os dados da sua empresa para ver o impacto financeiro oculto da falta de saúde mental.",
-        totalHeading: "Custo Total Anual Estimado",
-        presenteeismLabel: "Presenteísmo",
-        presenteeismDesc: "20% de perda de produtividade",
-        absenteeismLabel: "Absenteísmo",
-        absenteeismDesc: "17.5% de baixas médicas",
-        turnoverLabel: "Rotatividade (Turnover)",
-        turnoverDesc: "15% do custo anual da folha salarial",
-      },
-      bottomQuote1: "Por cada 1€ investido em saúde mental, as empresas têm um ROI de 5€.",
-      bottomQuote1Author: "— Deloitte, Relatório de Saúde Mental e Colaboradores 2024",
-      bottomQuote2:
-        "Estima-se que, globalmente, se percam 12 mil milhões de dias de trabalho por ano devido a depressão e ansiedade, a um custo de 1 bilião de dólares por ano.",
-      bottomQuote2Author: "— Organização Mundial da Saúde",
-      ctaButton1: "Descubra como resolver este problema",
-      ctaButton2: "Saiba mais sobre a nossa solução",
-    },
-    mentalScore: {
-      badge: "Simulador de Performance Neural",
-      heading: "Demonstrativo — não é um diagnóstico clínico",
-      description:
-        "Ajusta os sliders para simular o teu progresso em cada indicador, até ao ganho máximo já documentado nos nossos estudos de caso. O score combina os quatro indicadores com o peso usado no nosso painel de telemetria interno.",
-      biomarkerLabels: ["Controlo Emocional", "Velocidade de Decisão", "Autoconfiança", "Redução de Ansiedade"],
-      weightPrefix: "até",
-      weightMiddle: "· peso",
-      scoreLabel: "Mental Score",
-      disclaimer:
-        "Simulação ilustrativa baseada nos ganhos médios documentados nos estudos de caso Neroes. Não substitui avaliação clínica ou psicológica profissional.",
-    },
   },
   en: {
     nav: {
       home: "Home",
       science: "Science",
-      brainExperience: "Brain Experience",
-      services: "Services",
       about: "About",
       contact: "Contact",
-      calculator: "Calculator",
       schedule: "Schedule a demo",
+      skipToContent: "Skip to main content",
       openMenu: "Open menu",
       closeMenu: "Close menu",
     },
-    services: {
-      eyebrow: "Services",
-      title: "One platform, two paths",
-      sportTab: "Sport",
-      corporateTab: "Corporate",
-      sportHeading: "Neurotechnology applied to elite sport",
-      sportBody:
-        "Stress and anxiety are the leading cause of performance breakdown under pressure. Neroes MTP™ trains athletes' emotional control and decision-making, session after session.",
-      sportTestimonialsHeading: "Success stories in elite competition",
-      corporateHeading: "Resilience and leadership for teams",
-      corporateBody:
-        "Presenteeism, absenteeism, and turnover carry a real cost. Neroes trains focus, emotional control, and resilience — reducing burnout and strengthening team leadership.",
-      testimonialsHeading: "What people say",
-    },
     home: {
+      heroEyebrow: "Neurotechnology · EEG mental training",
       heroHeadlineLine1: "We train the brain",
       heroHeadlineLine2: "like you train the body.",
       heroSubtitle:
         "An EEG headset reads your brainwaves while you play a game that's only won by staying calm and focused — training focus, emotional control, and resilience, session after session.",
-      heroPrimaryCta: "Schedule a demo",
-      heroSecondaryCta: "See the science",
-      problemEyebrow: "01 — The Problem",
+      heroPrimaryCta: "See the evidence",
+      heroSecondaryCta: "Talk to us",
+      heroHudSignal: "Vital sign · illustrative",
+      heroHudAnxiety: "Average anxiety reduction",
+      heroHudAnxietySource: "Average of 3 clients · 8+ sessions · 30 min of training a week",
+      heroFigure: "Fig. 01 — Brain · illustrative model",
+      heroLoopLabel: "The loop",
+      heroLoopDetail: ["EEG and biosensors", "Game and adaptive AI", "Objective biomarkers"],
+      problemEyebrow: "01 — The problem",
       problemTitle: "The real cost of workplace stress",
-      problemSubtitle:
-        "Unmanaged stress and anxiety carry a measurable cost for organizations — before looking at the solution, the numbers behind the problem.",
-      platformEyebrow: "02 — The Platform",
-      howItWorksHeading: "How it works",
-      howItWorksSubtitlePrefix: "Neural network training focused on",
-      pillars: [
-        {
-          title: "Signal capture",
-          body: "EEG headsets and biosensors read your brain state several times per second — the same real-time reading used in the Neroes headset.",
-        },
-        {
-          title: "Adaptive training",
-          body: "An AI-driven game adjusts the challenge in real time based on your signals: the goal is simple — stay calm and focused to advance.",
-        },
-        {
-          title: "Progress and metrics",
-          body: "Brain signals are monitored session after session and turned into objective metrics — the same clinical visualization we use to prove real results.",
-        },
-      ],
-      platformHeading: "The platform",
-      platformSubtitle: "A precision instrument for the human mind.",
-      platformFeatures: [
-        {
-          title: "Neuroscience-based sessions",
-          desc: "Training protocols designed on neuroscience, organized into progressive sessions that build results over time.",
-        },
-        {
-          title: "EEG biofeedback",
-          desc: "An EEG headset reads brainwaves in real time and turns them into immediate feedback inside the game — you only win by staying calm and focused.",
-        },
-        {
-          title: "Performance analytics",
-          desc: "Objective progress metrics, session by session: focus, emotional control, and resilience become data you can track.",
-        },
-        {
-          title: "Personalization",
-          desc: "Each program adapts to each person's starting point and goals — training evolves with you.",
-        },
-        {
-          title: "Multi-team",
-          desc: "Built for organizations and clubs: track multiple teams and profiles on the same platform, with aggregate and individual views.",
-        },
-        {
-          title: "Clinical privacy",
-          desc: "Brain data is handled with the rigor and confidentiality of clinical data, in compliance with GDPR.",
-        },
-      ],
-      benefitsHeading: "Benefits",
-      benefits: [
-        { title: "Organizational health", desc: "More cohesive teams and better collaboration dynamics." },
-        { title: "More productivity", desc: "Higher output with a significant reduction in errors." },
-        { title: "Personal development", desc: "Happier, more fulfilled people." },
-      ],
-      featuresHeading: "Features",
-      features: [
-        { title: "Better communication", desc: "Stronger leadership and interpersonal skills." },
-        { title: "Better performance", desc: "High-level execution sustained under pressure." },
-        { title: "Sleep quality", desc: "Improved overall well-being and recovery." },
-      ],
-      evidenceEyebrow: "03 — The Evidence",
-      heroKpiLabels: ["Emotional control", "Decision speed", "Anxiety"],
-      heroHudBiosignals: "Real-time Biosignals",
-      heroHudActive: "Active",
-      heroHudAnxiety: "Anxiety reduction rate",
-      statsLabels: ["Emotional control", "Decision speed", "Self-confidence", "Anxiety"],
-      finalCtaHeading: "Ready to train your mind?",
-      finalCtaBody:
-        "Schedule a demo and try EEG biofeedback live — see in real time what happens when you learn to stay calm and focused.",
-      finalCtaPrimary: "Schedule a demo",
-      finalCtaSecondary: "See the science",
-      foundersHeading: "Who founded Neroes",
-      viewTeamLink: "See the whole team",
+      problemSubtitle: "Unmanaged stress and anxiety carry a measurable cost for organisations.",
+      platform: {
+        eyebrow: "02 — The platform",
+        title: "A closed loop between your brain and a game.",
+        lead: "Non-invasive. Adaptive. To play well, you learn to steer your own state — **calmer, sharper, more balanced** — while objective biomarkers record the change.",
+        steps: [
+          { index: "I", title: "Sense", desc: "An EEG headset and biosensors read your state many times per second." },
+          {
+            index: "II",
+            title: "Train",
+            desc: "A game reacts to your brain in real time; adaptive AI tunes the challenge to you. Regulating yourself is how you win.",
+          },
+          {
+            index: "III",
+            title: "Measure",
+            desc: "Objective brain signals are tracked over time — improvement you and a clinician can see.",
+          },
+        ],
+        networks:
+          "It reads and trains the brain networks most relevant to your goal — **calm, focus, or performance**. No single region, no single marker.",
+        techLabel: "Technology",
+        tech: ["Sensing & biomarkers", "BCI", "Adaptive AI", "Brain-driven games", "Breathing & audiovisual aids"],
+        techNote: "+ protected neuromodulation research, described in general terms only",
+        videoCaption: "Fig. 02 — Neroes EEG headset · non-invasive",
+        videoPlayLabel: "Watch with sound, full screen",
+        videoPause: "Pause",
+        videoResume: "Play",
+        videoFallback: "Your browser doesn't support HTML5 video.",
+        beyond:
+          "The same loop reaches beyond anxiety — including early-stage research into cognitive decline and healthy aging. **Not a product, and not a proven outcome:** a direction of serious research.",
+        includesTitle: "What the platform includes",
+        includes: [
+          { title: "Progressive protocols", desc: "Neuroscience-based sessions, organised in stages that build results over time." },
+          {
+            title: "Session-by-session metrics",
+            desc: "Focus, emotional control and resilience recorded every session, with comparable progress.",
+          },
+          {
+            title: "Individual programme",
+            desc: "Each programme starts from a person's baseline and goal, and adapts as they progress.",
+          },
+          {
+            title: "Multiple teams",
+            desc: "For organisations and clubs: several teams and profiles on one platform, with aggregate and individual views.",
+          },
+        ],
+      },
+      where: {
+        eyebrow: "04 — Contexts",
+        title: "Where it works today",
+        items: [
+          {
+            title: "Clinic",
+            desc: "Drug-free training for anxiety and emotional regulation — a support tool alongside care.",
+          },
+          {
+            title: "Sport",
+            desc: "Decision-making, processing speed, and composure — validated with professional and elite athletes.",
+          },
+          {
+            title: "Work",
+            desc: "Sustained focus and resilience for high-demand teams — feedback instead of guesswork.",
+          },
+        ],
+      },
+      journey: {
+        eyebrow: "05 — The journey",
+        title: "Each stage earns the next.",
+        stages: [
+          {
+            label: "Today",
+            title: "Relieve",
+            desc: "Measurably lower anxiety, restore balance — on the path toward clinical certification.",
+          },
+          {
+            label: "Next",
+            title: "Enhance",
+            desc: "From restoring a baseline to exceeding it — focus, decisions, speed, resilience.",
+          },
+          {
+            label: "The frontier — held as vision",
+            title: "Explore",
+            desc: "The deeper states of human consciousness — made measurable and trainable.",
+          },
+        ],
+      },
+      vision: {
+        shiftLabel: "Register shift",
+        measured: "Everything above this line is measured.",
+        believed: "Everything below it is believed.",
+        note: "Vision and philosophy — never clinical claims",
+        title: "Our north star is human consciousness.",
+        body: "The same technology that quiets anxiety can help people reach the states of deep focus, clarity, and connection that contemplative traditions have described for thousands of years. Not explained away, not made mystical — made reachable.",
+        quote:
+          "We can measure the brain-state of deep calm or self-transcendence, and help someone reach it reliably. What it means to them is theirs.",
+        quoteCaption: "The honest bridge between our science and our vision",
+        pillars: [
+          { title: "Expanded states", desc: "Meditation, flow, and awe — measured, trainable on demand." },
+          { title: "Meaning and connection", desc: "The clarity and connectedness felt at the edges of ordinary experience." },
+          { title: "Human potential", desc: "Attention, intuition, equanimity — capacities most of us never train, and could." },
+        ],
+      },
+      founders: {
+        eyebrow: "06 — Founders",
+        title: "Rigorous neurotechnology in one hand. The depths of the mind in the other.",
+        pedroMission:
+          "Pedro's mission, in his own words, is **to trigger excellence** — a career spent merging neurofeedback, AI, brain-computer interfaces, EEG, and data science to enhance the human mind, with three startups founded before this one.",
+        pedroPersonal:
+          "And it's personal: a daily practitioner of meditation and visualisation, a lifelong student of consciousness. **Neroes is where the two threads meet.**",
+        viewTeamLink: "Meet the team",
+      },
+      neurorights: {
+        eyebrow: "07 — Neurorights",
+        title: "The mind is the most private place there is.",
+        body: "Neural data is the most sensitive data there is. We build to neurotechnology's first global ethics standard — UNESCO's — by design, not as an afterthought.",
+        rights: [
+          { code: "R.01", title: "Mental privacy", desc: "Protected by design — never used to profile or manipulate." },
+          { code: "R.02", title: "Explicit consent", desc: "You decide what is measured and why — in plain language." },
+          { code: "R.03", title: "Data ownership", desc: "Your brain data is yours — access it, delete it." },
+          { code: "R.04", title: "No sale of neural data", desc: "Ever. Trust is the product." },
+        ],
+        privacyLink: "Read the privacy policy",
+      },
+      closing: {
+        ground: "The evidence is the ground.",
+        sky: "The vision is the sky.",
+        body: "We don't ask anyone to believe it. We measure it — and what it means is yours.",
+        primary: "Talk to us",
+        secondary: "See the science",
+      },
     },
     footer: {
-      tagline: "A precision instrument for the human mind.",
-      subtagline: "Improve mental performance in corporations and sports.",
+      tagline: "EEG neurofeedback mental training for clinic, sport and work.",
+      subtagline: "Neroes is a training and research platform — not a medical treatment.",
       navigationHeading: "Navigation",
       legalHeading: "Legal",
       contactHeading: "Contact Us",
       emailLabel: "Email",
       phoneLabel: "Phone",
-      addressLabel: "Address",
-      address: "Rua da Prata 80, 5th floor, Lisbon, Portugal",
+      addressLabel: "Location",
+      address: "Lisbon, Portugal",
       privacyPolicy: "Privacy Policy",
       termsConditions: "Terms and Conditions",
       copyright: "All rights reserved.",
-    },
-    calculatorScience: {
-      heading: "Scientific Basis & Validation",
-      point1:
-        "Neurofeedback and EEG reading, developed in collaboration with the Institute of Biophysics and Biomedical Engineering (IBEB) and the Faculty of Sciences of the University of Lisbon (FCUL).",
-      point2:
-        "Real 4-month case study with the Estoril Praia teams, with measurable improvements in emotional control and decision speed.",
-      point3:
-        "Real testimonials from elite athletes and business leaders, already validated on this platform.",
-      ctaLabel: "Learn more about the scientific method",
     },
     shared: {
       problemFacts: [
@@ -654,9 +717,41 @@ export const translations: Record<Locale, Translations> = {
           detail: "Turnover reduction up to 60%",
         },
       ],
-      clientsLoveHeading: "Clients Love It",
+      clientsLoveHeading: "What clients and athletes say",
       goToTestimonial: "Go to {name}'s testimonial",
       partnersHeading: "Supported by",
+      evidence: {
+        eyebrow: "03 — The evidence",
+        title: "We don't describe results. We measure them.",
+        leadValue: "−41%",
+        leadLabel: "average reduction in anxiety symptoms",
+        leadSource: "Average across 3 clients — CCA Law Firm, Metro Lisboa and Bayer · 8+ sessions · 30 min of training per week",
+        studies: [
+          {
+            value: "+21.7%",
+            desc: "faster information processing, **+9.4% self-confidence** — professional sports team, intervention vs control.",
+            method: "N=32 · BAI, CSAI-2, Tower of London, D2 · Wilcoxon & Kruskal-Wallis",
+          },
+          {
+            value: "+18.8%",
+            desc: "growth in decision-making, with **25% more optimal decisions** — elite-sport pilot.",
+            method: "N=10 · 30 sessions",
+          },
+          {
+            value: "−62%",
+            desc: "anxiety, **+10.6% attention accuracy**, 31% fewer wasted movements — an elite Olympic athlete, intensive case.",
+            method: "Single subject · EEG + psychological assessment",
+          },
+        ],
+        honestTitle: "Stated honestly",
+        honestBody:
+          "Early-stage evidence: small samples, pilots, single-subject cases. Larger controlled and longitudinal trials are underway, on a path toward clinical certification. **Today, Neroes is a training and research platform — not a medical treatment.**",
+        liveTitle: "And demonstrable, live",
+        liveBody: "In a session you watch your own regulation signal move as you calm your mind. **A plane in the air, not a promise.**",
+        ctaText: "Want the studies walked through?",
+        ctaButton: "Talk to us",
+        scienceLink: "See the science page",
+      },
     },
     science: {
       eyebrow: "Science",
@@ -677,19 +772,9 @@ export const translations: Record<Locale, Translations> = {
           desc: "Adaptive algorithms track each user's evolution across sessions, making training more demanding as skills improve.",
         },
       ],
-      statsHeading: "Results observed in corporate teams",
-      statsLabels: ["Emotional Control", "Decision Making Velocity", "Self-confidence", "Anxiety"],
+      statsHeading: "Results measured so far",
       sportCtaText: "Curious how this works for elite sports teams instead?",
       sportCtaButton: "See the Sport Science case study",
-    },
-    brainExperience: {
-      title: "THE BRAIN EXPERIENCE™",
-      subtitleHeading: "1-Day Mental Health Event for Corporate",
-      description:
-        "This 1-day corporate event allows up to 20 employees to have an individual experience that lasts for 30 minutes. Each experience is comprised of 2 parts: Drive with Your Mind / Brain Training Demo.",
-      ctaButton: "Schedule Brain Experience",
-      videoHeading: "Even Rock in Rio wanted to try!",
-      statsLabels: ["People Experienced", "Corporations", "Promoter Score"],
     },
     about: {
       eyebrow: "Who we are",
@@ -718,8 +803,8 @@ export const translations: Record<Locale, Translations> = {
       infoHeading: "Contact Information",
       emailLabel: "Email",
       phoneLabel: "Phone",
-      addressLabel: "Headquarters",
-      address: "Rua da Prata 80, 5th floor, Lisbon, Portugal",
+      addressLabel: "Location",
+      address: "Lisbon, Portugal",
       form: {
         nameLabel: "Name *",
         emailLabel: "Email *",
@@ -737,63 +822,6 @@ export const translations: Record<Locale, Translations> = {
         emailError: "Invalid email address",
         gdprError: "You must accept the privacy policy",
       },
-    },
-    calculator: {
-      eyebrow: "Calculator",
-      title: "Mental Health Economy - Corporate Calculator",
-      subtitle: "Discover the hidden costs of poor mental health in your company.",
-      form: {
-        industryLabel: "Industry / Sector",
-        industries: [
-          "Healthcare",
-          "Finance",
-          "Technology",
-          "Retail",
-          "Manufacturing",
-          "Education",
-          "Government",
-          "Hospitality",
-          "Legal",
-          "Media & Entertainment",
-          "Transportation",
-          "Construction",
-          "Energy & Utilities",
-          "Professional Services",
-          "Other",
-        ],
-        employeesLabel: "Number of Employees",
-        employeesError: "Must have at least 1 employee",
-        salaryLabel: "Annual Average Salary in EUR (optional)",
-        salaryHint: "Defaults to €35,000 if left empty",
-        submitLabel: "Calculate Cost",
-        placeholderText: "Enter your company details to see the hidden financial impact of poor mental health.",
-        totalHeading: "Total Estimated Annual Cost",
-        presenteeismLabel: "Presenteeism",
-        presenteeismDesc: "20% productivity loss",
-        absenteeismLabel: "Absenteeism",
-        absenteeismDesc: "17.5% sick leaves",
-        turnoverLabel: "Turnover",
-        turnoverDesc: "15% of annual payroll cost",
-      },
-      bottomQuote1: "For every 1€ spent in mental health, corporates have a 5€ ROI.",
-      bottomQuote1Author: "— Deloitte, Mental Health & Employees Report 2024",
-      bottomQuote2:
-        "Globally, an estimated 12 billion working days are lost every year to depression and anxiety at a cost of US$ 1 trillion per year.",
-      bottomQuote2Author: "— World Health Organization",
-      ctaButton1: "Find out how to solve this problem",
-      ctaButton2: "Know more about our solution",
-    },
-    mentalScore: {
-      badge: "Neural Performance Simulator",
-      heading: "Demo — not a clinical diagnosis",
-      description:
-        "Adjust the sliders to simulate your progress on each indicator, up to the maximum gain already documented in our case studies. The score combines the four indicators with the weighting used in our internal telemetry dashboard.",
-      biomarkerLabels: ["Emotional Control", "Decision Velocity", "Self-confidence", "Anxiety Reduction"],
-      weightPrefix: "up to",
-      weightMiddle: "· weight",
-      scoreLabel: "Mental Score",
-      disclaimer:
-        "Illustrative simulation based on average gains documented in Neroes case studies. Does not replace professional clinical or psychological assessment.",
     },
   },
 };

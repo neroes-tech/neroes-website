@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import { AboutPageContent } from "./AboutPageContent";
 
 export const metadata: Metadata = {
-  title: "About Us",
+  title: "Sobre nós",
   description:
-    "Neroes started as an idea developed by Pedro Pestana and Hugo Ferreira at the Faculty of Sciences of the University of Lisbon. Meet the team behind the Neroes Mental Training Platform.",
+    "A Neroes nasceu de uma ideia de Pedro Pestana e Hugo Ferreira na Faculdade de Ciências da Universidade de Lisboa. Conhece a equipa por detrás da plataforma de treino mental Neroes.",
 };
 
 export default function AboutPage() {
