@@ -49,14 +49,17 @@ export function ContactForm() {
           message: values.message || undefined,
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Unexpected error");
+      if (!res.ok) throw new Error(`Contact API responded ${res.status}`);
       setStatus("success");
       setStatusMessage(t.contact.form.successMessage);
       form.reset();
     } catch (err) {
+      // Network down, a server error or a non-JSON error page: the visitor
+      // always gets the same localized message with the direct email —
+      // never a raw technical error.
+      console.warn("[ContactForm] submission failed:", err);
       setStatus("error");
-      setStatusMessage(err instanceof Error ? err.message : t.contact.form.errorFallback);
+      setStatusMessage(t.contact.form.errorFallback);
     }
   };
 

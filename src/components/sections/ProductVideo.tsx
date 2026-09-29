@@ -22,6 +22,20 @@ interface ProductVideoProps {
 type WebkitVideo = HTMLVideoElement & { webkitEnterFullscreen?: () => void };
 
 /**
+ * play() rejects when autoplay is blocked, and on old engines it returns
+ * nothing or throws. Either way the visible controls still work, so the
+ * failure is swallowed here instead of surfacing as an unhandled rejection.
+ */
+function safePlay(video: HTMLVideoElement) {
+  try {
+    const attempt = video.play() as Promise<void> | undefined;
+    attempt?.catch(() => {});
+  } catch {
+    // Playback refused; the visitor can press play.
+  }
+}
+
+/**
  * Full-bleed product film. The muted loop loads only near the viewport and
  * plays only while on screen; because it moves for longer than 5s it always
  * has a visible pause control (WCAG 2.2.2), and under reduced motion it
@@ -57,11 +71,7 @@ export function ProductVideo({
       ([entry]) => {
         if (!entry) return;
         if (!entry.isIntersecting) video.pause();
-        else if (!reduced && !userPaused.current) {
-          void video.play().catch(() => {
-            // Autoplay can be blocked; the controls still work.
-          });
-        }
+        else if (!reduced && !userPaused.current) safePlay(video);
       },
       { threshold: 0.25 },
     );
@@ -92,7 +102,7 @@ export function ProductVideo({
     if (!video) return;
     if (video.paused) {
       userPaused.current = false;
-      void video.play();
+      safePlay(video);
     } else {
       userPaused.current = true;
       video.pause();
@@ -110,18 +120,14 @@ export function ProductVideo({
     }
     video.muted = false;
     userPaused.current = false;
-    void video.play().catch(() => {});
-    // Still inside the click, so the browser grants full screen.
-    if (video.requestFullscreen) {
-      void video.requestFullscreen().catch(() => {
-        // Refused: it keeps playing inline, with sound.
-      });
-    } else {
-      try {
-        video.webkitEnterFullscreen?.();
-      } catch {
-        // Older iOS before metadata: inline playback with sound.
-      }
+    safePlay(video);
+    // Still inside the click, so the browser grants full screen. Refused or
+    // unsupported (older iOS before metadata): it keeps playing inline, with sound.
+    try {
+      if (video.requestFullscreen) video.requestFullscreen().catch(() => {});
+      else video.webkitEnterFullscreen?.();
+    } catch {
+      // Inline playback with sound.
     }
   };
 
