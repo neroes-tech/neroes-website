@@ -22,12 +22,14 @@ interface PageHeroProps {
   size?: "default" | "compact";
   /** Optional CTA(s) rendered directly under the subtitle. */
   cta?: ReactNode;
+  /** Centred, as in version 2 (default); "left" for text-heavy pages. */
+  align?: "center" | "left";
   className?: string;
 }
 
 /**
- * Page header for inner pages: left-aligned, typographic, closed by a 1px
- * rule. No background shapes, no entrance animation.
+ * Page header for inner pages: centred and typographic (the version 2
+ * layout), closed by a 1px rule. No background shapes, no entrance animation.
  */
 export function PageHero({
   eyebrow,
@@ -37,9 +39,11 @@ export function PageHero({
   maxWidth = "4xl",
   size = "default",
   cta,
+  align = "center",
   className,
 }: PageHeroProps) {
   const dark = variant === "decorative";
+  const centred = align === "center";
 
   return (
     <section
@@ -51,7 +55,7 @@ export function PageHero({
       )}
     >
       <div className="container mx-auto px-4 md:px-6">
-        <div className={MAX_WIDTH[maxWidth]}>
+        <div className={cn(MAX_WIDTH[maxWidth], centred && "mx-auto text-center")}>
           {eyebrow && (
             <Eyebrow tone={dark ? "inverse" : "brand"} className="mb-5">
               {eyebrow}
@@ -69,13 +73,16 @@ export function PageHero({
             <p
               className={cn(
                 "mt-6 max-w-2xl text-lg leading-relaxed md:text-xl",
+                centred && "mx-auto",
                 dark ? "text-white/75" : "text-muted-foreground",
               )}
             >
               {subtitle}
             </p>
           )}
-          {cta && <div className="mt-9 flex flex-wrap items-center gap-3">{cta}</div>}
+          {cta && (
+            <div className={cn("mt-9 flex flex-wrap items-center gap-3", centred && "justify-center")}>{cta}</div>
+          )}
         </div>
       </div>
     </section>

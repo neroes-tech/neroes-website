@@ -15,10 +15,13 @@ export function PartnersBar() {
   return (
     <section className="border-t border-border bg-background py-14" aria-labelledby="partners-heading">
       <div className="container mx-auto px-4 md:px-6">
-        <h2 id="partners-heading" className="font-mono text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+        <h2
+          id="partners-heading"
+          className="text-center font-mono text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground"
+        >
           {t.shared.partnersHeading}
         </h2>
-        <ul className="mt-8 flex flex-wrap items-center gap-x-12 gap-y-8 md:gap-x-16">
+        <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-8 md:gap-x-16">
           {PARTNERS.map((partner) => (
             <li key={partner.name} className="flex items-center">
               <a

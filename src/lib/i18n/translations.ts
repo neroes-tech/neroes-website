@@ -42,6 +42,13 @@ interface SciencePillar {
   desc: string;
 }
 
+/** A headline result on the Science page, with where it comes from. */
+interface ScienceStat {
+  value: string;
+  label: string;
+  source: string;
+}
+
 export interface Translations {
   nav: {
     home: string;
@@ -140,7 +147,7 @@ export interface Translations {
     clientsLoveHeading: string;
     goToTestimonial: string;
     partnersHeading: string;
-    /** Shared by the Home and the Science page, so the figures never diverge. */
+    /** The Home's evidence section. science.stats repeats four of these figures — change both together. */
     evidence: {
       eyebrow: string;
       title: string;
@@ -166,6 +173,8 @@ export interface Translations {
     subtitle: string;
     pillars: [SciencePillar, SciencePillar, SciencePillar];
     statsHeading: string;
+    /** Same figures as shared.evidence (the −41% lead and the studies) — change both together. */
+    stats: [ScienceStat, ScienceStat, ScienceStat, ScienceStat];
     sportCtaText: string;
     sportCtaButton: string;
   };
@@ -432,6 +441,12 @@ export const translations: Record<Locale, Translations> = {
         },
       ],
       statsHeading: "Resultados medidos até agora",
+      stats: [
+        { value: "−41%", label: "Ansiedade", source: "Média de 3 clientes · 8+ sessões" },
+        { value: "+21,7%", label: "Processamento de informação", source: "Equipa desportiva profissional · N=32" },
+        { value: "+18,8%", label: "Tomada de decisão", source: "Piloto em desporto de elite · N=10" },
+        { value: "+9,4%", label: "Autoconfiança", source: "Equipa desportiva profissional · N=32" },
+      ],
       sportCtaText: "Tens curiosidade sobre como isto funciona em equipas de desporto de elite?",
       sportCtaButton: "Ver o caso de estudo de Ciência do Desporto",
     },
@@ -696,6 +711,12 @@ export const translations: Record<Locale, Translations> = {
         },
       ],
       statsHeading: "Results measured so far",
+      stats: [
+        { value: "−41%", label: "Anxiety", source: "Average of 3 clients · 8+ sessions" },
+        { value: "+21.7%", label: "Information processing", source: "Professional sports team · N=32" },
+        { value: "+18.8%", label: "Decision-making", source: "Elite sport pilot · N=10" },
+        { value: "+9.4%", label: "Self-confidence", source: "Professional sports team · N=32" },
+      ],
       sportCtaText: "Curious how this works for elite sports teams instead?",
       sportCtaButton: "See the Sport Science case study",
     },

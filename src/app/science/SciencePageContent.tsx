@@ -1,14 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { Activity, Brain, LineChart } from "lucide-react";
 
-import { Evidence } from "@/components/sections/Evidence";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { PageHero } from "@/components/ui/PageHero";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { cn } from "@/lib/utils";
 
-const PILLAR_INDEX = ["I", "II", "III"] as const;
+const PILLAR_ICONS = [Brain, Activity, LineChart] as const;
 
+/**
+ * Science page in its version 2 layout — three pillar cards, the headline
+ * results in one centred row, the sport case study — with the current
+ * figures (the −41% always with its source).
+ */
 export function SciencePageContent() {
   const { t } = useLanguage();
 
@@ -16,26 +24,65 @@ export function SciencePageContent() {
     <>
       <PageHero eyebrow={t.science.eyebrow} title={t.science.title} subtitle={t.science.subtitle} maxWidth="4xl" />
 
-      <section className="bg-background py-20 md:py-24">
+      {/* The three pillars */}
+      <section className="bg-muted py-20 md:py-24">
         <div className="container mx-auto px-4 md:px-6">
-          <ol className="grid border-y border-border md:grid-cols-3 md:divide-x md:divide-border">
-            {t.science.pillars.map(({ title, desc }, i) => (
-              <li key={title} className="border-b border-border py-7 last:border-b-0 md:border-b-0 md:px-7 md:first:pl-0">
-                <span className="font-mono text-sm text-secondary">{PILLAR_INDEX[i]}</span>
-                <h2 className="mt-2 text-2xl font-bold text-foreground">{title}</h2>
-                <p className="mt-2 leading-relaxed text-muted-foreground">{desc}</p>
-              </li>
-            ))}
-          </ol>
+          <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
+            {t.science.pillars.map(({ title, desc }, i) => {
+              const Icon = PILLAR_ICONS[i]!;
+              return (
+                <Card key={title} className="h-full text-center">
+                  <CardContent className="space-y-4 p-8">
+                    <div className="mx-auto inline-flex rounded-md bg-secondary/10 p-3">
+                      <Icon className="h-7 w-7 text-secondary" aria-hidden="true" />
+                    </div>
+                    <h2 className="text-xl font-bold text-foreground">{title}</h2>
+                    <p className="leading-relaxed text-muted-foreground">{desc}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      {/* Same figures, methods and caveats as the Home — one source. */}
-      <Evidence headingOverride={t.science.statsHeading} numbered={false} />
+      {/* Headline results, each with where it comes from */}
+      <section className="bg-background py-20 md:py-24" aria-labelledby="science-stats-heading">
+        <div className="container mx-auto px-4 md:px-6">
+          <SectionHeading id="science-stats-heading" title={t.science.statsHeading} align="center" />
+          <dl className="mx-auto grid max-w-5xl grid-cols-2 gap-x-8 gap-y-10 text-center md:grid-cols-4">
+            {t.science.stats.map((stat, i) => (
+              <div key={stat.label} className="flex flex-col-reverse gap-2">
+                <dt>
+                  <span className="block font-medium text-foreground">{stat.label}</span>
+                  {/* One line per part ("3 clientes" / "8+ sessões") instead of a
+                      "·" stranded at the start of a wrapped line. */}
+                  <span className="mt-1 block font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+                    {stat.source.split(" · ").map((part) => (
+                      <span key={part} className="block">
+                        {part}
+                      </span>
+                    ))}
+                  </span>
+                </dt>
+                <dd
+                  className={cn(
+                    "font-exo text-4xl font-bold tabular-nums md:text-5xl",
+                    i === 0 ? "text-secondary" : "text-foreground",
+                  )}
+                >
+                  {stat.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
 
-      <section className="border-t border-border bg-background py-16 md:py-20">
-        <div className="container mx-auto flex flex-col gap-6 px-4 md:flex-row md:items-center md:justify-between md:px-6">
-          <p className="max-w-xl text-lg leading-relaxed text-muted-foreground">{t.science.sportCtaText}</p>
+      {/* Sport case study */}
+      <section className="border-t border-border bg-card py-20 md:py-24">
+        <div className="container mx-auto max-w-2xl px-4 text-center md:px-6">
+          <p className="mb-8 text-lg leading-relaxed text-muted-foreground">{t.science.sportCtaText}</p>
           <Button asChild size="lg" variant="outline">
             <Link href="/sport/science">{t.science.sportCtaButton}</Link>
           </Button>

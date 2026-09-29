@@ -7,21 +7,10 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 
 /**
- * The published results, each with what it measures and how. One source
- * (t.shared.evidence) for the Home and the Science page, so a figure can
- * never read differently on two pages.
+ * The Home's evidence section (Pedro's "03 — The Evidence"): the lead
+ * result and each study with what it measures and how.
  */
-export function Evidence({
-  headingOverride,
-  numbered = true,
-  className,
-}: {
-  /** Science page uses its own heading; the Home uses the evidence title. */
-  headingOverride?: string;
-  /** false drops the Home's section index ("03 — ") from the eyebrow. */
-  numbered?: boolean;
-  className?: string;
-}) {
+export function Evidence({ className }: { className?: string }) {
   const { t } = useLanguage();
   const ev = t.shared.evidence;
 
@@ -32,11 +21,7 @@ export function Evidence({
       className={cn("scroll-mt-24 border-t border-border bg-muted py-20 md:py-28", className)}
     >
       <div className="container mx-auto px-4 md:px-6">
-        <SectionHeading
-          id="evidence-heading"
-          eyebrow={numbered ? ev.eyebrow : ev.eyebrow.replace(/^\d+\s*—\s*/, "")}
-          title={headingOverride ?? ev.title}
-        />
+        <SectionHeading id="evidence-heading" eyebrow={ev.eyebrow} title={ev.title} />
 
         {/* Lead result */}
         <div className="grid gap-6 border-t border-foreground/15 pt-8 lg:grid-cols-12 lg:gap-10">
