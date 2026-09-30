@@ -266,3 +266,10 @@ Fonte: gravação de ecrã do protótipo `Neroes.dc.html` (claude.ai/design, ace
 - Fundador na Início: só Pedro Pestana, "Fundador", como no protótipo (sem foto — pedir uma ao Pedro).
 - **Sem dourado na interface:** o registo "acreditado/visão" passa a itálico no azul da marca; o dourado fica só no logótipo.
 - Hero como na versão 2: o cérebro sozinho com o batimento (caixas de biossinais e −41%) e o texto, centrado, a entrar com o scroll; no fim, +21,7% / +18,8% / +9,4% (estudos do protótipo).
+
+**Versão 4 (30 set. 2026, feedback do Wendell e do Pedro):**
+- ⚠️ **Testemunhos:** os 5 textos que estavam em `src/lib/constants.ts` (e que a versão 2, em produção, mostra) **não correspondiam ao site antigo** — tinham sido reescritos numa passagem anterior e atribuídos às mesmas pessoas (ex.: "mental clarity needed to excel under pressure" atribuído a José Faria Machado). Substituídos pelos **8 testemunhos originais**, verbatim do export WordPress (`/`, `/team/`, `/solution/`, `/sport/`): José Faria Machado, Conguito, Joana Caetano, Alice Lobo, Maria João Souto, João Crisóstomo, Inês (21 anos), Luís (29 anos). EN = original; PT = tradução fiel. As empresas (Bayer, Mega Hits, Novartis) vêm do mapeamento confirmado pelo Bruno — o site antigo não as mostrava.
+- Testemunhos na Início: uma faixa que desliza no capítulo preto, no lugar da antiga galeria de fotos do headset (retirada a pedido do Pedro).
+- Parceiros ("Com o apoio de") passam para baixo de "Onde funciona hoje", alinhados com as três colunas.
+- Fundador: o título do Pedro dividido em dois painéis que se expandem ao passar o rato — "Neurotecnologia rigorosa numa mão." (o headset) e "As profundezas da mente na outra." (foto do Pedro ao microfone, 481×720 — pedir o original em alta resolução).
+- **Formulário de contacto:** o projeto Supabase do `.env.local` já não existe (o domínio não resolve) e o email nunca foi configurado, por isso nenhuma mensagem chegava a lado nenhum (a versão 2 mostrava "enviado" e perdia-a). O email da empresa é Google Workspace: basta `SMTP_USER` + `SMTP_PASS` (palavra-passe de app) — ver `.env.example` e `npm run mail:check`.

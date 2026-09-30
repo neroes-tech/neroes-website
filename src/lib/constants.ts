@@ -25,56 +25,8 @@ export const EXTERNAL_REPORTS = {
 
 export const SITE_URL = "https://neroes.tech";
 
-export interface Testimonial {
-  name: string;
-  role: string;
-  content: string;
-  /** Client company name — only set once confirmed against a real, named affiliation. */
-  company?: string;
-  /** Path to the client's logo file — only set once the real asset is supplied. */
-  companyLogo?: string;
-}
-
-// TODO(assets): Bruno confirmed Novartis / Bayer / Mega Hits / CCA Law /
-// Valadares as real clients, and the José/Conguito/Joana mapping below — but
-// the real logo files for those companies still haven't been supplied. Cards
-// render fine without them (see ClientTestimonials.tsx's fallback); the logo
-// slot just stays empty until the files are added.
-export const TESTIMONIALS: Testimonial[] = [
-  {
-    name: "José Faria Machado",
-    role: "Communication Manager",
-    company: "Bayer",
-    content:
-      "The Neroes platform gave our team the mental clarity needed to excel under pressure. A truly transformative tool.",
-  },
-  {
-    name: "Conguito",
-    role: "Humorist/Broadcaster/Musician",
-    company: "Mega Hits",
-    content:
-      "As someone constantly in the public eye, maintaining focus is hard. This brain training changed how I approach my daily work.",
-  },
-  {
-    name: "Joana Caetano",
-    role: "Business Intelligence Manager",
-    company: "Novartis",
-    content:
-      "We've seen a measurable improvement in decision-making speed across our department since implementing Neroes.",
-  },
-  {
-    name: "Alice Lobo",
-    role: "IT Manager",
-    content:
-      "The emotional control our team gained has directly translated into fewer mistakes and a much healthier work environment.",
-  },
-  {
-    name: "Maria João Souto",
-    role: "Co-Founder & Partner",
-    content:
-      "Neroes is more than a wellness perk; it is a critical component of our strategy for high performance and employee retention.",
-  },
-];
+// Client and athlete testimonials live in the dictionary (t.shared.testimonials):
+// verbatim from the old WordPress site in English, faithfully translated in PT.
 
 // Unified across About/Team/Sport About — the previous WordPress site listed
 // three different, inconsistent rosters across these pages.

@@ -5,6 +5,15 @@ interface NamedItem {
   desc: string;
 }
 
+/** A client or athlete quote, verbatim from the old site (PT is a faithful translation). */
+interface Testimonial {
+  quote: string;
+  name: string;
+  role: string;
+  /** Only where the affiliation is confirmed. */
+  company?: string;
+}
+
 /** A figure shown as the Hero's brain dissolves into data (Ato IV). */
 interface HeroKpi {
   value: string;
@@ -109,21 +118,17 @@ export interface Translations {
       quoteCaption: string;
       pillars: [NamedItem, NamedItem, NamedItem];
     };
-    /** Photos for the vision chapter and the headset gallery (alt text is what each image shows). */
-    media: {
-      measuredAlt: string;
-      believedAlt: string;
-      galleryLabel: string;
-      galleryPause: string;
-      galleryPlay: string;
-      galleryAlts: [string, string, string, string, string, string, string, string];
-    };
+    /** The founder panels: his line split across the device (left) and Pedro (right). */
     founders: {
       eyebrow: string;
-      title: string;
-      pedroRole: string;
+      titleTech: string;
+      titleMind: string;
       pedroMission: string;
       pedroPersonal: string;
+      deviceAlt: string;
+      pedroAlt: string;
+      /** Prefix for the keyboard control that brings a panel forward. */
+      showPanel: string;
     };
     neurorights: {
       eyebrow: string;
@@ -154,7 +159,9 @@ export interface Translations {
   };
   shared: {
     clientsLoveHeading: string;
-    goToTestimonial: string;
+    testimonials: Testimonial[];
+    testimonialsPause: string;
+    testimonialsPlay: string;
     partnersHeading: string;
     /** The Home's evidence section. science.stats repeats four of these figures — change both together. */
     evidence: {
@@ -224,6 +231,9 @@ export interface Translations {
       submittingLabel: string;
       successMessage: string;
       errorFallback: string;
+      /** Opens the visitor's own email app with the message filled in. */
+      mailtoButton: string;
+      mailtoSubject: string;
       nameError: string;
       emailError: string;
       gdprError: string;
@@ -349,31 +359,17 @@ export const translations: Record<Locale, Translations> = {
           },
         ],
       },
-      media: {
-        measuredAlt: "O headset Neroes visto de baixo, com os elétrodos",
-        believedAlt: "Modelo do cérebro feito de pontos de luz azuis, com um sinal vermelho no lobo frontal",
-        galleryLabel: "O headset Neroes, peça a peça",
-        galleryPause: "Pausar a galeria",
-        galleryPlay: "Retomar a galeria",
-        galleryAlts: [
-          "Elétrodo do headset, desmontado",
-          "Elétrodo de pinos no braço do headset",
-          "Braço do headset com o botão",
-          "Estrutura interna do headset",
-          "O headset visto de baixo",
-          "A banda do headset",
-          "Pormenor lateral do headset",
-          "O headset com os elétrodos",
-        ],
-      },
       founders: {
         eyebrow: "06 — Fundador",
-        title: "Neurotecnologia rigorosa numa mão. As profundezas da mente na outra.",
-        pedroRole: "Fundador",
+        titleTech: "Neurotecnologia rigorosa numa mão.",
+        titleMind: "As profundezas da mente na outra.",
         pedroMission:
           "A missão do Pedro, nas suas palavras, é **despoletar a excelência** — uma carreira a juntar neurofeedback, IA, interfaces cérebro-computador, EEG e ciência de dados para potenciar a mente humana, com três startups fundadas antes desta.",
         pedroPersonal:
           "E é pessoal: pratica meditação e visualização todos os dias e estuda a consciência há toda a vida. **A Neroes é onde as duas linhas se encontram.**",
+        deviceAlt: "O headset EEG da Neroes, visto de baixo, com os elétrodos",
+        pedroAlt: "Pedro Pestana, fundador da Neroes, de pé, a falar ao microfone de olhos fechados",
+        showPanel: "Mostrar",
       },
       neurorights: {
         eyebrow: "07 — Neurodireitos",
@@ -409,7 +405,59 @@ export const translations: Record<Locale, Translations> = {
     },
     shared: {
       clientsLoveHeading: "O que dizem clientes e atletas",
-      goToTestimonial: "Ir para o testemunho de {name}",
+      testimonialsPause: "Pausar os testemunhos",
+      testimonialsPlay: "Retomar os testemunhos",
+      testimonials: [
+        {
+          quote:
+            "O treino da Neroes tem sido extraordinário e melhorou muito a forma como giro o stress. Noto uma melhoria substancial no meu bem-estar, com efeitos positivos na minha atividade profissional.",
+          name: "José Faria Machado",
+          role: "Gestor de Comunicação",
+          company: "Bayer",
+        },
+        {
+          quote: "Uma experiência incrível, que eu nem sabia que era possível! As possibilidades da tecnologia são infinitas.",
+          name: "Conguito",
+          role: "Humorista, radialista e músico",
+          company: "Mega Hits",
+        },
+        {
+          quote:
+            "Adorei a minha experiência com a Neroes. É incrível ver um carro mover-se só por passar de um estado de pouca energia para um estado de muita energia.",
+          name: "Joana Caetano",
+          role: "Gestora de Business Intelligence",
+          company: "Novartis",
+        },
+        {
+          quote:
+            "O treino mental mudou a pressão que eu punha em cada tarefa que me chegava. Agora consigo focar-me no que é importante, sem gastar stress com as tarefas pendentes.",
+          name: "Alice Lobo",
+          role: "Gestora de TI",
+        },
+        {
+          quote: "Consegui reduzir internamente o impacto de um problema profissional numa única sessão de treino.",
+          name: "Maria João Souto",
+          role: "Cofundadora e sócia",
+        },
+        {
+          quote:
+            "Com esta abordagem interativa, é mais simples e mais fácil perceber o que é preciso fazer para conseguir resultados em competição.",
+          name: "João Crisóstomo",
+          role: "Medalha de bronze no Europeu de Judo 2021",
+        },
+        {
+          quote:
+            "O objetivo do jogo é simples e claro: focar e focar melhor, eliminando a ansiedade. E o jogo cumpre esse objetivo.",
+          name: "Inês",
+          role: "21 anos",
+        },
+        {
+          quote:
+            "O sistema de pontuação dá uma motivação extra ao jogador, que quer sempre ser melhor. O Asteroids é um exemplo de como a pontuação pode motivar e recompensar a capacidade de controlar a ansiedade e aumentar a concentração e o foco.",
+          name: "Luís",
+          role: "29 anos",
+        },
+      ],
       partnersHeading: "Com o apoio de",
       evidence: {
         eyebrow: "03 — A evidência",
@@ -517,7 +565,9 @@ export const translations: Record<Locale, Translations> = {
         submittingLabel: "A enviar...",
         successMessage: "Obrigado. A sua mensagem foi enviada com sucesso. Entraremos em contacto brevemente.",
         errorFallback:
-          "Algo correu mal. Por favor tente novamente ou envie-nos um email diretamente para info@neroes.tech.",
+          "Não foi possível enviar a mensagem agora. Tente outra vez daqui a pouco, ou envie-a do seu email — já fica preenchida.",
+        mailtoButton: "Enviar pelo meu email",
+        mailtoSubject: "Contacto através do site",
         nameError: "O nome é obrigatório",
         emailError: "Endereço de email inválido",
         gdprError: "Tem de aceitar a política de privacidade",
@@ -637,31 +687,17 @@ export const translations: Record<Locale, Translations> = {
           { title: "Human potential", desc: "Attention, intuition, equanimity — capacities most of us never train, and could." },
         ],
       },
-      media: {
-        measuredAlt: "The Neroes headset seen from below, with its electrodes",
-        believedAlt: "A model of the brain made of blue points of light, with a red signal on the frontal lobe",
-        galleryLabel: "The Neroes headset, piece by piece",
-        galleryPause: "Pause the gallery",
-        galleryPlay: "Resume the gallery",
-        galleryAlts: [
-          "Headset electrode, taken apart",
-          "Pin electrode on the headset arm",
-          "Headset arm with its button",
-          "The headset's internal frame",
-          "The headset seen from below",
-          "The headset band",
-          "Side detail of the headset",
-          "The headset with its electrodes",
-        ],
-      },
       founders: {
         eyebrow: "06 — Founder",
-        title: "Rigorous neurotechnology in one hand. The depths of the mind in the other.",
-        pedroRole: "Founder",
+        titleTech: "Rigorous neurotechnology in one hand.",
+        titleMind: "The depths of the mind in the other.",
         pedroMission:
           "Pedro's mission, in his own words, is **to trigger excellence** — a career spent merging neurofeedback, AI, brain-computer interfaces, EEG, and data science to enhance the human mind, with three startups founded before this one.",
         pedroPersonal:
           "And it's personal: a daily practitioner of meditation and visualisation, a lifelong student of consciousness. **Neroes is where the two threads meet.**",
+        deviceAlt: "The Neroes EEG headset, seen from below, with its electrodes",
+        pedroAlt: "Pedro Pestana, founder of Neroes, standing and speaking into a microphone with his eyes closed",
+        showPanel: "Show",
       },
       neurorights: {
         eyebrow: "07 — Neurorights",
@@ -697,7 +733,59 @@ export const translations: Record<Locale, Translations> = {
     },
     shared: {
       clientsLoveHeading: "What clients and athletes say",
-      goToTestimonial: "Go to {name}'s testimonial",
+      testimonialsPause: "Pause the testimonials",
+      testimonialsPlay: "Resume the testimonials",
+      testimonials: [
+        {
+          quote:
+            "Neroes training has been extraordinary, significantly improving my stress management. I’ve noticed a substantial improvement in my well-being, positively affecting my professional activities.",
+          name: "José Faria Machado",
+          role: "Communication Manager",
+          company: "Bayer",
+        },
+        {
+          quote: "A mind-blowing experience, that I did not know was possible! The number of possibilities with technology are endless.",
+          name: "Conguito",
+          role: "Humorist, Broadcaster, Musician",
+          company: "Mega Hits",
+        },
+        {
+          quote:
+            "I loved my Experience with Neroes. It is amazing to see a car move just by changing myself from low energy to a high energy state.",
+          name: "Joana Caetano",
+          role: "Business Intelligence Manager",
+          company: "Novartis",
+        },
+        {
+          quote:
+            "The mental training changed the pressure I used to put in every single task that came to me. Now, I can focus in what is important, without dedicating stress to pending tasks.",
+          name: "Alice Lobo",
+          role: "IT Manager",
+        },
+        {
+          quote: "I managed to internally reduce the impact of a professional problem in just one training session.",
+          name: "Maria João Souto",
+          role: "Co-Founder & Partner",
+        },
+        {
+          quote:
+            "With this interactive approach, it is simpler and easier to figure out what has to be done to achieve results during the sports competition.",
+          name: "João Crisóstomo",
+          role: "Judo European Bronze Medal 2021",
+        },
+        {
+          quote:
+            "The goal of the game is simple and clear: focus and focus better, eliminating anxiety. And the game hits that goal.",
+          name: "Inês",
+          role: "21 years old",
+        },
+        {
+          quote:
+            "The score system offers extra motivation for the player, motivating him to always want to be better. Asteroids are an example of how the score system can motivate and reward a player’s ability to control anxiety and increase concentration / focus.",
+          name: "Luís",
+          role: "29 years old",
+        },
+      ],
       partnersHeading: "Supported by",
       evidence: {
         eyebrow: "03 — The evidence",
@@ -804,7 +892,9 @@ export const translations: Record<Locale, Translations> = {
         submittingLabel: "Sending...",
         successMessage: "Thank you. Your message has been sent successfully. We will get back to you shortly.",
         errorFallback:
-          "Something went wrong. Please try again or email us directly at info@neroes.tech.",
+          "We couldn't send your message just now. Please try again shortly, or send it from your own email — it's already filled in.",
+        mailtoButton: "Send from my email",
+        mailtoSubject: "Contact from the website",
         nameError: "Name is required",
         emailError: "Invalid email address",
         gdprError: "You must accept the privacy policy",

@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "mail:check": "node scripts/check-mail.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

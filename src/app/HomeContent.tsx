@@ -1,14 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { Hero } from "@/components/home/Hero";
 import { PartnerLogos } from "@/components/layout/PartnerLogos";
 import { BlurReveal } from "@/components/motion/BlurReveal";
-import { Marquee } from "@/components/motion/Marquee";
 import { WordReveal } from "@/components/motion/WordReveal";
+import { ClientTestimonials } from "@/components/sections/ClientTestimonials";
 import { Evidence } from "@/components/sections/Evidence";
+import { ExpandingPanels } from "@/components/sections/ExpandingPanels";
 import { ProductVideo } from "@/components/sections/ProductVideo";
 import { Button } from "@/components/ui/button";
 import { Eyebrow } from "@/components/ui/Eyebrow";
@@ -24,8 +24,6 @@ const HEADSET_VIDEO = {
   poster: "/media/neroes-headset-poster.webp",
 } as const;
 
-// Stills from the headset film, in the order of the gallery (alt texts in t.home.media.galleryAlts).
-const GALLERY = ["0_5", "4", "8", "12", "16", "20", "24", "28"].map((t) => `/media/gallery/headset-${t}.webp`);
 
 // The "believed / vision" register: italic in the logo's vivid blue on
 // black (7.4:1) and the brand blue on white (5.1:1). No gold.
@@ -37,44 +35,14 @@ const STAGE_DOT = ["bg-foreground", "bg-secondary", "bg-accent"] as const;
 
 // One statement per section, set large and tight.
 const STATEMENT = "font-exo text-5xl font-medium leading-[0.95] tracking-[-0.04em] md:text-7xl lg:text-[5.5rem]";
+// The two lines either side of the register shift, a step smaller.
+const SHIFT = "font-exo text-4xl font-medium leading-[1.02] tracking-[-0.035em] md:text-6xl";
 
-/** A full-height photo card with its statement laid over the lower part. */
-function ImageCard({
-  src,
-  alt,
-  title,
-  body,
-  imageClassName,
-}: {
-  src: string;
-  alt: string;
-  title: string;
-  body?: string;
-  /** e.g. mix-blend-screen for a render on black, so it sits on the card surface. */
-  imageClassName?: string;
-}) {
-  return (
-    <figure className="relative isolate flex min-h-[480px] flex-col justify-end overflow-hidden rounded-3xl bg-[#101010] p-7 ring-1 ring-inset ring-white/10 md:min-h-[640px] md:p-10">
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        sizes="(min-width: 1024px) 50vw, 100vw"
-        className={cn("-z-10 object-cover", imageClassName)}
-      />
-      {/* Legibility: the lower half darkens under the text. */}
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
-      <figcaption>
-        <h3 className="font-exo text-4xl font-medium leading-[0.98] tracking-[-0.04em] text-white md:text-6xl">{title}</h3>
-        {body && (
-          <p className="mt-6 max-w-lg rounded-2xl bg-black/50 p-5 text-base font-light leading-relaxed text-white/90 backdrop-blur-md md:text-lg">
-            {body}
-          </p>
-        )}
-      </figcaption>
-    </figure>
-  );
-}
+// Founder panels: the device (left) and Pedro (right).
+const FOUNDER_IMAGES = {
+  device: "/media/founder-device.webp",
+  pedro: "/media/founder-pedro.webp",
+} as const;
 
 /**
  * The Home, laid out after the Neurable company page the team picked as the
@@ -85,13 +53,12 @@ function ImageCard({
 export function HomeContent() {
   const { t } = useLanguage();
   const h = t.home;
-  const media = h.media;
 
   return (
     <>
       <Hero />
 
-      {/* 02 — The platform, stated; then who backs it */}
+      {/* 02 — The platform, stated */}
       <section
         id="plataforma"
         aria-labelledby="platform-heading"
@@ -107,11 +74,6 @@ export function HomeContent() {
           <p className="mx-auto mt-8 max-w-2xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
             <Rich text={h.platform.lead} />
           </p>
-
-          <p className="mt-20 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground md:mt-24">
-            {t.shared.partnersHeading}
-          </p>
-          <PartnerLogos className="mt-8" />
         </div>
       </section>
 
@@ -188,6 +150,14 @@ export function HomeContent() {
               </div>
             ))}
           </div>
+
+          {/* Who backs it: one row, edge to edge with the three columns above */}
+          <div className="mt-20 border-t border-border pt-10 md:mt-28 md:pt-12">
+            <h3 className="text-center text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+              {t.shared.partnersHeading}
+            </h3>
+            <PartnerLogos spread className="mt-10 md:mt-12" />
+          </div>
         </div>
       </section>
 
@@ -224,24 +194,28 @@ export function HomeContent() {
       </section>
 
       {/* Vision — measured above the line, believed below; one black chapter */}
-      <section aria-labelledby="vision-heading" className="bg-black pb-24 pt-24 text-white md:pb-36 md:pt-32">
+      <section aria-labelledby="register-shift" className="bg-black pb-8 pt-28 text-white md:pb-12 md:pt-40">
         <div className="container mx-auto px-4 md:px-6">
-          <h2 id="vision-heading" className="text-center text-xs font-bold uppercase tracking-[0.14em] text-white/55">
-            {h.vision.shiftLabel} · {h.vision.note}
-          </h2>
-          <div className="mt-10 grid gap-4 lg:grid-cols-2">
-            <ImageCard src="/media/vision-headset.webp" alt={media.measuredAlt} title={h.vision.measured} />
-            <ImageCard
-              src="/media/vision-brain.webp"
-              alt={media.believedAlt}
-              title={h.vision.believed}
-              body={h.vision.body}
-              imageClassName="object-[center_25%] mix-blend-screen"
-            />
+          {/* The register shift: everything above this line on the page is measured */}
+          <div className="mx-auto max-w-5xl text-center">
+            <BlurReveal>
+              <p className={SHIFT}>{h.vision.measured}</p>
+            </BlurReveal>
+            <div className="my-10 flex items-center gap-5 md:my-12">
+              <span aria-hidden="true" className="h-px flex-1 bg-white/25" />
+              <span id="register-shift" className="text-xs font-bold uppercase tracking-[0.14em] text-white/55">
+                {h.vision.shiftLabel}
+              </span>
+              <span aria-hidden="true" className="h-px flex-1 bg-white/25" />
+            </div>
+            <BlurReveal>
+              <p className={cn(SHIFT, VISION_ON_BLACK)}>{h.vision.believed}</p>
+            </BlurReveal>
+            <p className="mt-10 text-xs font-bold uppercase tracking-[0.14em] text-white/55">{h.vision.note}</p>
           </div>
 
           {/* The honest bridge, read word by word */}
-          <figure className="mx-auto mt-28 max-w-5xl md:mt-40">
+          <figure className="mx-auto mt-32 max-w-5xl md:mt-44">
             <blockquote>
               <WordReveal
                 text={`“${h.vision.quote}”`}
@@ -251,35 +225,29 @@ export function HomeContent() {
             <figcaption className="mt-8 text-sm text-white/55">— {h.vision.quoteCaption}</figcaption>
           </figure>
         </div>
+      </section>
 
-        {/* The headset, piece by piece */}
-        <div className="mt-24 md:mt-32" role="group" aria-label={media.galleryLabel}>
-          <Marquee
-            pauseLabel={media.galleryPause}
-            playLabel={media.galleryPlay}
-            items={GALLERY.map((src, i) => (
-              <Image
-                key={src}
-                src={src}
-                alt={media.galleryAlts[i]!}
-                width={450}
-                height={300}
-                className="h-[220px] w-auto rounded-2xl object-cover md:h-[300px]"
-              />
-            ))}
-          />
-        </div>
+      {/* What clients and athletes say — where the headset gallery used to be */}
+      <ClientTestimonials />
 
-        <div className="container mx-auto mt-28 px-4 md:mt-40 md:px-6">
+      {/* The north star, and what it opens up */}
+      <section aria-labelledby="vision-heading" className="bg-black pb-20 pt-16 text-white md:pb-28 md:pt-24">
+        <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-4xl text-center">
             <BlurReveal>
-              <h3 className={STATEMENT}>{h.vision.title}</h3>
+              <h2 id="vision-heading" className={STATEMENT}>
+                {h.vision.title}
+              </h2>
             </BlurReveal>
+            <p className="mx-auto mt-8 max-w-2xl text-lg font-light leading-relaxed text-white/70 md:text-xl">
+              {h.vision.body}
+            </p>
           </div>
-          <div className="mt-16 grid gap-12 md:mt-24 md:grid-cols-3 md:gap-12">
+
+          <div className="mt-24 grid gap-12 md:mt-32 md:grid-cols-3 md:gap-12">
             {h.vision.pillars.map((pillar) => (
               <div key={pillar.title}>
-                <h4 className={cn("text-xl font-bold", VISION_ON_BLACK)}>{pillar.title}</h4>
+                <h3 className={cn("text-xl font-bold", VISION_ON_BLACK)}>{pillar.title}</h3>
                 <p className="mt-3 leading-relaxed text-white/65">{pillar.desc}</p>
               </div>
             ))}
@@ -287,27 +255,40 @@ export function HomeContent() {
         </div>
       </section>
 
-      {/* 06 — Founder */}
-      <section aria-labelledby="founders-heading" className="bg-background py-24 md:py-36">
+      {/* 06 — Founder: his line split across the device and the man */}
+      <section aria-labelledby="founders-heading" className="bg-black pb-24 pt-16 text-white md:pb-36 md:pt-24">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="mx-auto max-w-4xl text-center">
-            <Eyebrow className="mb-6">{h.founders.eyebrow}</Eyebrow>
+          <div className="mx-auto max-w-4xl border-t border-white/15 pt-20 text-center md:pt-28">
+            <Eyebrow tone="inverse" className="mb-6">
+              {h.founders.eyebrow}
+            </Eyebrow>
             <BlurReveal>
-              <h2 id="founders-heading" className={cn(STATEMENT, "text-foreground")}>
-                {h.founders.title}
+              <h2 id="founders-heading" className={STATEMENT}>
+                Pedro Pestana
               </h2>
             </BlurReveal>
           </div>
-          <article className="mx-auto mt-16 max-w-2xl text-center md:mt-20">
-            <h3 className="text-2xl font-medium tracking-[-0.02em] text-foreground">Pedro Pestana</h3>
-            <p className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-secondary">{h.founders.pedroRole}</p>
-            <p className="mt-6 text-lg font-light leading-relaxed text-muted-foreground">
-              <Rich text={h.founders.pedroMission} />
-            </p>
-            <p className="mt-4 text-lg font-light leading-relaxed text-muted-foreground">
-              <Rich text={h.founders.pedroPersonal} />
-            </p>
-          </article>
+          <div className="mt-14 md:mt-20">
+            <ExpandingPanels
+              showLabel={h.founders.showPanel}
+              panels={[
+                {
+                  image: FOUNDER_IMAGES.device,
+                  alt: h.founders.deviceAlt,
+                  focus: "center 35%",
+                  title: h.founders.titleTech,
+                  body: h.founders.pedroMission,
+                },
+                {
+                  image: FOUNDER_IMAGES.pedro,
+                  alt: h.founders.pedroAlt,
+                  focus: "center 18%",
+                  title: h.founders.titleMind,
+                  body: h.founders.pedroPersonal,
+                },
+              ]}
+            />
+          </div>
         </div>
       </section>
 

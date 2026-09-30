@@ -9,9 +9,9 @@ import { cn } from "@/lib/utils";
 /**
  * Endless horizontal strip. The items render twice (the copy is hidden from
  * assistive technology) and the track slides by half its width, so the loop
- * is seamless. It moves for longer than 5 seconds, so it has a visible
- * pause control (WCAG 2.2.2); hover and keyboard focus inside also pause it.
- * Under reduced motion it doesn't move at all and scrolls by hand instead.
+ * is seamless. It moves for longer than 5 seconds, so it has a visible pause
+ * control under it (WCAG 2.2.2); pointing at the strip also holds it still,
+ * to read. Under reduced motion nothing moves: the items wrap into a grid.
  */
 export function Marquee({
   items,
@@ -31,39 +31,48 @@ export function Marquee({
 
   if (reduced) {
     return (
-      <div className={cn("overflow-x-auto", className)}>
-        <ul className="flex w-max gap-4 px-4 md:px-6">{items.map((item, i) => <li key={i}>{item}</li>)}</ul>
-      </div>
+      <ul className={cn("container mx-auto flex flex-wrap justify-center gap-4 px-4 md:px-6", className)}>
+        {items.map((item, i) => (
+          <li key={i}>{item}</li>
+        ))}
+      </ul>
     );
   }
 
   return (
-    <div className={cn("group relative overflow-hidden", className)}>
-      <div
-        className={cn(
-          "flex w-max animate-marquee group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]",
-          paused && "[animation-play-state:paused]",
-        )}
-        style={{ ["--marquee-duration" as string]: `${durationSeconds}s` }}
-      >
-        {/* Each copy carries its trailing gap (pr-4), so sliding by exactly
-            half the track lands the second copy where the first began. */}
-        <ul className="flex gap-4 pr-4">{items.map((item, i) => <li key={i}>{item}</li>)}</ul>
-        <ul className="flex gap-4 pr-4" aria-hidden="true">
-          {items.map((item, i) => (
-            <li key={i}>{item}</li>
-          ))}
-        </ul>
+    <div className={className}>
+      <div className="group overflow-hidden">
+        <div
+          className={cn(
+            "flex w-max animate-marquee group-hover:[animation-play-state:paused]",
+            paused && "[animation-play-state:paused]",
+          )}
+          style={{ ["--marquee-duration" as string]: `${durationSeconds}s` }}
+        >
+          {/* Each copy carries its trailing gap (pr-4), so sliding by exactly
+              half the track lands the second copy where the first began. */}
+          <ul className="flex gap-4 pr-4">
+            {items.map((item, i) => (
+              <li key={i}>{item}</li>
+            ))}
+          </ul>
+          <ul className="flex gap-4 pr-4" aria-hidden="true">
+            {items.map((item, i) => (
+              <li key={i}>{item}</li>
+            ))}
+          </ul>
+        </div>
       </div>
-      <button
-        type="button"
-        onClick={() => setPaused((p) => !p)}
-        aria-label={paused ? playLabel : pauseLabel}
-        aria-pressed={paused}
-        className="absolute bottom-3 right-3 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/70 text-white transition-colors hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:right-6"
-      >
-        {paused ? <Play className="h-4 w-4" aria-hidden="true" /> : <Pause className="h-4 w-4" aria-hidden="true" />}
-      </button>
+      <div className="container mx-auto mt-6 flex justify-end px-4 md:px-6">
+        <button
+          type="button"
+          onClick={() => setPaused((p) => !p)}
+          aria-label={paused ? playLabel : pauseLabel}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          {paused ? <Play className="h-4 w-4" aria-hidden="true" /> : <Pause className="h-4 w-4" aria-hidden="true" />}
+        </button>
+      </div>
     </div>
   );
 }

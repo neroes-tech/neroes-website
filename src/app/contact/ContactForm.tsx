@@ -6,15 +6,37 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
+import { CONTACT_INFO } from "@/lib/constants";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+
+/** mailto: link to the company with the visitor's message filled in — the fallback when sending fails. */
+function mailtoHref(subject: string, values: { name: string; email: string; phone?: string; message?: string }) {
+  const body = [
+    `Nome / Name: ${values.name}`,
+    `Email: ${values.email}`,
+    values.phone ? `Telefone / Phone: ${values.phone}` : null,
+    "",
+    // Some mail apps cut long mailto: links; the message is kept under ~1500 characters.
+    (values.message ?? "").slice(0, 1500),
+  ]
+    .filter((line) => line !== null)
+    .join("\r\n");
+  return `mailto:${CONTACT_INFO.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
 
 const inputClasses =
   "w-full rounded-xl border border-input bg-background px-4 outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30";
 
 export function ContactForm() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [statusMessage, setStatusMessage] = useState("");
+  // What the visitor sent last, for the email fallback if delivery fails.
+  const [lastValues, setLastValues] = useState<{ name: string; email: string; phone?: string; message?: string } | null>(
+    null,
+  );
+  // Honeypot — see the hidden "website" field below.
+  const [website, setWebsite] = useState("");
 
   const formSchema = useMemo(
     () =>
@@ -38,6 +60,7 @@ export function ContactForm() {
   const onSubmit = async (values: FormValues) => {
     setStatus("submitting");
     setStatusMessage("");
+    setLastValues({ name: values.name, email: values.email, phone: values.phone, message: values.message });
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
@@ -47,6 +70,8 @@ export function ContactForm() {
           email: values.email,
           phone: values.phone || undefined,
           message: values.message || undefined,
+          locale,
+          website: website || undefined,
         }),
       });
       if (!res.ok) throw new Error(`Contact API responded ${res.status}`);
@@ -75,16 +100,35 @@ export function ContactForm() {
           </div>
         )}
         {status === "error" && (
-          <div
-            role="alert"
-            className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 font-medium text-destructive"
-          >
-            {statusMessage}
+          <div role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-destructive">
+            <p className="font-medium">{statusMessage}</p>
+            {lastValues && (
+              <a
+                href={mailtoHref(t.contact.form.mailtoSubject, lastValues)}
+                className="mt-3 inline-flex h-10 items-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
+              >
+                {t.contact.form.mailtoButton}
+              </a>
+            )}
           </div>
         )}
       </div>
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="relative space-y-6" noValidate>
+        {/* Honeypot: invisible to people and assistive technology; bots that
+            fill every field reveal themselves and the server drops the message. */}
+        <div aria-hidden="true" className="absolute -left-[10000px] top-auto h-px w-px overflow-hidden">
+          <label htmlFor="website">Website</label>
+          <input
+            id="website"
+            name="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={website}
+            onChange={(event) => setWebsite(event.target.value)}
+          />
+        </div>
         <div className="space-y-2">
           <label htmlFor="name" className="text-sm font-medium text-foreground">
             {t.contact.form.nameLabel}

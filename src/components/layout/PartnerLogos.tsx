@@ -6,13 +6,30 @@ import { PARTNERS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 /**
- * The partner logos in one centred row: greyscale at rest, their real
- * colours on hover or keyboard focus. "inverse" renders them white, for
- * black surfaces.
+ * The partner logos in one row: greyscale at rest, their real colours on
+ * hover or keyboard focus. "inverse" renders them white, for black surfaces.
+ * "spread" runs the row edge to edge (first logo on the left edge, last on
+ * the right), so it lines up with a column grid above it; on phones it
+ * becomes a centred 3 × 2 grid.
  */
-export function PartnerLogos({ tone = "default", className }: { tone?: "default" | "inverse"; className?: string }) {
+export function PartnerLogos({
+  tone = "default",
+  spread = false,
+  className,
+}: {
+  tone?: "default" | "inverse";
+  spread?: boolean;
+  className?: string;
+}) {
   return (
-    <ul className={cn("flex flex-wrap items-center justify-center gap-x-12 gap-y-8 md:gap-x-16", className)}>
+    <ul
+      className={cn(
+        spread
+          ? "grid grid-cols-3 place-items-center gap-x-6 gap-y-10 md:flex md:items-center md:justify-between md:gap-x-8"
+          : "flex flex-wrap items-center justify-center gap-x-12 gap-y-8 md:gap-x-16",
+        className,
+      )}
+    >
       {PARTNERS.map((partner) => (
         <li key={partner.name} className="flex items-center">
           <a

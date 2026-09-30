@@ -125,7 +125,7 @@
   }
 }
 
-/* Endless horizontal strip (gallery): the track holds the items twice and
+/* Endless horizontal strip (testimonials): the track holds the items twice and
    slides by half its width. Paused by the visible control, by hover and by
    keyboard focus inside; off entirely under reduced motion. */
 @keyframes marquee {
