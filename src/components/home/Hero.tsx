@@ -27,16 +27,25 @@ import { cn } from "@/lib/utils";
 // instead of blocking the Hero on its bundle.
 const BrainHero = dynamic(() => import("@/components/BrainHero"), { ssr: false });
 
-// The logo's vivid blue, solid (no gradient): 6.5:1 on the ink background.
+// The logo's vivid blue, solid (no gradient): 6.5:1 on the dark background.
 const HERO_ACCENT = "text-[#00A5E9]";
 
-// Small labels on black (white/60: 7.4:1).
+// Deep-navy backdrop of version 2 — lit centre falling off to near-black —
+// which gives the particle brain its depth.
+const HERO_BG = "radial-gradient(ellipse 80% 70% at 50% 45%, #0D1B2A 0%, #0A192F 35%, #040711 100%)";
+
+// Small labels on the dark background (white/60: 7.4:1).
 const LABEL = "text-[11px] font-bold uppercase tracking-[0.14em] text-white/60";
 
 // Translucent readouts with a hairline border, square corners. No blur
 // (backdrop-filter over the WebGL canvas in a sticky section left them blank
 // after scrolling back in Chrome), no glow, no float.
-const HUD_CARD = "absolute border border-[#F4F3F0]/30 bg-[#F4F3F0]/[0.07] p-3";
+const HUD_CARD = "border border-[#F4F3F0]/30 bg-[#F4F3F0]/[0.07] p-3";
+
+// Scroll progress (0..1) windows. The text is in and sharp well before the
+// brain starts to break apart at 0.55 (BrainHero's Ato III), so it is never
+// racing the explosion; the results take over at the end (Ato IV, 0.85).
+const REVEAL = { headline: [0.06, 0.26], subtitle: [0.1, 0.3], ctas: [0.14, 0.34] } as const;
 
 function smoothstep(edge0: number, edge1: number, x: number) {
   const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
@@ -53,18 +62,12 @@ function revealStyle(revealed: number): CSSProperties {
   };
 }
 
-/**
- * The two readouts beside the brain, visible from the first frame. They sit
- * in the bottom corners, level with the scroll hint, so the centred headline
- * never runs into them; below 1280px there is no room beside it, so (as on
- * phones) the brain carries the heartbeat alone.
- */
-function HudCards({ reduced }: { reduced: boolean }) {
+/** Heartbeat monitor, in lockstep with the brain's red vital points (heartbeat.ts). */
+function HeartbeatCard({ reduced, className }: { reduced: boolean; className?: string }) {
   const { t } = useLanguage();
   const h = t.home;
 
-  // Same page clock as the brain's red points (heartbeat.ts): the R spike
-  // crosses the trace's centre line as those points flash.
+  // The R spike crosses the trace's centre line as the brain's red points flash.
   const ecgX = useMotionValue(ECG_SYNC_OFFSET_PX);
   const dotOpacity = useMotionValue(1);
   useAnimationFrame(() => {
@@ -75,55 +78,58 @@ function HudCards({ reduced }: { reduced: boolean }) {
   });
 
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 hidden xl:block">
-      <div className="container relative mx-auto h-full px-6">
-        {/* Heartbeat monitor, in lockstep with the brain's red vital points */}
-        <div className={cn(HUD_CARD, "bottom-[9%] left-6")}>
-          <div className="relative h-8 overflow-hidden" style={{ width: ECG_WINDOW_PX, maxWidth: "100%" }}>
-            <motion.svg
-              viewBox={`0 0 ${ECG_PERIOD_PX * 2} ${ECG_HEIGHT_PX}`}
-              width={ECG_PERIOD_PX * 2}
-              height={ECG_HEIGHT_PX}
-              className="max-w-none"
-              fill="none"
-              style={{ x: ecgX }}
-            >
-              <path d={ECG_PATH} stroke={HEART_RED} strokeOpacity="0.3" strokeWidth="1" strokeLinejoin="round" />
-              <path d={ECG_PATH} stroke={HEART_RED} strokeWidth="2.2" strokeLinecap="round" strokeDasharray="0.1 4.5" />
-            </motion.svg>
-            <div className="absolute inset-y-0 left-1/2 w-px bg-white/15" />
-          </div>
-          <p className={cn(LABEL, "mt-2 flex items-center gap-2 whitespace-nowrap")}>
-            <motion.span
-              className="h-1.5 w-1.5 shrink-0 rounded-full"
-              style={{ backgroundColor: HEART_RED, opacity: dotOpacity }}
-            />
-            <span>
-              {h.heroHudBiosignals}: <span className="text-[#FF6B84]">{h.heroHudActive}</span>
-            </span>
-          </p>
-        </div>
-
-        {/* The headline result, with its source */}
-        <div className={cn(HUD_CARD, "bottom-[9%] right-6 min-w-56")}>
-          <p className={LABEL}>{h.heroHudAnxiety}</p>
-          <p className="mt-1.5 font-exo text-3xl font-medium leading-none tracking-[-0.03em] tabular-nums text-white">
-            {t.shared.evidence.leadValue}
-          </p>
-          <p className="mt-1.5 text-xs text-white/60">{h.heroHudAnxietySource}</p>
-        </div>
+    <div aria-hidden="true" className={cn(HUD_CARD, className)}>
+      <div className="relative h-8 overflow-hidden" style={{ width: ECG_WINDOW_PX, maxWidth: "100%" }}>
+        <motion.svg
+          viewBox={`0 0 ${ECG_PERIOD_PX * 2} ${ECG_HEIGHT_PX}`}
+          width={ECG_PERIOD_PX * 2}
+          height={ECG_HEIGHT_PX}
+          className="max-w-none"
+          fill="none"
+          style={{ x: ecgX }}
+        >
+          <path d={ECG_PATH} stroke={HEART_RED} strokeOpacity="0.3" strokeWidth="1" strokeLinejoin="round" />
+          <path d={ECG_PATH} stroke={HEART_RED} strokeWidth="2.2" strokeLinecap="round" strokeDasharray="0.1 4.5" />
+        </motion.svg>
+        <div className="absolute inset-y-0 left-1/2 w-px bg-white/15" />
       </div>
+      <p className={cn(LABEL, "mt-2 flex items-center gap-2 whitespace-nowrap")}>
+        <motion.span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: HEART_RED, opacity: dotOpacity }} />
+        <span>
+          {h.heroHudBiosignals}: <span className="text-[#FF6B84]">{h.heroHudActive}</span>
+        </span>
+      </p>
+    </div>
+  );
+}
+
+/** The headline result, with its source. */
+function AnxietyCard({ className }: { className?: string }) {
+  const { t } = useLanguage();
+  const h = t.home;
+  return (
+    <div aria-hidden="true" className={cn(HUD_CARD, "min-w-56", className)}>
+      <p className={LABEL}>{h.heroHudAnxiety}</p>
+      <p className="mt-1.5 font-exo text-3xl font-medium leading-none tracking-[-0.03em] tabular-nums text-white">
+        {t.shared.evidence.leadValue}
+      </p>
+      <p className="mt-1.5 text-xs text-white/60">{h.heroHudAnxietySource}</p>
     </div>
   );
 }
 
 /**
- * Opening screen, told by scrolling (as in version 2). The section is three
- * screens tall with a pinned stage: first the brain on its own, with the
- * heartbeat readouts; as the visitor scrolls, the camera dives in and the
- * headline, text and buttons rise in, centred; at the end the brain breaks
- * into points and the measured results appear. Scrolling back up plays it in
- * reverse — the readouts never leave the screen.
+ * Opening screen, told by scrolling (as in version 2). The section is a
+ * little over two and a half screens tall with a pinned stage: first the
+ * brain on its own, with the heartbeat readouts; as the visitor scrolls, the
+ * headline, text and buttons come into focus, centred; then the camera dives
+ * and the brain breaks into points behind the text; at the end the measured
+ * results appear. Scrolling back up plays it in reverse.
+ *
+ * Layout: the text is centred in the space between the floating navigation
+ * and a bottom band that holds the two readouts and the results, so nothing
+ * slides under the navigation or off the bottom on short laptop screens; the
+ * headline also scales with the screen's height.
  *
  * Reduced motion: no pinning and no scroll effects — one screen, everything
  * visible, the brain as a still frame.
@@ -151,32 +157,27 @@ export function Hero() {
 
   const shown = reduced || focusReveal;
   const gate = shown || textReady;
-  const reveal = (from: number, to: number) => (shown ? 1 : gate ? smoothstep(from, to, progress) : 0);
-  const headlineReveal = reveal(0.15, 0.45);
-  const subtitleReveal = reveal(0.2, 0.5);
-  const ctaReveal = reveal(0.25, 0.55);
+  const reveal = ([from, to]: readonly [number, number]) => (shown ? 1 : gate ? smoothstep(from, to, progress) : 0);
+  const headlineReveal = reveal(REVEAL.headline);
+  const subtitleReveal = reveal(REVEAL.subtitle);
+  const ctaReveal = reveal(REVEAL.ctas);
   const kpisShown = !reduced && act >= 4;
 
   return (
     <section
       ref={sectionRef}
       aria-labelledby="hero-heading"
-      className="relative bg-black text-white"
-      style={{ height: reduced ? undefined : "300vh" }}
+      className="relative bg-[#040711] text-white"
+      style={{ height: reduced ? undefined : "260vh" }}
     >
       <div
-        className={cn(
-          // Full screen, under the floating navigation.
-          "flex h-svh min-h-[600px] w-full items-center justify-center overflow-hidden",
-          !reduced && "sticky top-0",
-        )}
+        className={cn("relative flex h-svh min-h-[560px] w-full flex-col overflow-hidden", !reduced && "sticky top-0")}
+        style={{ background: HERO_BG }}
       >
         {/* A failing WebGL brain must never take the Hero down with it. */}
         <ErrorBoundary label="BrainHero">
           <BrainHero progressRef={progressRef} />
         </ErrorBoundary>
-
-        <HudCards reduced={reduced} />
 
         {/* Readability behind the copy over the brightest particles; it only
             comes in with the text, so the brain opens unshaded. */}
@@ -184,61 +185,73 @@ export function Hero() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 z-10"
           style={{
-            background: "radial-gradient(ellipse 48% 40% at 50% 50%, rgba(0,0,0,0.72), transparent 75%)",
+            background: "radial-gradient(ellipse 58% 46% at 50% 45%, rgba(4,7,17,0.82), transparent 74%)",
             opacity: headlineReveal,
           }}
         />
 
-        <div
-          className="relative z-20 mx-auto max-w-6xl px-4 text-center md:px-6"
-          onFocus={() => setFocusReveal(true)}
-        >
-          <h1
-            id="hero-heading"
-            className="font-exo text-5xl font-medium leading-[0.92] tracking-[-0.045em] sm:text-6xl md:text-7xl lg:text-[5.5rem] xl:text-[6.5rem]"
-            style={revealStyle(headlineReveal)}
-          >
-            <span className="block">{h.heroHeadlineLine1}</span>{" "}
-            <span className={cn("block", HERO_ACCENT)}>{h.heroHeadlineLine2}</span>
-          </h1>
-
-          <p
-            className="mx-auto mt-6 max-w-2xl text-base font-light leading-relaxed tracking-[-0.01em] text-white/80 sm:text-lg md:mt-8 md:text-xl"
-            style={revealStyle(subtitleReveal)}
-          >
-            {h.heroSubtitle}
-          </p>
-
-          <div
-            className="mt-8 flex flex-wrap items-center justify-center gap-3 md:mt-10"
-            style={{ ...revealStyle(ctaReveal), pointerEvents: ctaReveal > 0.5 ? "auto" : "none" }}
-          >
-            <Button asChild size="lg" variant="inverse">
-              <Link href="#evidencia">{h.heroPrimaryCta}</Link>
-            </Button>
-            <Button asChild size="lg" variant="outlineInverse">
-              <Link href="/contact">{h.heroSecondaryCta}</Link>
-            </Button>
-          </div>
-
-          {/* Ato IV — the brain breaks into points and the results emerge */}
-          {!reduced && (
-            <dl
-              className="mx-auto mt-10 grid max-w-2xl grid-cols-3 divide-x divide-white/15 border-y border-white/15 transition-opacity duration-700 md:mt-12"
-              style={{ opacity: kpisShown ? 1 : 0 }}
-              aria-hidden={!kpisShown}
+        {/* The copy, centred between the navigation (pt) and the bottom band */}
+        <div className="relative z-20 flex flex-1 items-center justify-center px-4 pb-4 pt-24 md:px-6 md:pt-28">
+          <div className="mx-auto max-w-6xl text-center" onFocus={() => setFocusReveal(true)}>
+            <h1
+              id="hero-heading"
+              className="font-exo text-[length:clamp(2.75rem,min(8vw,11.5svh),6.5rem)] font-medium leading-[0.94] tracking-[-0.045em]"
+              style={revealStyle(headlineReveal)}
             >
-              {h.heroKpis.map((kpi) => (
-                <div key={kpi.label} className="flex flex-col-reverse gap-1.5 px-3 py-4">
-                  <dt className={LABEL}>{kpi.label}</dt>
-                  <dd className="font-exo text-2xl font-medium tracking-[-0.03em] tabular-nums text-white md:text-4xl">{kpi.value}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
+              <span className="block">{h.heroHeadlineLine1}</span>{" "}
+              <span className={cn("block", HERO_ACCENT)}>{h.heroHeadlineLine2}</span>
+            </h1>
+
+            <p
+              className="mx-auto mt-5 max-w-2xl text-balance text-base font-light leading-relaxed tracking-[-0.01em] text-white/80 sm:text-lg md:mt-7 md:text-xl"
+              style={revealStyle(subtitleReveal)}
+            >
+              {h.heroSubtitle}
+            </p>
+
+            <div
+              className="mt-7 flex flex-wrap items-center justify-center gap-3 md:mt-9"
+              style={{ ...revealStyle(ctaReveal), pointerEvents: ctaReveal > 0.5 ? "auto" : "none" }}
+            >
+              <Button asChild size="lg" variant="inverse">
+                <Link href="#evidencia">{h.heroPrimaryCta}</Link>
+              </Button>
+              <Button asChild size="lg" variant="outlineInverse">
+                <Link href="/contact">{h.heroSecondaryCta}</Link>
+              </Button>
+            </div>
+          </div>
         </div>
 
-        {/* Scroll hint — only while the brain is on its own */}
+        {/* Bottom band: heartbeat · the results (Ato IV) · anxiety result */}
+        <div className="relative z-20 pb-5 md:pb-7">
+          <div className="container mx-auto grid items-end gap-4 px-4 md:px-6 xl:grid-cols-[15rem_minmax(0,1fr)_15rem]">
+            <HeartbeatCard reduced={reduced} className="hidden xl:block" />
+
+            {reduced ? (
+              <span className="hidden xl:block" />
+            ) : (
+              <dl
+                className="mx-auto grid w-full max-w-2xl grid-cols-3 divide-x divide-white/15 border-y border-white/15 transition-opacity duration-700"
+                style={{ opacity: kpisShown ? 1 : 0 }}
+                aria-hidden={!kpisShown}
+              >
+                {h.heroKpis.map((kpi) => (
+                  <div key={kpi.label} className="flex flex-col-reverse gap-1.5 px-3 py-3 text-center md:py-4">
+                    <dt className={LABEL}>{kpi.label}</dt>
+                    <dd className="font-exo text-2xl font-medium tracking-[-0.03em] tabular-nums text-white md:text-4xl">
+                      {kpi.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+
+            <AnxietyCard className="hidden justify-self-end xl:block" />
+          </div>
+        </div>
+
+        {/* Scroll hint — only while the brain is on its own (the results band is still empty then) */}
         {!reduced && (
           <div
             aria-hidden="true"

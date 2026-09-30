@@ -273,3 +273,9 @@ Fonte: gravação de ecrã do protótipo `Neroes.dc.html` (claude.ai/design, ace
 - Parceiros ("Com o apoio de") passam para baixo de "Onde funciona hoje", alinhados com as três colunas.
 - Fundador: o título do Pedro dividido em dois painéis que se expandem ao passar o rato — "Neurotecnologia rigorosa numa mão." (o headset) e "As profundezas da mente na outra." (foto do Pedro ao microfone, 481×720 — pedir o original em alta resolução).
 - **Formulário de contacto:** o projeto Supabase do `.env.local` já não existe (o domínio não resolve) e o email nunca foi configurado, por isso nenhuma mensagem chegava a lado nenhum (a versão 2 mostrava "enviado" e perdia-a). O email da empresa é Google Workspace: basta `SMTP_USER` + `SMTP_PASS` (palavra-passe de app) — ver `.env.example` e `npm run mail:check`.
+
+**Feedback do Duarte (30 set. 2026):**
+- Secção 04 passa a **"04 — Serviços"**, por esta ordem: **Corporate, Desporto, Clínicas, Educação**. ⚠️ A descrição de Educação ("Foco, gestão da ansiedade e controlo emocional para estudantes — antes dos exames e ao longo do ano letivo.") foi escrita agora — o site antigo não tinha nada sobre educação; **confirmar com o Duarte**. O título "Onde funciona hoje" mantém-se (do Pedro); mudar se Educação ainda não estiver ativa.
+- "Com o apoio de" → **"Confiados por" / "Trusted by"**. O Duarte vai enviar mais logótipos.
+- Painéis do fundador: **"Missão"** (headset, texto da missão do Pedro) e **"Visão"** (foto do Pedro, texto pessoal dele). A frase do Pedro volta a ser o título da secção 06.
+- Hero: o cérebro volta às cores da versão 2 (#3B82F6 / #22D3EE / #00F0FF) e ao fundo azul-marinho; o texto entra antes da explosão e não fica por baixo da navegação em ecrãs baixos.

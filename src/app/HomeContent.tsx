@@ -53,6 +53,9 @@ const FOUNDER_IMAGES = {
 export function HomeContent() {
   const { t } = useLanguage();
   const h = t.home;
+  // Pedro's line has two halves ("… numa mão." / "… na outra."); the second
+  // takes the vision register, like "measured" / "believed" above.
+  const [founderLineA, founderLineB] = h.founders.title.split(/(?<=\.)\s+/);
 
   return (
     <>
@@ -131,7 +134,7 @@ export function HomeContent() {
       {/* 03 — The evidence, on black */}
       <Evidence />
 
-      {/* 04 — Where it works today */}
+      {/* 04 — Services: Corporate, Sport, Clinics, Education */}
       <section aria-labelledby="where-heading" className="bg-background py-24 md:py-36">
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-4xl text-center">
@@ -142,7 +145,7 @@ export function HomeContent() {
               </h2>
             </BlurReveal>
           </div>
-          <div className="mt-16 grid gap-12 md:mt-24 md:grid-cols-3 md:gap-12">
+          <div className="mt-16 grid gap-12 sm:grid-cols-2 md:mt-24 md:gap-10 lg:grid-cols-4">
             {h.where.items.map((item) => (
               <div key={item.title} className="border-t border-foreground pt-6">
                 <h3 className="text-3xl font-medium tracking-[-0.03em] text-foreground">{item.title}</h3>
@@ -151,7 +154,7 @@ export function HomeContent() {
             ))}
           </div>
 
-          {/* Who backs it: one row, edge to edge with the three columns above */}
+          {/* Trusted by: one row, edge to edge with the four columns above */}
           <div className="mt-20 border-t border-border pt-10 md:mt-28 md:pt-12">
             <h3 className="text-center text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
               {t.shared.partnersHeading}
@@ -255,7 +258,7 @@ export function HomeContent() {
         </div>
       </section>
 
-      {/* 06 — Founder: his line split across the device and the man */}
+      {/* 06 — Founder: his line as the title, then Mission (the device) and Vision (Pedro) */}
       <section aria-labelledby="founders-heading" className="bg-black pb-24 pt-16 text-white md:pb-36 md:pt-24">
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-4xl border-t border-white/15 pt-20 text-center md:pt-28">
@@ -263,10 +266,12 @@ export function HomeContent() {
               {h.founders.eyebrow}
             </Eyebrow>
             <BlurReveal>
-              <h2 id="founders-heading" className={STATEMENT}>
-                Pedro Pestana
+              <h2 id="founders-heading" className={SHIFT}>
+                {founderLineA}{" "}
+                {founderLineB && <span className={cn("block", VISION_ON_BLACK)}>{founderLineB}</span>}
               </h2>
             </BlurReveal>
+            <p className="mt-8 text-lg font-medium text-white/80">Pedro Pestana</p>
           </div>
           <div className="mt-14 md:mt-20">
             <ExpandingPanels
@@ -276,14 +281,14 @@ export function HomeContent() {
                   image: FOUNDER_IMAGES.device,
                   alt: h.founders.deviceAlt,
                   focus: "center 35%",
-                  title: h.founders.titleTech,
+                  title: h.founders.missionTitle,
                   body: h.founders.pedroMission,
                 },
                 {
                   image: FOUNDER_IMAGES.pedro,
                   alt: h.founders.pedroAlt,
                   focus: "center 18%",
-                  title: h.founders.titleMind,
+                  title: h.founders.visionTitle,
                   body: h.founders.pedroPersonal,
                 },
               ]}

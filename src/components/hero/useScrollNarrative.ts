@@ -30,10 +30,13 @@ export interface ScrollNarrative {
 
 // ── Ato boundaries, in scroll progress (0..1) ──────────────────────────
 const ACT_BOUNDARIES: readonly [number, number, number, number, number] = [0, 0.22, 0.55, 0.85, 1];
-const LERP_FACTOR = 0.04;
+// Forward smoothing: 0.04 trailed a quick scroll by about a second, so the
+// brain could already be breaking apart while the headline was still coming
+// in. 0.08 keeps the motion soft but in step with the wheel.
+const LERP_FACTOR = 0.08;
 // Scrolling back up settles faster: at 0.04 a quick return to the top left
 // the Hero black (brain still mid-dissolve) for 1–2s before it re-formed.
-const LERP_FACTOR_BACK = 0.1;
+const LERP_FACTOR_BACK = 0.14;
 const REACT_STATE_THROTTLE_MS = 100;
 
 function lerp(a: number, b: number, t: number): number {

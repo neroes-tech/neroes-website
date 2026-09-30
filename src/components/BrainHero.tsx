@@ -18,13 +18,12 @@ type BrainData = {
   cerebrumCount: number;
 };
 
-// Brand palette only (brand manual "Referências Cromáticas" + logo): teal →
-// blue across the surface, glow hubs toward the logo's vivid blue. No neon
-// cyan. Additive blending (see pointMat) still lets dense regions read as
-// light on the dark Hero.
-const C_BLUE = new THREE.Color("#1270B0");
-const C_TEAL = new THREE.Color("#0F9CAC");
-const C_CYAN = new THREE.Color("#00A5E9");
+// The version 2 palette, which the team preferred for the 3D brain: electric
+// cyan → royal blue across the surface, glow hubs toward a bright cyan.
+// Additive blending (see pointMat) lets dense regions bloom on the dark Hero.
+const C_BLUE = new THREE.Color("#3B82F6");
+const C_TEAL = new THREE.Color("#22D3EE");
+const C_CYAN = new THREE.Color("#00F0FF");
 
 // Neural-connection graph: a subset of glow hubs linked to their nearest
 // same-hemisphere neighbours (see buildConnections).
@@ -496,9 +495,9 @@ const POINT_FRAG = `
     float core = 1.0 - smoothstep(0.18, 0.34, d);
     float halo = pow(1.0 - d * 2.0, 2.0);
     float shape = max(core, halo * 0.55);
-    // vec3(0.0, 0.647, 0.914) = #00A5E9, the logo's vivid blue.
-    vec3 col = mix(vColor, vec3(0.0, 0.647, 0.914), vGlow * 0.6);
-    col = mix(col, vec3(0.72, 0.88, 1.0), vSpark * 0.6);
+    // vec3(0.0, 0.941, 1.0) = #00F0FF electric cyan.
+    vec3 col = mix(vColor, vec3(0.0, 0.941, 1.0), vGlow * 0.6);
+    col = mix(col, vec3(0.75, 0.98, 1.0), vSpark * 0.7);
     // Ato II bloom whitens the cloud; vital points keep most of their red.
     col = mix(col, vec3(1.0), uBloom * 0.35 * (1.0 - d * 1.6) * (1.0 - vVital * 0.8));
     col += vCursorBoost;
@@ -573,8 +572,8 @@ const LINE_FRAG = `
     float head = fract(cycle);
     float gate = step(0.6, fract(sin(floor(cycle) * 12.9898 + vEdgePhase * 78.233) * 43758.5453));
     float pulse = exp(-pow((vEnd - head) * 8.0, 2.0)) * gate;
-    // #1270B0 brand blue → #00A5E9 vivid blue as a pulse passes.
-    vec3 col = mix(vec3(0.071, 0.439, 0.69), vec3(0.0, 0.647, 0.914), 0.4 + pulse * 0.6);
+    // #3B82F6 royal blue → #00F0FF electric cyan as a pulse passes.
+    vec3 col = mix(vec3(0.231, 0.51, 0.965), vec3(0.0, 0.941, 1.0), 0.4 + pulse * 0.6);
     gl_FragColor = vec4(col, (breathe + pulse * 0.75) * uLineFade);
   }
 `;

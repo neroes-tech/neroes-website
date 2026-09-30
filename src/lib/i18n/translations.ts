@@ -97,10 +97,11 @@ export interface Translations {
       videoFallback: string;
       beyond: string;
     };
+    /** 04 — Serviços, in the team's order: Corporate, Desporto, Clínicas, Educação. */
     where: {
       eyebrow: string;
       title: string;
-      items: [NamedItem, NamedItem, NamedItem];
+      items: [NamedItem, NamedItem, NamedItem, NamedItem];
     };
     journey: {
       eyebrow: string;
@@ -121,8 +122,10 @@ export interface Translations {
     /** The founder panels: his line split across the device (left) and Pedro (right). */
     founders: {
       eyebrow: string;
-      titleTech: string;
-      titleMind: string;
+      /** Pedro's line from the prototype — the section title. */
+      title: string;
+      missionTitle: string;
+      visionTitle: string;
       pedroMission: string;
       pedroPersonal: string;
       deviceAlt: string;
@@ -302,20 +305,24 @@ export const translations: Record<Locale, Translations> = {
           "O mesmo circuito vai além da ansiedade — incluindo investigação em fase inicial sobre declínio cognitivo e envelhecimento saudável. **Não é um produto, nem um resultado comprovado:** é uma linha de investigação séria.",
       },
       where: {
-        eyebrow: "04 — Contextos",
+        eyebrow: "04 — Serviços",
         title: "Onde funciona hoje",
         items: [
           {
-            title: "Clínica",
-            desc: "Treino sem medicação para a ansiedade e a regulação emocional — uma ferramenta de apoio, a par do acompanhamento clínico.",
+            title: "Corporate",
+            desc: "Foco sustentado e resiliência para equipas sob grande exigência — feedback em vez de suposições.",
           },
           {
             title: "Desporto",
             desc: "Tomada de decisão, velocidade de processamento e compostura — validado com atletas profissionais e de elite.",
           },
           {
-            title: "Trabalho",
-            desc: "Foco sustentado e resiliência para equipas sob grande exigência — feedback em vez de suposições.",
+            title: "Clínicas",
+            desc: "Treino sem medicação para a ansiedade e a regulação emocional — uma ferramenta de apoio, a par do acompanhamento clínico.",
+          },
+          {
+            title: "Educação",
+            desc: "Foco, gestão da ansiedade e controlo emocional para estudantes — antes dos exames e ao longo do ano letivo.",
           },
         ],
       },
@@ -361,8 +368,9 @@ export const translations: Record<Locale, Translations> = {
       },
       founders: {
         eyebrow: "06 — Fundador",
-        titleTech: "Neurotecnologia rigorosa numa mão.",
-        titleMind: "As profundezas da mente na outra.",
+        title: "Neurotecnologia rigorosa numa mão. As profundezas da mente na outra.",
+        missionTitle: "Missão",
+        visionTitle: "Visão",
         pedroMission:
           "A missão do Pedro, nas suas palavras, é **despoletar a excelência** — uma carreira a juntar neurofeedback, IA, interfaces cérebro-computador, EEG e ciência de dados para potenciar a mente humana, com três startups fundadas antes desta.",
         pedroPersonal:
@@ -458,7 +466,7 @@ export const translations: Record<Locale, Translations> = {
           role: "29 anos",
         },
       ],
-      partnersHeading: "Com o apoio de",
+      partnersHeading: "Confiados por",
       evidence: {
         eyebrow: "03 — A evidência",
         title: "Não descrevemos resultados. Medimo-los.",
@@ -633,20 +641,24 @@ export const translations: Record<Locale, Translations> = {
           "The same loop reaches beyond anxiety — including early-stage research into cognitive decline and healthy aging. **Not a product, and not a proven outcome:** a direction of serious research.",
       },
       where: {
-        eyebrow: "04 — Contexts",
+        eyebrow: "04 — Services",
         title: "Where it works today",
         items: [
           {
-            title: "Clinic",
-            desc: "Drug-free training for anxiety and emotional regulation — a support tool alongside care.",
+            title: "Corporate",
+            desc: "Sustained focus and resilience for high-demand teams — feedback instead of guesswork.",
           },
           {
             title: "Sport",
             desc: "Decision-making, processing speed, and composure — validated with professional and elite athletes.",
           },
           {
-            title: "Work",
-            desc: "Sustained focus and resilience for high-demand teams — feedback instead of guesswork.",
+            title: "Clinics",
+            desc: "Drug-free training for anxiety and emotional regulation — a support tool alongside care.",
+          },
+          {
+            title: "Education",
+            desc: "Focus, anxiety management and emotional control for students — before exams and throughout the school year.",
           },
         ],
       },
@@ -689,8 +701,9 @@ export const translations: Record<Locale, Translations> = {
       },
       founders: {
         eyebrow: "06 — Founder",
-        titleTech: "Rigorous neurotechnology in one hand.",
-        titleMind: "The depths of the mind in the other.",
+        title: "Rigorous neurotechnology in one hand. The depths of the mind in the other.",
+        missionTitle: "Mission",
+        visionTitle: "Vision",
         pedroMission:
           "Pedro's mission, in his own words, is **to trigger excellence** — a career spent merging neurofeedback, AI, brain-computer interfaces, EEG, and data science to enhance the human mind, with three startups founded before this one.",
         pedroPersonal:
@@ -786,7 +799,7 @@ export const translations: Record<Locale, Translations> = {
           role: "29 years old",
         },
       ],
-      partnersHeading: "Supported by",
+      partnersHeading: "Trusted by",
       evidence: {
         eyebrow: "03 — The evidence",
         title: "We don't describe results. We measure them.",

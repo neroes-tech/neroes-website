@@ -75,7 +75,7 @@ export function ExpandingPanels({
 
             <div className="mt-auto p-7 md:p-9 xl:p-10">
               {/* Wraps with the panel's width: fewer lines when it widens. */}
-              <h3 className="font-exo text-4xl font-medium leading-[0.98] tracking-[-0.04em] text-white md:text-5xl xl:text-6xl">
+              <h3 className="font-exo text-5xl font-medium leading-[0.95] tracking-[-0.045em] text-white md:text-6xl xl:text-7xl">
                 {panel.title}
               </h3>
               {/* Fixed height on desktop, so both titles sit at the same height. */}
