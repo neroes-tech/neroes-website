@@ -1,14 +1,18 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
 import { Hero } from "@/components/home/Hero";
+import { PartnerLogos } from "@/components/layout/PartnerLogos";
+import { BlurReveal } from "@/components/motion/BlurReveal";
+import { Marquee } from "@/components/motion/Marquee";
+import { WordReveal } from "@/components/motion/WordReveal";
 import { Evidence } from "@/components/sections/Evidence";
 import { ProductVideo } from "@/components/sections/ProductVideo";
 import { Button } from "@/components/ui/button";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Rich } from "@/components/ui/Rich";
-import { SectionHeading } from "@/components/ui/SectionHeading";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 
@@ -20,70 +24,99 @@ const HEADSET_VIDEO = {
   poster: "/media/neroes-headset-poster.webp",
 } as const;
 
-// The "believed / vision" register: italic in the brand blue (5.1:1 on
-// paper). No gold — it stays in the logo artwork only.
-const VISION_TEXT = "text-secondary";
+// Stills from the headset film, in the order of the gallery (alt texts in t.home.media.galleryAlts).
+const GALLERY = ["0_5", "4", "8", "12", "16", "20", "24", "28"].map((t) => `/media/gallery/headset-${t}.webp`);
 
-// Today → next → the frontier: ink, brand blue, the logo's vivid blue.
+// The "believed / vision" register: italic in the logo's vivid blue on
+// black (7.4:1) and the brand blue on white (5.1:1). No gold.
+const VISION_ON_BLACK = "italic text-[#00A5E9]";
+const VISION_ON_WHITE = "italic text-secondary";
+
+// Today → next → the frontier.
 const STAGE_DOT = ["bg-foreground", "bg-secondary", "bg-accent"] as const;
 
-/** Standard section shell: 1px top rule, generous vertical rhythm. */
-function Section({
-  id,
-  labelledBy,
-  tone = "paper",
-  className,
-  children,
+// One statement per section, set large and tight.
+const STATEMENT = "font-exo text-5xl font-medium leading-[0.95] tracking-[-0.04em] md:text-7xl lg:text-[5.5rem]";
+
+/** A full-height photo card with its statement laid over the lower part. */
+function ImageCard({
+  src,
+  alt,
+  title,
+  body,
+  imageClassName,
 }: {
-  id?: string;
-  labelledBy: string;
-  tone?: "paper" | "muted";
-  className?: string;
-  children: React.ReactNode;
+  src: string;
+  alt: string;
+  title: string;
+  body?: string;
+  /** e.g. mix-blend-screen for a render on black, so it sits on the card surface. */
+  imageClassName?: string;
 }) {
   return (
-    <section
-      id={id}
-      aria-labelledby={labelledBy}
-      className={cn(
-        "scroll-mt-24 border-t border-border py-20 md:py-28",
-        tone === "muted" ? "bg-muted" : "bg-background",
-        className,
-      )}
-    >
-      <div className="container mx-auto px-4 md:px-6">{children}</div>
-    </section>
+    <figure className="relative isolate flex min-h-[480px] flex-col justify-end overflow-hidden rounded-3xl bg-[#101010] p-7 ring-1 ring-inset ring-white/10 md:min-h-[640px] md:p-10">
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes="(min-width: 1024px) 50vw, 100vw"
+        className={cn("-z-10 object-cover", imageClassName)}
+      />
+      {/* Legibility: the lower half darkens under the text. */}
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+      <figcaption>
+        <h3 className="font-exo text-4xl font-medium leading-[0.98] tracking-[-0.04em] text-white md:text-6xl">{title}</h3>
+        {body && (
+          <p className="mt-6 max-w-lg rounded-2xl bg-black/50 p-5 text-base font-light leading-relaxed text-white/90 backdrop-blur-md md:text-lg">
+            {body}
+          </p>
+        )}
+      </figcaption>
+    </figure>
   );
 }
 
 /**
- * The Home carries the content of Pedro's prototype (docs/content-inventory.md,
- * section 6) — platform, evidence, where it works, journey, vision, founder,
- * neurorights, closing — plus the headset film. Nothing else.
+ * The Home, laid out after the Neurable company page the team picked as the
+ * reference, with the content of Pedro's prototype (docs/content-inventory.md,
+ * section 6) and the headset film. Black and white chapters alternate; every
+ * statement is one large, tightly set line that comes into focus on scroll.
  */
 export function HomeContent() {
   const { t } = useLanguage();
   const h = t.home;
+  const media = h.media;
 
   return (
     <>
       <Hero />
 
-      {/* 02 — The platform: the device edge to edge, then the sense → train → measure loop */}
+      {/* 02 — The platform, stated; then who backs it */}
       <section
         id="plataforma"
         aria-labelledby="platform-heading"
-        className="scroll-mt-24 border-t border-border bg-background pt-20 md:pt-28"
+        className="scroll-mt-24 bg-background pb-20 pt-28 md:pb-28 md:pt-40"
       >
-        <div className="container mx-auto px-4 md:px-6">
-          <SectionHeading
-            id="platform-heading"
-            eyebrow={h.platform.eyebrow}
-            title={h.platform.title}
-            intro={<Rich text={h.platform.lead} />}
-          />
-        </div>
+        <div className="container mx-auto px-4 text-center md:px-6">
+          <Eyebrow className="mb-6">{h.platform.eyebrow}</Eyebrow>
+          <BlurReveal>
+            <h2 id="platform-heading" className={cn(STATEMENT, "mx-auto max-w-5xl text-foreground")}>
+              {h.platform.title}
+            </h2>
+          </BlurReveal>
+          <p className="mx-auto mt-8 max-w-2xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
+            <Rich text={h.platform.lead} />
+          </p>
 
+          <p className="mt-20 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground md:mt-24">
+            {t.shared.partnersHeading}
+          </p>
+          <PartnerLogos className="mt-8" />
+        </div>
+      </section>
+
+      {/* The device itself, edge to edge */}
+      <div className="bg-background">
         <ProductVideo
           src={HEADSET_VIDEO.loop}
           fullSrc={HEADSET_VIDEO.full}
@@ -94,178 +127,231 @@ export function HomeContent() {
           resumeLabel={h.platform.videoResume}
           fallback={h.platform.videoFallback}
         />
+      </div>
 
-        <div className="container mx-auto px-4 pb-20 pt-16 md:px-6 md:pb-28 md:pt-20">
-          <ol className="grid border-y border-border md:grid-cols-3 md:divide-x md:divide-border">
+      {/* The loop, and what it runs on */}
+      <section aria-label={h.platform.techLabel} className="bg-background pb-24 pt-16 md:pb-32 md:pt-24">
+        <div className="container mx-auto px-4 md:px-6">
+          <ol className="grid gap-10 md:grid-cols-3 md:gap-12">
             {h.platform.steps.map((step) => (
-              <li key={step.index} className="border-b border-border py-7 last:border-b-0 md:border-b-0 md:px-7 md:first:pl-0">
-                <span className="font-mono text-sm text-secondary">{step.index}</span>
-                <h3 className="mt-2 text-2xl font-bold text-foreground">{step.title}</h3>
-                <p className="mt-2 leading-relaxed text-muted-foreground">{step.desc}</p>
+              <li key={step.index}>
+                <span className="text-sm font-bold text-secondary">{step.index}</span>
+                <h3 className="mt-3 text-3xl font-medium tracking-[-0.03em] text-foreground">{step.title}</h3>
+                <p className="mt-3 text-lg font-light leading-relaxed text-muted-foreground">{step.desc}</p>
               </li>
             ))}
           </ol>
 
-          <div className="mt-12 grid gap-10 lg:grid-cols-12 lg:gap-12">
+          <div className="mt-20 grid gap-12 border-t border-border pt-12 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-7">
-              <p className="text-xl leading-relaxed text-muted-foreground">
+              <p className="text-2xl font-light leading-snug text-foreground md:text-3xl">
                 <Rich text={h.platform.networks} />
               </p>
-              <div className="mt-8 border-l-2 border-secondary pl-5">
-                <p className="leading-relaxed text-muted-foreground">
-                  <Rich text={h.platform.beyond} />
-                </p>
-              </div>
+              <p className="mt-8 border-l-2 border-secondary pl-5 leading-relaxed text-muted-foreground">
+                <Rich text={h.platform.beyond} />
+              </p>
             </div>
             <div className="lg:col-span-5">
               <Eyebrow tone="muted">{h.platform.techLabel}</Eyebrow>
               <ul className="mt-4 divide-y divide-border border-y border-border">
                 {h.platform.tech.map((item) => (
-                  <li key={item} className="py-2.5 text-foreground">
+                  <li key={item} className="py-3 text-lg text-foreground">
                     {item}
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 text-sm text-muted-foreground">{h.platform.techNote}</p>
+              <p className="mt-4 text-sm text-muted-foreground">{h.platform.techNote}</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 03 — The evidence (shared with the Science page) */}
+      {/* 03 — The evidence, on black */}
       <Evidence />
 
       {/* 04 — Where it works today */}
-      <Section labelledBy="where-heading">
-        <SectionHeading id="where-heading" eyebrow={h.where.eyebrow} title={h.where.title} />
-        <div className="grid gap-10 md:grid-cols-3 md:gap-8">
-          {h.where.items.map((item) => (
-            <div key={item.title} className="border-t-2 border-foreground pt-5">
-              <h3 className="text-3xl font-bold text-foreground">{item.title}</h3>
-              <p className="mt-3 text-lg leading-relaxed text-muted-foreground">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      {/* 05 — The journey */}
-      <Section labelledBy="journey-heading">
-        <SectionHeading id="journey-heading" eyebrow={h.journey.eyebrow} title={h.journey.title} />
-        <ol>
-          {h.journey.stages.map((stage, i) => (
-            <li
-              key={stage.title}
-              className="grid gap-3 border-t border-border py-7 md:grid-cols-12 md:items-baseline md:gap-8"
-            >
-              {/* Block text (not flex) so its baseline lines up with the stage title's. */}
-              <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground md:col-span-3">
-                <span
-                  aria-hidden="true"
-                  className={cn("mr-2.5 inline-block h-2 w-2 -translate-y-px rounded-full align-middle", STAGE_DOT[i])}
-                />
-                {stage.label}
-              </p>
-              <h3 className={cn("text-4xl font-bold text-foreground md:col-span-4", i === 2 && cn("italic", VISION_TEXT))}>
-                {stage.title}
-              </h3>
-              <p className="text-lg leading-relaxed text-muted-foreground md:col-span-5">{stage.desc}</p>
-            </li>
-          ))}
-        </ol>
-      </Section>
-
-      {/* Register shift — measured above, believed below; then the vision. Centred, as one statement. */}
-      <Section labelledBy="vision-heading" tone="muted">
-        <div className="mx-auto max-w-4xl text-center">
-          <p className="text-3xl font-bold leading-tight text-foreground md:text-5xl">{h.vision.measured}</p>
-          <div className="my-6 flex items-center gap-4" aria-hidden="true">
-            <span className="h-px flex-1 bg-foreground/30" />
-            <span className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">{h.vision.shiftLabel}</span>
-            <span className="h-px flex-1 bg-foreground/30" />
+      <section aria-labelledby="where-heading" className="bg-background py-24 md:py-36">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="mx-auto max-w-4xl text-center">
+            <Eyebrow className="mb-6">{h.where.eyebrow}</Eyebrow>
+            <BlurReveal>
+              <h2 id="where-heading" className={cn(STATEMENT, "text-foreground")}>
+                {h.where.title}
+              </h2>
+            </BlurReveal>
           </div>
-          <p className={cn("text-3xl font-bold italic leading-tight md:text-5xl", VISION_TEXT)}>{h.vision.believed}</p>
-          <Eyebrow tone="muted" className="mt-6">
-            {h.vision.note}
-          </Eyebrow>
+          <div className="mt-16 grid gap-12 md:mt-24 md:grid-cols-3 md:gap-12">
+            {h.where.items.map((item) => (
+              <div key={item.title} className="border-t border-foreground pt-6">
+                <h3 className="text-3xl font-medium tracking-[-0.03em] text-foreground">{item.title}</h3>
+                <p className="mt-3 text-lg font-light leading-relaxed text-muted-foreground">{item.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
+      </section>
 
-        <div className="mx-auto mt-20 max-w-3xl text-center">
-          <h2 id="vision-heading" className="text-3xl font-bold leading-[1.1] tracking-tight text-foreground md:text-[2.75rem]">
-            {h.vision.title}
+      {/* 05 — The journey, as one line with three stops */}
+      <section aria-labelledby="journey-heading" className="bg-muted py-24 md:py-36">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="mx-auto max-w-4xl text-center">
+            <Eyebrow className="mb-6">{h.journey.eyebrow}</Eyebrow>
+            <BlurReveal>
+              <h2 id="journey-heading" className={cn(STATEMENT, "text-foreground")}>
+                {h.journey.title}
+              </h2>
+            </BlurReveal>
+          </div>
+          <ol className="relative mt-16 grid gap-12 md:mt-24 md:grid-cols-3 md:gap-10">
+            <span aria-hidden="true" className="absolute inset-x-0 top-[7px] hidden h-px bg-foreground/20 md:block" />
+            {h.journey.stages.map((stage, i) => (
+              <li key={stage.title} className="relative">
+                <span aria-hidden="true" className={cn("block h-3.5 w-3.5 rounded-full ring-8 ring-muted", STAGE_DOT[i])} />
+                <p className="mt-6 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">{stage.label}</p>
+                <h3
+                  className={cn(
+                    "mt-3 text-4xl font-medium tracking-[-0.03em] text-foreground md:text-5xl",
+                    i === 2 && VISION_ON_WHITE,
+                  )}
+                >
+                  {stage.title}
+                </h3>
+                <p className="mt-4 text-lg font-light leading-relaxed text-muted-foreground">{stage.desc}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Vision — measured above the line, believed below; one black chapter */}
+      <section aria-labelledby="vision-heading" className="bg-black pb-24 pt-24 text-white md:pb-36 md:pt-32">
+        <div className="container mx-auto px-4 md:px-6">
+          <h2 id="vision-heading" className="text-center text-xs font-bold uppercase tracking-[0.14em] text-white/55">
+            {h.vision.shiftLabel} · {h.vision.note}
           </h2>
-          <p className="mt-6 text-lg leading-relaxed text-muted-foreground">{h.vision.body}</p>
-          <figure className="mt-12">
-            <blockquote className={cn("text-2xl italic leading-snug md:text-[1.75rem]", VISION_TEXT)}>
-              “{h.vision.quote}”
+          <div className="mt-10 grid gap-4 lg:grid-cols-2">
+            <ImageCard src="/media/vision-headset.webp" alt={media.measuredAlt} title={h.vision.measured} />
+            <ImageCard
+              src="/media/vision-brain.webp"
+              alt={media.believedAlt}
+              title={h.vision.believed}
+              body={h.vision.body}
+              imageClassName="object-[center_25%] mix-blend-screen"
+            />
+          </div>
+
+          {/* The honest bridge, read word by word */}
+          <figure className="mx-auto mt-28 max-w-5xl md:mt-40">
+            <blockquote>
+              <WordReveal
+                text={`“${h.vision.quote}”`}
+                className="font-exo text-3xl font-light leading-[1.2] tracking-[-0.02em] md:text-5xl"
+              />
             </blockquote>
-            <figcaption className="mt-4 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
-              {h.vision.quoteCaption}
-            </figcaption>
+            <figcaption className="mt-8 text-sm text-white/55">— {h.vision.quoteCaption}</figcaption>
           </figure>
         </div>
 
-        <div className="mt-16 grid gap-10 text-center md:grid-cols-3 md:gap-8">
-          {h.vision.pillars.map((pillar) => (
-            <div key={pillar.title} className="border-t border-foreground/15 pt-5">
-              <h3 className={cn("text-xl font-bold italic", VISION_TEXT)}>{pillar.title}</h3>
-              <p className="mt-2 leading-relaxed text-muted-foreground">{pillar.desc}</p>
-            </div>
-          ))}
+        {/* The headset, piece by piece */}
+        <div className="mt-24 md:mt-32" role="group" aria-label={media.galleryLabel}>
+          <Marquee
+            pauseLabel={media.galleryPause}
+            playLabel={media.galleryPlay}
+            items={GALLERY.map((src, i) => (
+              <Image
+                key={src}
+                src={src}
+                alt={media.galleryAlts[i]!}
+                width={450}
+                height={300}
+                className="h-[220px] w-auto rounded-2xl object-cover md:h-[300px]"
+              />
+            ))}
+          />
         </div>
-      </Section>
+
+        <div className="container mx-auto mt-28 px-4 md:mt-40 md:px-6">
+          <div className="mx-auto max-w-4xl text-center">
+            <BlurReveal>
+              <h3 className={STATEMENT}>{h.vision.title}</h3>
+            </BlurReveal>
+          </div>
+          <div className="mt-16 grid gap-12 md:mt-24 md:grid-cols-3 md:gap-12">
+            {h.vision.pillars.map((pillar) => (
+              <div key={pillar.title}>
+                <h4 className={cn("text-xl font-bold", VISION_ON_BLACK)}>{pillar.title}</h4>
+                <p className="mt-3 leading-relaxed text-white/65">{pillar.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* 06 — Founder */}
-      <Section labelledBy="founders-heading">
-        <SectionHeading id="founders-heading" eyebrow={h.founders.eyebrow} title={h.founders.title} />
-        <article className="max-w-3xl border-t-2 border-foreground pt-6">
-          <h3 className="text-2xl font-bold text-foreground">Pedro Pestana</h3>
-          <p className="mt-1 font-mono text-xs uppercase tracking-[0.14em] text-secondary">{h.founders.pedroRole}</p>
-          <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-            <Rich text={h.founders.pedroMission} />
-          </p>
-          <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-            <Rich text={h.founders.pedroPersonal} />
-          </p>
-        </article>
-      </Section>
+      <section aria-labelledby="founders-heading" className="bg-background py-24 md:py-36">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="mx-auto max-w-4xl text-center">
+            <Eyebrow className="mb-6">{h.founders.eyebrow}</Eyebrow>
+            <BlurReveal>
+              <h2 id="founders-heading" className={cn(STATEMENT, "text-foreground")}>
+                {h.founders.title}
+              </h2>
+            </BlurReveal>
+          </div>
+          <article className="mx-auto mt-16 max-w-2xl text-center md:mt-20">
+            <h3 className="text-2xl font-medium tracking-[-0.02em] text-foreground">Pedro Pestana</h3>
+            <p className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-secondary">{h.founders.pedroRole}</p>
+            <p className="mt-6 text-lg font-light leading-relaxed text-muted-foreground">
+              <Rich text={h.founders.pedroMission} />
+            </p>
+            <p className="mt-4 text-lg font-light leading-relaxed text-muted-foreground">
+              <Rich text={h.founders.pedroPersonal} />
+            </p>
+          </article>
+        </div>
+      </section>
 
       {/* 07 — Neurorights */}
-      <Section labelledBy="neurorights-heading">
-        <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
-          <SectionHeading
-            id="neurorights-heading"
-            eyebrow={h.neurorights.eyebrow}
-            title={h.neurorights.title}
-            className="mb-0 lg:col-span-6"
-          />
-          <p className="text-lg leading-relaxed text-muted-foreground lg:col-span-6 lg:pt-10">{h.neurorights.body}</p>
+      <section aria-labelledby="neurorights-heading" className="bg-muted py-24 md:py-36">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="mx-auto max-w-4xl text-center">
+            <Eyebrow className="mb-6">{h.neurorights.eyebrow}</Eyebrow>
+            <BlurReveal>
+              <h2 id="neurorights-heading" className={cn(STATEMENT, "text-foreground")}>
+                {h.neurorights.title}
+              </h2>
+            </BlurReveal>
+            <p className="mx-auto mt-8 max-w-2xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
+              {h.neurorights.body}
+            </p>
+          </div>
+          <ul className="mt-16 grid gap-4 sm:grid-cols-2 md:mt-20 lg:grid-cols-4">
+            {h.neurorights.rights.map((right) => (
+              <li key={right.code} className="rounded-2xl bg-background p-7">
+                <span className="text-xs font-bold tracking-[0.1em] text-secondary">{right.code}</span>
+                <h3 className="mt-3 text-xl font-medium tracking-[-0.02em] text-foreground">{right.title}</h3>
+                <p className="mt-2 leading-relaxed text-muted-foreground">{right.desc}</p>
+              </li>
+            ))}
+          </ul>
         </div>
-        <ul className="mt-12 grid border-t border-border sm:grid-cols-2 lg:grid-cols-4 lg:divide-x lg:divide-border">
-          {h.neurorights.rights.map((right) => (
-            <li key={right.code} className="border-b border-border py-6 lg:border-b-0 lg:px-6 lg:first:pl-0">
-              <span className="font-mono text-xs text-secondary">{right.code}</span>
-              <h3 className="mt-2 text-xl font-bold text-foreground">{right.title}</h3>
-              <p className="mt-2 leading-relaxed text-muted-foreground">{right.desc}</p>
-            </li>
-          ))}
-        </ul>
-      </Section>
+      </section>
 
-      {/* Closing — centred, one action */}
-      <Section labelledBy="closing-heading">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 id="closing-heading" className="text-4xl font-bold leading-[1.05] tracking-tight text-foreground md:text-6xl">
+      {/* Closing — one card, one action */}
+      <section aria-labelledby="closing-heading" className="bg-black px-4 py-16 md:px-6 md:py-24">
+        <div className="mx-auto max-w-6xl rounded-[2rem] border border-white/15 bg-gradient-to-b from-white/[0.09] to-white/[0.01] px-6 py-20 text-center text-white md:py-32">
+          <h2 id="closing-heading" className={cn(STATEMENT, "mx-auto max-w-4xl")}>
             {h.closing.ground}{" "}
-            <span className={cn("block italic", VISION_TEXT)}>{h.closing.sky}</span>
+            <span className={cn("block", VISION_ON_BLACK)}>{h.closing.sky}</span>
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-xl leading-relaxed text-muted-foreground">{h.closing.body}</p>
+          <p className="mx-auto mt-8 max-w-xl text-lg font-light leading-relaxed text-white/70 md:text-xl">{h.closing.body}</p>
           <div className="mt-10 flex justify-center">
-            <Button asChild size="lg">
+            <Button asChild size="lg" variant="inverse">
               <Link href="/contact">{h.closing.primary}</Link>
             </Button>
           </div>
         </div>
-      </Section>
+      </section>
     </>
   );
 }

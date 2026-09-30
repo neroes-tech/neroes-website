@@ -40,13 +40,13 @@ export function LanguageSwitcher() {
         aria-pressed={locale === "pt"}
         aria-label="Português"
         className={cn(
-          "rounded-sm transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue",
+          "rounded-sm transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
           locale === "pt" ? "opacity-100" : "opacity-45 hover:opacity-80",
         )}
       >
         <FlagPT />
       </button>
-      <span aria-hidden="true" className="text-border">
+      <span aria-hidden="true" className="text-white/25">
         |
       </span>
       <button
@@ -55,7 +55,7 @@ export function LanguageSwitcher() {
         aria-pressed={locale === "en"}
         aria-label="English"
         className={cn(
-          "rounded-sm transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue",
+          "rounded-sm transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
           locale === "en" ? "opacity-100" : "opacity-45 hover:opacity-80",
         )}
       >

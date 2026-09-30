@@ -3,9 +3,8 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Instrument-style label: section index ("02 — Plataforma"), study
- * methodology, data captions. Monospace, small, tracked — never for
- * running text.
+ * Small uppercase label: section index ("02 — A plataforma"), captions,
+ * study methods. Never for running text.
  */
 export function Eyebrow({
   children,
@@ -21,7 +20,7 @@ export function Eyebrow({
   return (
     <Tag
       className={cn(
-        "font-mono text-xs font-medium uppercase tracking-[0.16em]",
+        "text-xs font-bold uppercase tracking-[0.14em]",
         tone === "brand" && "text-secondary",
         tone === "muted" && "text-muted-foreground",
         tone === "inverse" && "text-white/60",

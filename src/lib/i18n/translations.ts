@@ -109,6 +109,15 @@ export interface Translations {
       quoteCaption: string;
       pillars: [NamedItem, NamedItem, NamedItem];
     };
+    /** Photos for the vision chapter and the headset gallery (alt text is what each image shows). */
+    media: {
+      measuredAlt: string;
+      believedAlt: string;
+      galleryLabel: string;
+      galleryPause: string;
+      galleryPlay: string;
+      galleryAlts: [string, string, string, string, string, string, string, string];
+    };
     founders: {
       eyebrow: string;
       title: string;
@@ -338,6 +347,23 @@ export const translations: Record<Locale, Translations> = {
             title: "Potencial humano",
             desc: "Atenção, intuição, equanimidade — capacidades que a maioria de nós nunca treina, e poderia treinar.",
           },
+        ],
+      },
+      media: {
+        measuredAlt: "O headset Neroes visto de baixo, com os elétrodos",
+        believedAlt: "Modelo do cérebro feito de pontos de luz azuis, com um sinal vermelho no lobo frontal",
+        galleryLabel: "O headset Neroes, peça a peça",
+        galleryPause: "Pausar a galeria",
+        galleryPlay: "Retomar a galeria",
+        galleryAlts: [
+          "Elétrodo do headset, desmontado",
+          "Elétrodo de pinos no braço do headset",
+          "Braço do headset com o botão",
+          "Estrutura interna do headset",
+          "O headset visto de baixo",
+          "A banda do headset",
+          "Pormenor lateral do headset",
+          "O headset com os elétrodos",
         ],
       },
       founders: {
@@ -609,6 +635,23 @@ export const translations: Record<Locale, Translations> = {
           { title: "Expanded states", desc: "Meditation, flow, and awe — measured, trainable on demand." },
           { title: "Meaning and connection", desc: "The clarity and connectedness felt at the edges of ordinary experience." },
           { title: "Human potential", desc: "Attention, intuition, equanimity — capacities most of us never train, and could." },
+        ],
+      },
+      media: {
+        measuredAlt: "The Neroes headset seen from below, with its electrodes",
+        believedAlt: "A model of the brain made of blue points of light, with a red signal on the frontal lobe",
+        galleryLabel: "The Neroes headset, piece by piece",
+        galleryPause: "Pause the gallery",
+        galleryPlay: "Resume the gallery",
+        galleryAlts: [
+          "Headset electrode, taken apart",
+          "Pin electrode on the headset arm",
+          "Headset arm with its button",
+          "The headset's internal frame",
+          "The headset seen from below",
+          "The headset band",
+          "Side detail of the headset",
+          "The headset with its electrodes",
         ],
       },
       founders: {

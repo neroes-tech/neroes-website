@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Roboto_Condensed, Roboto_Mono } from "next/font/google";
+import { Roboto_Condensed } from "next/font/google";
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -10,24 +10,16 @@ import { SegmentProvider } from "@/lib/segment/SegmentProvider";
 import { CONTACT_INFO, SITE_URL } from "@/lib/constants";
 import "./globals.css";
 
-// Brand manual (06 Tipografia): Roboto Condensed Regular for text, Bold for
-// titles. Self-hosted via next/font: no render-blocking CSS @import and no
-// font-swap layout shift.
+// Brand manual (06 Tipografia): Roboto Condensed — the one typeface on the
+// site. Light for large supporting lines, Regular for text, Medium for the
+// big display titles, Bold for small headings. Self-hosted via next/font: no
+// render-blocking CSS @import and no font-swap layout shift.
 const robotoCondensed = Roboto_Condensed({
   subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "700"],
+  weight: ["300", "400", "500", "700"],
   style: ["normal", "italic"],
   display: "swap",
   variable: "--font-roboto-condensed",
-});
-
-// Monospace for instrument-style labels only (section indices, study
-// methodology, data captions) — never for running text.
-const robotoMono = Roboto_Mono({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500"],
-  display: "swap",
-  variable: "--font-roboto-mono",
 });
 
 export const metadata: Metadata = {
@@ -68,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     // Portuguese is what the server renders; LanguageProvider keeps this in
     // step when a visitor switches to English.
-    <html lang="pt-PT" className={`${robotoCondensed.variable} ${robotoMono.variable}`}>
+    <html lang="pt-PT" className={robotoCondensed.variable}>
       <body className="flex min-h-screen flex-col">
         <script
           type="application/ld+json"

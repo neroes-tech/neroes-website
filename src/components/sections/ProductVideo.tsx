@@ -160,14 +160,14 @@ export function ProductVideo({
               <button
                 type="button"
                 onClick={togglePlay}
-                className="h-10 rounded-md bg-brand-ink/85 px-4 text-sm font-medium text-white transition-colors hover:bg-brand-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="h-10 rounded-full border border-white/20 bg-black/70 px-5 text-sm font-medium text-white transition-colors hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 {playing ? pauseLabel : resumeLabel}
               </button>
               <button
                 type="button"
                 onClick={openWithSound}
-                className="h-10 rounded-md bg-white px-4 text-sm font-medium text-brand-ink transition-colors hover:bg-white/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="h-10 rounded-full bg-white px-5 text-sm font-medium text-black transition-colors hover:bg-white/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 {soundLabel}
               </button>
@@ -175,7 +175,7 @@ export function ProductVideo({
           </div>
         )}
       </div>
-      <figcaption className="container mx-auto px-4 pt-4 font-mono text-xs uppercase tracking-[0.12em] text-muted-foreground md:px-6">
+      <figcaption className="container mx-auto px-4 pt-4 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground md:px-6">
         {caption}
       </figcaption>
     </figure>

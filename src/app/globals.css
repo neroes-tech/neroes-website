@@ -46,7 +46,6 @@
 
   --font-sans: var(--app-font-sans);
   --font-exo: var(--app-font-heading);
-  --font-mono: var(--font-roboto-mono), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
@@ -55,39 +54,39 @@
 }
 
 :root {
-  /* Neroes — instrument palette. Three roles, nothing decorative:
-       Ink    #0E1624  218 44% 10%  text, dark surfaces, solid buttons (≈17:1 on paper)
-       Blue   #1270B0  205 81% 38%  brand blue: links, labels, primary actions
-                                     (5.3:1 on white — AA for body text)
-       Vivid  #00A5E9  198 100% 46%  the logo's bright blue: graphic accents only
-                                     (rules, dots) — never text on paper (2.9:1)
-     Neutrals
-       Paper  #FAFAF7  45 30% 97%   page
-       Muted  #EFEEE8  45 16% 93%   alternating section tint
-       Line   #DCDFE5  222 14% 88%  1px rules and borders
-       Grey   #4B5263  222 14% 34%  secondary text (≈7.6:1 on paper) */
-  --background: 45 30% 97%;
-  --foreground: 218 44% 10%;
-  --border: 222 14% 88%;
+  /* Neroes — version 4: black and white, the brand blue as the only accent
+     (after the Neurable company page the team chose as the reference).
+       Black  #000000  dark sections, the Hero, the footer
+       White  #FFFFFF  light sections
+       Stone  #F4F3F0  alternating light tint
+       Ink    #0A0A0A  text on white (19.8:1); solid buttons on light
+       Grey   #5C5C5C  secondary text on white (6.7:1) and stone (6.0:1)
+       Blue   #1270B0  brand blue: links, labels (5.1:1 on white)
+       Vivid  #00A5E9  the logo's bright blue: accents on black (7.4:1);
+                       on white only as a dot or rule, never text (2.9:1)
+     No gold in the interface — it lives in the logo artwork only. */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 4%;
+  --border: 40 8% 89%;
   --card: 0 0% 100%;
-  --card-foreground: 218 44% 10%;
+  --card-foreground: 0 0% 4%;
   --popover: 0 0% 100%;
-  --popover-foreground: 218 44% 10%;
-  --primary: 218 44% 10%;
+  --popover-foreground: 0 0% 4%;
+  --primary: 0 0% 4%;
   --primary-foreground: 0 0% 100%;
   --secondary: 205 81% 38%;
   --secondary-foreground: 0 0% 100%;
-  --muted: 45 16% 93%;
-  --muted-foreground: 222 14% 34%;
+  --muted: 45 13% 95%;
+  --muted-foreground: 0 0% 36%;
   --accent: 198 100% 46%;
-  --accent-foreground: 218 44% 10%;
+  --accent-foreground: 0 0% 4%;
   --destructive: 0 72% 40%;
   --destructive-foreground: 0 0% 100%;
-  --input: 222 14% 78%;
+  --input: 0 0% 80%;
   --ring: 205 81% 38%;
   --app-font-sans: var(--font-roboto-condensed), 'Roboto Condensed', 'Arial Narrow', sans-serif;
   --app-font-heading: var(--font-roboto-condensed), 'Roboto Condensed', 'Arial Narrow', sans-serif;
-  --radius: 0.375rem;
+  --radius: 0.5rem;
 }
 
 /* One centred column on every screen. Tailwind v4's container steps its
@@ -119,4 +118,25 @@
     outline: 2px solid hsl(var(--ring));
     outline-offset: 2px;
   }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+/* Endless horizontal strip (gallery): the track holds the items twice and
+   slides by half its width. Paused by the visible control, by hover and by
+   keyboard focus inside; off entirely under reduced motion. */
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@utility animate-marquee {
+  animation: marquee var(--marquee-duration, 70s) linear infinite;
 }

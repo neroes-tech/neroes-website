@@ -5,7 +5,7 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { CONTACT_INFO } from "@/lib/constants";
 import { ContactForm } from "./ContactForm";
 
-const labelClass = "font-mono text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground";
+const labelClass = "text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground";
 
 export function ContactPageContent() {
   const { t } = useLanguage();

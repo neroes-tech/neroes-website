@@ -10,26 +10,26 @@ const MAX_WIDTH = {
 } as const;
 
 interface PageHeroProps {
-  /** Small monospace label above the title, e.g. "Ciência". */
+  /** Small uppercase label above the title, e.g. "Ciência". */
   eyebrow?: string;
   /** Rendered as the page's single H1 — keep to one PageHero per page. */
   title: string;
   subtitle?: ReactNode;
-  /** "decorative" = dark ink surface (kept name for existing call sites). */
+  /** "decorative" = black surface. */
   variant?: "default" | "decorative";
   maxWidth?: keyof typeof MAX_WIDTH;
   /** "compact" trims vertical padding for shorter pages (legal, contact). */
   size?: "default" | "compact";
   /** Optional CTA(s) rendered directly under the subtitle. */
   cta?: ReactNode;
-  /** Centred, as in version 2 (default); "left" for text-heavy pages. */
+  /** Centred (default); "left" for text-heavy pages. */
   align?: "center" | "left";
   className?: string;
 }
 
 /**
- * Page header for inner pages: centred and typographic (the version 2
- * layout), closed by a 1px rule. No background shapes, no entrance animation.
+ * Page header for inner pages: one large, tightly set statement, centred,
+ * with room above for the floating navigation. No shapes, no animation.
  */
 export function PageHero({
   eyebrow,
@@ -48,22 +48,21 @@ export function PageHero({
   return (
     <section
       className={cn(
-        "border-b",
-        size === "compact" ? "pb-12 pt-16 md:pb-14 md:pt-20" : "pb-16 pt-20 md:pb-20 md:pt-28",
-        dark ? "border-white/10 bg-brand-ink text-white" : "border-border bg-background",
+        size === "compact" ? "pb-14 pt-32 md:pb-16 md:pt-40" : "pb-16 pt-36 md:pb-24 md:pt-48",
+        dark ? "bg-black text-white" : "bg-background",
         className,
       )}
     >
       <div className="container mx-auto px-4 md:px-6">
         <div className={cn(MAX_WIDTH[maxWidth], centred && "mx-auto text-center")}>
           {eyebrow && (
-            <Eyebrow tone={dark ? "inverse" : "brand"} className="mb-5">
+            <Eyebrow tone={dark ? "inverse" : "brand"} className="mb-6">
               {eyebrow}
             </Eyebrow>
           )}
           <h1
             className={cn(
-              "font-exo text-4xl font-bold leading-[1.05] tracking-tight md:text-6xl",
+              "font-exo text-5xl font-medium leading-[0.98] tracking-[-0.04em] md:text-7xl",
               dark ? "text-white" : "text-foreground",
             )}
           >
@@ -72,16 +71,16 @@ export function PageHero({
           {subtitle && (
             <p
               className={cn(
-                "mt-6 max-w-2xl text-lg leading-relaxed md:text-xl",
+                "mt-7 max-w-2xl text-lg font-light leading-relaxed md:text-xl",
                 centred && "mx-auto",
-                dark ? "text-white/75" : "text-muted-foreground",
+                dark ? "text-white/70" : "text-muted-foreground",
               )}
             >
               {subtitle}
             </p>
           )}
           {cta && (
-            <div className={cn("mt-9 flex flex-wrap items-center gap-3", centred && "justify-center")}>{cta}</div>
+            <div className={cn("mt-10 flex flex-wrap items-center gap-3", centred && "justify-center")}>{cta}</div>
           )}
         </div>
       </div>

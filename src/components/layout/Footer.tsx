@@ -13,9 +13,10 @@ const SOCIAL_LINKS = [
   { label: "Facebook", href: CONTACT_INFO.social.facebook },
 ] as const;
 
-const linkClass = "inline-block py-1 text-white/75 transition-colors hover:text-white";
-const headingClass = "mb-4 font-mono text-xs font-medium uppercase tracking-[0.16em] text-white/50";
+const linkClass = "inline-block py-1 text-white/65 transition-colors hover:text-white";
+const headingClass = "mb-5 text-base font-bold text-white";
 
+/** Black footer: the logo and what Neroes is on the left, then the columns. */
 export function Footer() {
   const { t } = useLanguage();
 
@@ -32,26 +33,24 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-brand-ink text-white">
-      <div className="container mx-auto px-4 py-16 md:px-6 md:py-20">
-        <div className="grid gap-12 md:grid-cols-12">
-          <div className="md:col-span-5">
-            <span className="inline-block rounded-md bg-background px-3 py-2">
-              <Image
-                src={NEROES_LOCKUP.src}
-                alt="Neroes"
-                width={NEROES_LOCKUP.width}
-                height={NEROES_LOCKUP.height}
-                className="h-7 w-auto max-w-none object-contain"
-              />
-            </span>
-            <p className="mt-6 max-w-sm text-lg font-medium leading-snug">{t.footer.tagline}</p>
-            <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/60">{t.footer.subtagline}</p>
+    <footer className="bg-black text-white">
+      <div className="container mx-auto px-4 pb-10 pt-24 md:px-6 md:pt-32">
+        <div className="grid gap-14 lg:grid-cols-12 lg:gap-10">
+          <div className="lg:col-span-5">
+            <Image
+              src={NEROES_LOCKUP.src}
+              alt="Neroes"
+              width={NEROES_LOCKUP.width}
+              height={NEROES_LOCKUP.height}
+              className="h-10 w-auto max-w-none object-contain md:h-12"
+            />
+            <p className="mt-8 max-w-sm text-xl font-light leading-snug text-white/85">{t.footer.tagline}</p>
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/50">{t.footer.subtagline}</p>
           </div>
 
-          <nav aria-label="Footer navigation" className="md:col-span-2">
+          <nav aria-label="Footer" className="lg:col-span-2">
             <h2 className={headingClass}>{t.footer.navigationHeading}</h2>
-            <ul className="space-y-1">
+            <ul className="space-y-1.5">
               {navItems.map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className={linkClass}>
@@ -62,9 +61,9 @@ export function Footer() {
             </ul>
           </nav>
 
-          <nav aria-label="Legal navigation" className="md:col-span-2">
+          <nav aria-label="Legal" className="lg:col-span-2">
             <h2 className={headingClass}>{t.footer.legalHeading}</h2>
-            <ul className="space-y-1">
+            <ul className="space-y-1.5">
               {legalItems.map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className={linkClass}>
@@ -75,19 +74,22 @@ export function Footer() {
             </ul>
           </nav>
 
-          <div className="md:col-span-3">
+          <div className="lg:col-span-3">
             <h2 className={headingClass}>{t.footer.contactHeading}</h2>
-            <dl className="space-y-3 text-sm">
+            <dl className="space-y-4">
               <div>
-                <dt className="text-white/50">{t.footer.emailLabel}</dt>
+                <dt className="sr-only">{t.footer.emailLabel}</dt>
                 <dd>
-                  <a href={`mailto:${CONTACT_INFO.email}`} className={linkClass}>
+                  <a
+                    href={`mailto:${CONTACT_INFO.email}`}
+                    className="text-lg text-white underline decoration-white/40 underline-offset-4 transition-colors hover:decoration-white"
+                  >
                     {CONTACT_INFO.email}
                   </a>
                 </dd>
               </div>
               <div>
-                <dt className="text-white/50">{t.footer.phoneLabel}</dt>
+                <dt className="text-xs font-bold uppercase tracking-[0.14em] text-white/45">{t.footer.phoneLabel}</dt>
                 <dd>
                   <a href={`tel:${CONTACT_INFO.phone.replace(/\s+/g, "")}`} className={linkClass}>
                     {CONTACT_INFO.phone}
@@ -95,14 +97,14 @@ export function Footer() {
                 </dd>
               </div>
               <div>
-                <dt className="text-white/50">{t.footer.addressLabel}</dt>
-                <dd className="py-1 text-white/75">{t.footer.address}</dd>
+                <dt className="text-xs font-bold uppercase tracking-[0.14em] text-white/45">{t.footer.addressLabel}</dt>
+                <dd className="py-1 text-white/65">{t.footer.address}</dd>
               </div>
             </dl>
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-6 text-sm text-white/55 md:flex-row md:items-center md:justify-between">
+        <div className="mt-20 flex flex-col gap-4 border-t border-white/15 pt-6 text-sm text-white/50 md:flex-row md:items-center md:justify-between">
           <p>
             &copy; {new Date().getFullYear()} Neroes Technologies. {t.footer.copyright}
           </p>

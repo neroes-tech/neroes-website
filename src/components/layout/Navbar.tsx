@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
@@ -14,22 +14,20 @@ import { CALENDLY_URL } from "@/lib/constants";
 import { NEROES_LOCKUP } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
-// Sports uses the official pre-composed horizontal lockup (icon + "neroes
-// sports" wordmark already laid out side by side, unlike the Corporate
-// file) — genuinely transparent (verified: ~91% of pixels are alpha=0, the
-// rest is the actual artwork), so it's rendered as-is with no crop and no
-// separate HTML text.
+// Sports uses its own pre-composed, transparent horizontal lockup.
 const SPORTS_LOGO = {
-  // Cropped to its actual visible content (see
-  // scratchpad/pw/crop-sports-logo.js) — the original 1536x1024 export had
-  // the icon+wordmark occupying only a ~1055x431 region in the middle, so a
-  // CSS height on the untrimmed canvas left the visible logo a fraction of
-  // the box size regardless of how tall the box was set.
   src: "/sport-logo-horizontal.png",
   width: 1115,
   height: 461,
 } as const;
 
+/**
+ * Floating pill navigation: one near-opaque black bar that sits over every
+ * page (the Hero runs underneath it) — opaque enough that the multicolour
+ * logo keeps its contrast over white sections too — logo left, sections centre, language
+ * and the demo booking right. On phones the pill keeps the logo and a menu
+ * button; the menu opens as a panel under it.
+ */
 export function Navbar() {
   const pathname = usePathname();
   const { t } = useLanguage();
@@ -37,43 +35,37 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const closeMenu = () => setIsMobileMenuOpen(false);
 
-  const navLinks = [
+  // A route change closes the menu; so does Escape.
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsMobileMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isMobileMenuOpen]);
+
+  const links = [
     { href: "/", label: t.nav.home },
     { href: "/science", label: t.nav.science },
-  ];
-
-  const secondaryLinks = [
     { href: "/about", label: t.nav.about },
     { href: "/contact", label: t.nav.contact },
   ];
 
-  const linkClass = (href: string) =>
-    cn(
-      "py-2 transition-colors hover:text-foreground",
-      pathname === href ? "text-foreground" : "text-muted-foreground",
-    );
-
   return (
-    // Solid bar with a 1px rule — no translucency, blur or shadow shifting on scroll.
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-        <Link
-          href="/"
-          aria-label="Neroes"
-          onClick={closeMenu}
-          className="flex h-12 flex-row items-center gap-3 cursor-pointer"
-        >
+    <header className="pointer-events-none fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-6 md:pt-4">
+      <div className="pointer-events-auto mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-full border border-white/15 bg-black/90 pl-5 pr-2 text-white backdrop-blur-md md:h-16 md:pl-7">
+        <Link href="/" aria-label="Neroes" onClick={closeMenu} className="flex shrink-0 items-center">
           {segment === "sports" ? (
-            // Pre-composed lockup, genuinely transparent — no crop, no
-            // separate text (the file already contains "neroes sports").
-            // max-w-none: cancels preflight's img max-width:100%, which
-            // collapses a flex-item image with auto width to 0px.
             <Image
               src={SPORTS_LOGO.src}
               alt="Neroes Sports"
               width={SPORTS_LOGO.width}
               height={SPORTS_LOGO.height}
-              className="h-11 w-auto max-w-none object-contain mix-blend-multiply md:h-12"
+              className="h-8 w-auto max-w-none object-contain md:h-9"
               priority
             />
           ) : (
@@ -82,28 +74,34 @@ export function Navbar() {
               alt="Neroes"
               width={NEROES_LOCKUP.width}
               height={NEROES_LOCKUP.height}
-              className="h-8 w-auto max-w-none object-contain md:h-9"
+              className="h-7 w-auto max-w-none object-contain md:h-8"
               priority
             />
           )}
         </Link>
 
-        <nav className="hidden items-center gap-7 text-[0.95rem] font-medium md:flex">
-          {navLinks.map((link) => (
-            <Link key={link.href} href={link.href} className={linkClass(link.href)}>
-              {link.label}
-            </Link>
-          ))}
-          {secondaryLinks.map((link) => (
-            <Link key={link.href} href={link.href} className={linkClass(link.href)}>
-              {link.label}
-            </Link>
-          ))}
+        <nav aria-label="Principal" className="hidden items-center gap-8 md:flex">
+          {links.map((link) => {
+            const active = pathname === link.href;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "py-2 text-[0.8rem] font-bold uppercase tracking-[0.1em] transition-colors hover:text-white",
+                  active ? "text-white" : "text-white/70",
+                )}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="hidden items-center gap-4 md:flex">
           <LanguageSwitcher />
-          <Button asChild>
+          <Button asChild variant="inverse">
             <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">
               {t.nav.schedule}
             </a>
@@ -112,33 +110,37 @@ export function Navbar() {
 
         <button
           type="button"
-          className="p-2 text-foreground md:hidden"
+          className="mr-1 inline-flex h-10 w-10 items-center justify-center rounded-full text-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white md:hidden"
           onClick={() => setIsMobileMenuOpen((open) => !open)}
           aria-expanded={isMobileMenuOpen}
           aria-controls="mobile-menu"
           aria-label={isMobileMenuOpen ? t.nav.closeMenu : t.nav.openMenu}
         >
-          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
       {isMobileMenuOpen && (
-        <div id="mobile-menu" className="flex flex-col gap-4 border-t border-border bg-background px-4 py-6 md:hidden">
-          {navLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="text-lg font-medium" onClick={closeMenu}>
-              {link.label}
-            </Link>
-          ))}
-          {secondaryLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="text-lg font-medium" onClick={closeMenu}>
-              {link.label}
-            </Link>
-          ))}
-          <div className="mt-2 flex items-center justify-between border-t border-border pt-4">
+        <div
+          id="mobile-menu"
+          className="pointer-events-auto mx-auto mt-2 max-w-6xl rounded-3xl border border-white/15 bg-black/90 p-6 text-white backdrop-blur-md md:hidden"
+        >
+          <nav aria-label="Principal" className="flex flex-col">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={pathname === link.href ? "page" : undefined}
+                className="border-b border-white/10 py-3 text-2xl font-medium tracking-[-0.02em] last:border-b-0"
+                onClick={closeMenu}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="mt-6 flex items-center justify-between gap-4">
             <LanguageSwitcher />
-          </div>
-          <div className="flex flex-col gap-4">
-            <Button asChild className="w-full">
+            <Button asChild variant="inverse">
               <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">
                 {t.nav.schedule}
               </a>

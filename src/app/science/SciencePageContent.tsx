@@ -57,7 +57,7 @@ export function SciencePageContent() {
                   <span className="block font-medium text-foreground">{stat.label}</span>
                   {/* One line per part ("3 clientes" / "8+ sessões") instead of a
                       "·" stranded at the start of a wrapped line. */}
-                  <span className="mt-1 block font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+                  <span className="mt-1 block text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
                     {stat.source.split(" · ").map((part) => (
                       <span key={part} className="block">
                         {part}

@@ -30,25 +30,26 @@ const BrainHero = dynamic(() => import("@/components/BrainHero"), { ssr: false }
 // The logo's vivid blue, solid (no gradient): 6.5:1 on the ink background.
 const HERO_ACCENT = "text-[#00A5E9]";
 
-// Instrument labels on the ink background (white/60: 6.9:1).
-const LABEL = "font-mono text-[11px] uppercase tracking-[0.14em] text-white/60";
+// Small labels on black (white/60: 7.4:1).
+const LABEL = "text-[11px] font-bold uppercase tracking-[0.14em] text-white/60";
 
-// Flat, near-opaque cards: no blur (backdrop-filter over the WebGL canvas in
-// a sticky section left them blank after scrolling back in Chrome), no glow,
-// no float — they read as instrument readouts, not decoration.
-const HUD_CARD = "absolute rounded-md border border-white/15 bg-brand-ink/90 p-3";
+// Translucent readouts with a hairline border, square corners. No blur
+// (backdrop-filter over the WebGL canvas in a sticky section left them blank
+// after scrolling back in Chrome), no glow, no float.
+const HUD_CARD = "absolute border border-[#F4F3F0]/30 bg-[#F4F3F0]/[0.07] p-3";
 
 function smoothstep(edge0: number, edge1: number, x: number) {
   const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
   return t * t * (3 - 2 * t);
 }
 
-/** Scroll-coupled fade + rise: driven by scroll progress (0..1), not by time. */
+/** Scroll-coupled focus-in: blurred, faint and a little low at 0, sharp at 1. */
 function revealStyle(revealed: number): CSSProperties {
   return {
     opacity: revealed,
-    transform: `translateY(${(1 - revealed) * 32}px)`,
-    transition: "opacity 150ms linear, transform 150ms linear",
+    filter: revealed < 1 ? `blur(${(1 - revealed) * 12}px)` : undefined,
+    transform: `translateY(${(1 - revealed) * 18}px)`,
+    transition: "opacity 150ms linear, filter 150ms linear, transform 150ms linear",
   };
 }
 
@@ -106,7 +107,7 @@ function HudCards({ reduced }: { reduced: boolean }) {
         {/* The headline result, with its source */}
         <div className={cn(HUD_CARD, "bottom-[9%] right-6 min-w-56")}>
           <p className={LABEL}>{h.heroHudAnxiety}</p>
-          <p className="mt-1.5 font-exo text-3xl font-bold leading-none tabular-nums text-white">
+          <p className="mt-1.5 font-exo text-3xl font-medium leading-none tracking-[-0.03em] tabular-nums text-white">
             {t.shared.evidence.leadValue}
           </p>
           <p className="mt-1.5 text-xs text-white/60">{h.heroHudAnxietySource}</p>
@@ -160,13 +161,14 @@ export function Hero() {
     <section
       ref={sectionRef}
       aria-labelledby="hero-heading"
-      className="relative bg-brand-ink text-white"
+      className="relative bg-black text-white"
       style={{ height: reduced ? undefined : "300vh" }}
     >
       <div
         className={cn(
-          "flex h-[calc(100svh-4rem)] min-h-[560px] w-full items-center justify-center overflow-hidden",
-          !reduced && "sticky top-16",
+          // Full screen, under the floating navigation.
+          "flex h-svh min-h-[600px] w-full items-center justify-center overflow-hidden",
+          !reduced && "sticky top-0",
         )}
       >
         {/* A failing WebGL brain must never take the Hero down with it. */}
@@ -182,18 +184,18 @@ export function Hero() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 z-10"
           style={{
-            background: "radial-gradient(ellipse 45% 38% at 50% 50%, rgba(14,22,36,0.72), transparent 75%)",
+            background: "radial-gradient(ellipse 48% 40% at 50% 50%, rgba(0,0,0,0.72), transparent 75%)",
             opacity: headlineReveal,
           }}
         />
 
         <div
-          className="relative z-20 mx-auto max-w-4xl px-4 text-center md:px-6"
+          className="relative z-20 mx-auto max-w-6xl px-4 text-center md:px-6"
           onFocus={() => setFocusReveal(true)}
         >
           <h1
             id="hero-heading"
-            className="font-exo text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl md:text-7xl"
+            className="font-exo text-5xl font-medium leading-[0.92] tracking-[-0.045em] sm:text-6xl md:text-7xl lg:text-[5.5rem] xl:text-[6.5rem]"
             style={revealStyle(headlineReveal)}
           >
             <span className="block">{h.heroHeadlineLine1}</span>{" "}
@@ -201,7 +203,7 @@ export function Hero() {
           </h1>
 
           <p
-            className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg md:mt-6 md:text-xl"
+            className="mx-auto mt-6 max-w-2xl text-base font-light leading-relaxed tracking-[-0.01em] text-white/80 sm:text-lg md:mt-8 md:text-xl"
             style={revealStyle(subtitleReveal)}
           >
             {h.heroSubtitle}
@@ -229,7 +231,7 @@ export function Hero() {
               {h.heroKpis.map((kpi) => (
                 <div key={kpi.label} className="flex flex-col-reverse gap-1.5 px-3 py-4">
                   <dt className={LABEL}>{kpi.label}</dt>
-                  <dd className="font-exo text-2xl font-bold tabular-nums text-white md:text-3xl">{kpi.value}</dd>
+                  <dd className="font-exo text-2xl font-medium tracking-[-0.03em] tabular-nums text-white md:text-4xl">{kpi.value}</dd>
                 </div>
               ))}
             </dl>

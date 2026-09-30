@@ -38,7 +38,7 @@ export function ClientTestimonials() {
                       className="h-8 w-auto object-contain"
                     />
                   ) : testimonial.company ? (
-                    <span className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                    <span className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
                       {testimonial.company}
                     </span>
                   ) : null}
