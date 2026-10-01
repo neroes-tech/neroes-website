@@ -861,7 +861,9 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       };
     }
 
-    const clock = new THREE.Clock();
+    // THREE.Clock is deprecated in r185; Timer gives the same wall-clock
+    // elapsed time (a paused loop catches up on its first update).
+    const timer = new THREE.Timer();
     let raf = 0;
     let running = true;
     stopLoop = () => {
@@ -872,7 +874,8 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
     const drawFrame = () => {
-      const t = clock.getElapsedTime();
+      timer.update();
+      const t = timer.getElapsed();
       const progress = progressRef?.current ?? 0;
 
       // ── ATO I (0–0.22): revelação — quase parado, cérebro a assentar ──
@@ -993,6 +996,7 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       vitalMat.dispose();
       renderTarget?.dispose();
       postMat.dispose();
+      timer.dispose();
       releaseRenderer();
       if (renderer.domElement.parentNode === mount) {
         mount.removeChild(renderer.domElement);

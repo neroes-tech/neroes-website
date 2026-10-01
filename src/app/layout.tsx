@@ -6,7 +6,6 @@ import { Footer } from "@/components/layout/Footer";
 import { PartnersBar } from "@/components/layout/PartnersBar";
 import { SkipLink } from "@/components/layout/SkipLink";
 import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
-import { SegmentProvider } from "@/lib/segment/SegmentProvider";
 import { CONTACT_INFO, SITE_URL } from "@/lib/constants";
 import "./globals.css";
 
@@ -69,14 +68,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <LanguageProvider>
           <SkipLink />
-          <SegmentProvider>
-            <Navbar />
-            <main id="main-content" className="flex-1">
-              {children}
-            </main>
-            <PartnersBar />
-            <Footer />
-          </SegmentProvider>
+          <Navbar />
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
+          <PartnersBar />
+          <Footer />
         </LanguageProvider>
       </body>
     </html>

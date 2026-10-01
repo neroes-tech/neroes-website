@@ -5,7 +5,7 @@ import { Reveal } from "@/components/home/Reveal";
 import { Button } from "@/components/ui/button";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { PARTNERS, TEAM_MEMBERS } from "@/lib/constants";
+import { TEAM_MEMBERS } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Sport — About Us",
@@ -53,29 +53,6 @@ export default function SportAboutPage() {
               </Reveal>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Partnerships */}
-      <section className="border-y border-border bg-card py-24" aria-label="Partnerships">
-        <div className="container mx-auto max-w-5xl px-4 md:px-6">
-          <Reveal>
-            <SectionHeading title="Partnerships" className="mb-10" />
-            <ul className="flex flex-wrap items-center justify-center gap-x-12 gap-y-5">
-              {PARTNERS.map((partner) => (
-                <li key={partner.name}>
-                  <a
-                    href={partner.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block py-1 font-exo text-xl font-semibold tracking-wide text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    {partner.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </Reveal>
         </div>
       </section>
 

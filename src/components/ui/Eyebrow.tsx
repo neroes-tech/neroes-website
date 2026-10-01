@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Small uppercase label: section index ("02 — A plataforma"), captions,
+ * Small uppercase label: section name ("A plataforma", never numbered), captions,
  * study methods. Never for running text.
  */
 export function Eyebrow({

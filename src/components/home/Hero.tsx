@@ -232,8 +232,11 @@ export function Hero() {
                 aria-hidden={!kpisShown}
               >
                 {h.heroKpis.map((kpi) => (
-                  <div key={kpi.label} className="flex flex-col-reverse gap-1.5 px-3 py-3 text-center md:py-4">
-                    <dt className={LABEL}>{kpi.label}</dt>
+                  // justify-end in a column-reverse flex = top: the three values share
+                  // one line however many lines their labels wrap to. On phones the
+                  // labels drop to 10px and tighter tracking so long words fit the cell.
+                  <div key={kpi.label} className="flex flex-col-reverse justify-end gap-1.5 px-1.5 py-3 text-center sm:px-3 md:py-4">
+                    <dt className={cn(LABEL, "max-sm:text-[10px] max-sm:tracking-[0.06em]")}>{kpi.label}</dt>
                     <dd className="font-exo text-2xl font-medium tracking-[-0.03em] tabular-nums text-white md:text-4xl">
                       {kpi.value}
                     </dd>

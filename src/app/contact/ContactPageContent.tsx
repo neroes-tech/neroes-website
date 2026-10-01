@@ -18,7 +18,14 @@ export function ContactPageContent() {
 
   return (
     <>
-      <PageHero eyebrow={c.eyebrow} title={c.title} subtitle={c.subtitle} size="compact" maxWidth="3xl" />
+      <PageHero
+        eyebrow={c.eyebrow}
+        title={c.title}
+        // The calendar subtitle promises a slot picker; without one, say what happens instead.
+        subtitle={CALENDLY_URL ? c.subtitle : c.subtitleNoCalendar}
+        size="compact"
+        maxWidth="3xl"
+      />
 
       <section className="bg-background pb-20 md:pb-28">
         <div className="container mx-auto max-w-5xl px-4 md:px-6">

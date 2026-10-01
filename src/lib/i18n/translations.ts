@@ -52,6 +52,8 @@ export interface Translations {
     contact: string;
     schedule: string;
     skipToContent: string;
+    /** aria-label of the main navigation landmark. */
+    mainLabel: string;
     openMenu: string;
     closeMenu: string;
   };
@@ -121,6 +123,8 @@ export interface Translations {
     tagline: string;
     subtagline: string;
     navigationHeading: string;
+    /** aria-label of the footer navigation landmark. */
+    navLabel: string;
     legalHeading: string;
     contactHeading: string;
     emailLabel: string;
@@ -157,12 +161,29 @@ export interface Translations {
     body: string;
     retry: string;
   };
+  /** src/app/not-found.tsx */
+  notFound: {
+    title: string;
+    body: string;
+    back: string;
+  };
+  /**
+   * Browser-tab titles, applied by LanguageProvider when the visitor switches
+   * to English (the Portuguese ones are the routes' own metadata). The legal
+   * and /sport pages are English-only, so their metadata titles already fit.
+   */
+  meta: {
+    home: string;
+    contact: string;
+  };
   /** The Contacto page: scheduling only (Pedro, 30 Sept 2026). */
   contact: {
     eyebrow: string;
     title: string;
     subtitle: string;
     /** Accessible name of the embedded Calendly calendar. */
+    /** Subtitle while no booking link is configured (no calendar on the page). */
+    subtitleNoCalendar: string;
     calendarTitle: string;
     /** Under the calendar, for when it doesn't load. */
     calendarFallbackPrefix: string;
@@ -184,6 +205,7 @@ export const translations: Record<Locale, Translations> = {
       contact: "Contacto",
       schedule: "Marcar uma demonstração",
       skipToContent: "Saltar para o conteúdo",
+      mainLabel: "Principal",
       openMenu: "Abrir menu",
       closeMenu: "Fechar menu",
     },
@@ -281,7 +303,7 @@ export const translations: Record<Locale, Translations> = {
         measured: "Tudo acima desta linha é medido.",
         believed: "Tudo abaixo dela é aquilo em que acreditamos.",
         note: "Visão e filosofia — nunca alegações clínicas",
-        title: "A nossa estrela-guia é a consciência humana.",
+        title: "A nossa estrela‑guia é a consciência humana.",
         body: "A mesma tecnologia que acalma a ansiedade pode ajudar as pessoas a alcançar os estados de foco profundo, clareza e ligação que as tradições contemplativas descrevem há milhares de anos. Sem os reduzir a nada, sem os tornar místicos — tornando-os alcançáveis.",
         quote:
           "Conseguimos medir o estado cerebral de calma profunda ou de autotranscendência, e ajudar alguém a alcançá-lo de forma fiável. O que isso significa para cada pessoa é seu.",
@@ -317,6 +339,7 @@ export const translations: Record<Locale, Translations> = {
       tagline: "Treino mental com neurotecnologia.",
       subtagline: "A Neroes é uma plataforma de treino e investigação — não um tratamento médico.",
       navigationHeading: "Navegação",
+      navLabel: "Rodapé",
       legalHeading: "Legal",
       contactHeading: "Contacto",
       emailLabel: "Email",
@@ -419,6 +442,7 @@ export const translations: Record<Locale, Translations> = {
       title: "Marca uma conversa connosco",
       subtitle:
         "Escolhe o dia e a hora que te dão mais jeito para falarmos sobre a plataforma. A confirmação chega-te por email.",
+      subtitleNoCalendar: "Diz-nos que dias e horas te dão jeito e marcamos uma conversa sobre a plataforma.",
       calendarTitle: "Calendário para marcar uma conversa com a Neroes",
       calendarFallbackPrefix: "O calendário não abriu?",
       calendarFallbackLink: "Abrir numa nova janela",
@@ -434,6 +458,15 @@ export const translations: Record<Locale, Translations> = {
       body: "Tenta outra vez. Se o problema continuar, escreve-nos para info@neroes.tech.",
       retry: "Tentar outra vez",
     },
+    notFound: {
+      title: "Página não encontrada",
+      body: "A página que procuras não existe ou mudou de sítio.",
+      back: "Voltar ao início",
+    },
+    meta: {
+      home: "Neroes — Treino mental com neurofeedback",
+      contact: "Contacto — Neroes",
+    },
   },
   en: {
     nav: {
@@ -441,6 +474,7 @@ export const translations: Record<Locale, Translations> = {
       contact: "Contact",
       schedule: "Schedule a demo",
       skipToContent: "Skip to main content",
+      mainLabel: "Main",
       openMenu: "Open menu",
       closeMenu: "Close menu",
     },
@@ -571,6 +605,7 @@ export const translations: Record<Locale, Translations> = {
       tagline: "Mental training with neurotechnology.",
       subtagline: "Neroes is a training and research platform — not a medical treatment.",
       navigationHeading: "Navigation",
+      navLabel: "Footer",
       legalHeading: "Legal",
       contactHeading: "Contact Us",
       emailLabel: "Email",
@@ -672,6 +707,7 @@ export const translations: Record<Locale, Translations> = {
       title: "Book a conversation with us",
       subtitle:
         "Pick the day and time that suit you best to talk about the platform. The confirmation arrives by email.",
+      subtitleNoCalendar: "Tell us which days and times suit you and we'll book a conversation about the platform.",
       calendarTitle: "Calendar to book a conversation with Neroes",
       calendarFallbackPrefix: "Calendar didn't load?",
       calendarFallbackLink: "Open it in a new window",
@@ -686,6 +722,15 @@ export const translations: Record<Locale, Translations> = {
       title: "Something went wrong opening this page.",
       body: "Please try again. If it keeps happening, write to us at info@neroes.tech.",
       retry: "Try again",
+    },
+    notFound: {
+      title: "Page not found",
+      body: "The page you're looking for doesn't exist or has moved.",
+      back: "Back to home",
+    },
+    meta: {
+      home: "Neroes — Mental training with neurofeedback",
+      contact: "Contact — Neroes",
     },
   },
 };

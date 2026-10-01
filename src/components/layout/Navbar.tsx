@@ -9,28 +9,21 @@ import { Menu, X } from "lucide-react";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { useSegment } from "@/lib/segment/SegmentProvider";
 import { NEROES_LOCKUP } from "@/lib/brand";
 import { cn } from "@/lib/utils";
-
-// Sports uses its own pre-composed, transparent horizontal lockup.
-const SPORTS_LOGO = {
-  src: "/sport-logo-horizontal.png",
-  width: 1115,
-  height: 461,
-} as const;
 
 /**
  * Floating pill navigation: one near-opaque black bar that sits over every
  * page (the Hero runs underneath it) — opaque enough that the multicolour
- * logo keeps its contrast over white sections too — logo left, sections centre, language
- * and the booking button right (it opens the Contacto page, where the calendar is). On phones the pill keeps the logo and a menu
- * button; the menu opens as a panel under it.
+ * logo keeps its contrast over white sections too. Three columns from md up:
+ * logo left, sections in the true centre of the pill, language and the
+ * booking button right (it opens the Contacto page, where the calendar is).
+ * On phones the pill keeps the logo and a menu button; the menu opens as a
+ * panel under it.
  */
 export function Navbar() {
   const pathname = usePathname();
   const { t } = useLanguage();
-  const { segment } = useSegment();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const closeMenu = () => setIsMobileMenuOpen(false);
 
@@ -54,30 +47,19 @@ export function Navbar() {
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-6 md:pt-4">
-      <div className="pointer-events-auto mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-full border border-white/15 bg-black/90 pl-5 pr-2 text-white backdrop-blur-md md:h-16 md:pl-7">
-        <Link href="/" aria-label="Neroes" onClick={closeMenu} className="flex shrink-0 items-center">
-          {segment === "sports" ? (
-            <Image
-              src={SPORTS_LOGO.src}
-              alt="Neroes Sports"
-              width={SPORTS_LOGO.width}
-              height={SPORTS_LOGO.height}
-              className="h-8 w-auto max-w-none object-contain md:h-9"
-              priority
-            />
-          ) : (
-            <Image
-              src={NEROES_LOCKUP.src}
-              alt="Neroes"
-              width={NEROES_LOCKUP.width}
-              height={NEROES_LOCKUP.height}
-              className="h-7 w-auto max-w-none object-contain md:h-8"
-              priority
-            />
-          )}
+      <div className="pointer-events-auto mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-full border border-white/15 bg-black/90 pl-5 pr-2 text-white backdrop-blur-md md:grid md:h-16 md:grid-cols-[1fr_auto_1fr] md:pl-7">
+        <Link href="/" aria-label="Neroes" onClick={closeMenu} className="flex shrink-0 items-center md:justify-self-start">
+          <Image
+            src={NEROES_LOCKUP.src}
+            alt="Neroes"
+            width={NEROES_LOCKUP.width}
+            height={NEROES_LOCKUP.height}
+            className="h-7 w-auto max-w-none object-contain md:h-8"
+            priority
+          />
         </Link>
 
-        <nav aria-label="Principal" className="hidden items-center gap-8 md:flex">
+        <nav aria-label={t.nav.mainLabel} className="hidden items-center gap-8 md:flex">
           {links.map((link) => {
             const active = pathname === link.href;
             return (
@@ -96,7 +78,7 @@ export function Navbar() {
           })}
         </nav>
 
-        <div className="hidden items-center gap-4 md:flex">
+        <div className="hidden items-center gap-4 md:flex md:justify-self-end">
           <LanguageSwitcher />
           <Button asChild variant="inverse">
             <Link href="/contact">{t.nav.schedule}</Link>
@@ -120,7 +102,7 @@ export function Navbar() {
           id="mobile-menu"
           className="pointer-events-auto mx-auto mt-2 max-w-6xl rounded-3xl border border-white/15 bg-black/90 p-6 text-white backdrop-blur-md md:hidden"
         >
-          <nav aria-label="Principal" className="flex flex-col">
+          <nav aria-label={t.nav.mainLabel} className="flex flex-col">
             {links.map((link) => (
               <Link
                 key={link.href}

@@ -46,7 +46,7 @@ export function Footer() {
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/50">{t.footer.subtagline}</p>
           </div>
 
-          <nav aria-label="Footer" className="lg:col-span-2">
+          <nav aria-label={t.footer.navLabel} className="lg:col-span-2">
             <h2 className={headingClass}>{t.footer.navigationHeading}</h2>
             <ul className="space-y-1.5">
               {navItems.map((item) => (
@@ -87,7 +87,7 @@ export function Footer() {
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-bold uppercase tracking-[0.14em] text-white/45">{t.footer.phoneLabel}</dt>
+                <dt className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">{t.footer.phoneLabel}</dt>
                 <dd>
                   <a href={`tel:${CONTACT_INFO.phone.replace(/\s+/g, "")}`} className={linkClass}>
                     {CONTACT_INFO.phone}
@@ -95,7 +95,7 @@ export function Footer() {
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-bold uppercase tracking-[0.14em] text-white/45">{t.footer.addressLabel}</dt>
+                <dt className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">{t.footer.addressLabel}</dt>
                 <dd className="py-1 text-white/65">{t.footer.address}</dd>
               </div>
             </dl>
@@ -104,7 +104,7 @@ export function Footer() {
 
         <div className="mt-20 flex flex-col gap-4 border-t border-white/15 pt-6 text-sm text-white/50 md:flex-row md:items-center md:justify-between">
           <p>
-            &copy; {new Date().getFullYear()} Neroes Technologies. {t.footer.copyright}
+            &copy; {new Date().getFullYear()} Neroes. {t.footer.copyright}
           </p>
           <ul className="flex gap-6">
             {SOCIAL_LINKS.map(({ label, href }) => (

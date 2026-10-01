@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 
 import { translations, type Locale, type Translations } from "@/lib/i18n/translations";
 
@@ -34,11 +35,41 @@ function storeLocale(locale: Locale) {
   }
 }
 
+/**
+ * Keeps the browser-tab title on `title` while mounted (pass undefined for no
+ * override). The Portuguese title is the route's metadata, which Next.js can
+ * insert or replace after hydration, so it is re-applied whenever a <title>
+ * changes; on unmount (e.g. back to PT) the elements it rewrote get their
+ * metadata text back.
+ */
+export function useDocumentTitle(title: string | undefined) {
+  useEffect(() => {
+    if (!title) return;
+    const original = new Map<HTMLTitleElement, string>();
+    const apply = () => {
+      const el = document.querySelector("title");
+      if (!el || el.textContent === title) return;
+      original.set(el, el.textContent ?? "");
+      el.textContent = title;
+    };
+    apply();
+    const observer = new MutationObserver(apply);
+    observer.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+    return () => {
+      observer.disconnect();
+      original.forEach((text, el) => {
+        if (el.isConnected && el.textContent === title) el.textContent = text;
+      });
+    };
+  }, [title]);
+}
+
 // Default is Portuguese; persists the user's choice across visits via
 // localStorage, read once on mount (kept out of the initial render so the
 // server-rendered PT markup always matches the client's first paint).
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("pt");
+  const pathname = usePathname();
 
   useEffect(() => {
     const stored = readStoredLocale();
@@ -49,6 +80,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = locale === "pt" ? "pt-PT" : "en";
   }, [locale]);
+
+  // Browser-tab title in English on the bilingual routes (PT = route metadata).
+  const enTitles: Record<string, string> = { "/": translations.en.meta.home, "/contact": translations.en.meta.contact };
+  useDocumentTitle(locale === "en" ? enTitles[pathname] : undefined);
 
   const setLocale = (next: Locale) => {
     setLocaleState(next);

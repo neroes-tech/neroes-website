@@ -1,6 +1,8 @@
 -- contact_submissions
--- Usada por src/app/api/contact/route.ts (POST /api/contact) para guardar
--- os envios do formulário de contacto.
+-- ⚠️ SEM USO desde 30 set. 2026: o formulário de contacto e o endpoint
+-- POST /api/contact foram removidos (a página Contacto passou a ser só
+-- marcação por Calendly, a pedido do Pedro). Mantido apenas como referência,
+-- caso um formulário volte. Originalmente usada por src/app/api/contact/route.ts.
 
 create table if not exists public.contact_submissions (
   id         uuid primary key default gen_random_uuid(),

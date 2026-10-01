@@ -40,7 +40,8 @@ const SHIFT = "font-exo text-4xl font-light leading-[1.05] tracking-[-0.035em] m
 /**
  * The Home, laid out after the Neurable company page the team picked as the
  * reference, with the content of Pedro's prototype (docs/content-inventory.md,
- * section 6) and the headset film. Black and white chapters alternate; every
+ * section 6) and the headset film. Light throughout (DESIGN.md): only the hero
+ * and the closing card are dark. Every
  * statement is one large, tightly set line that comes into focus on scroll.
  * The founder section was removed at Pedro's request (30 Sept 2026).
  */
@@ -52,7 +53,7 @@ export function HomeContent() {
     <>
       <Hero />
 
-      {/* 02 — The platform, stated */}
+      {/* The platform, stated */}
       <section
         id="plataforma"
         aria-labelledby="platform-heading"
@@ -122,10 +123,10 @@ export function HomeContent() {
         </div>
       </section>
 
-      {/* 03 — The evidence, on black */}
+      {/* The evidence */}
       <Evidence />
 
-      {/* 04 — Services: Corporate, Sport, Clinics, Education */}
+      {/* Services: Corporate, Sport, Clinics, Education */}
       <section aria-labelledby="where-heading" className="bg-background py-24 md:py-36">
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-4xl text-center">
@@ -155,7 +156,7 @@ export function HomeContent() {
         </div>
       </section>
 
-      {/* 05 — The journey, as one line with three stops */}
+      {/* The journey, as one line with three stops */}
       <section aria-labelledby="journey-heading" className="bg-muted py-24 md:py-36">
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-4xl text-center">
@@ -249,7 +250,7 @@ export function HomeContent() {
         </div>
       </section>
 
-      {/* 06 — Neurorights */}
+      {/* Neurorights */}
       <section aria-labelledby="neurorights-heading" className="bg-muted py-24 md:py-36">
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-4xl text-center">

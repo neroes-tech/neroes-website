@@ -33,14 +33,14 @@ export function LanguageSwitcher() {
   const { locale, setLocale } = useLanguage();
 
   return (
-    <div role="group" aria-label="Selecionar idioma / Select language" className="flex items-center gap-1.5">
+    <div role="group" aria-label="Selecionar idioma / Select language" className="flex items-center gap-0.5">
       <button
         type="button"
         onClick={() => setLocale("pt")}
         aria-pressed={locale === "pt"}
         aria-label="Português"
         className={cn(
-          "rounded-sm transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
+          "inline-flex h-8 w-8 items-center justify-center rounded-md transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-white",
           locale === "pt" ? "opacity-100" : "opacity-45 hover:opacity-80",
         )}
       >
@@ -55,7 +55,7 @@ export function LanguageSwitcher() {
         aria-pressed={locale === "en"}
         aria-label="English"
         className={cn(
-          "rounded-sm transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
+          "inline-flex h-8 w-8 items-center justify-center rounded-md transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-white",
           locale === "en" ? "opacity-100" : "opacity-45 hover:opacity-80",
         )}
       >

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { PARTNERS } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Sport",
@@ -179,28 +178,6 @@ export default function SportPage() {
         </div>
       </section>
 
-      <section className="bg-background py-24">
-        <div className="container mx-auto max-w-5xl px-4 md:px-6">
-          <Reveal>
-            <SectionHeading title="Many organizations already foresee the benefits of mental enhancement" />
-            <ul className="flex flex-wrap items-center justify-center gap-x-12 gap-y-5">
-              {PARTNERS.map((partner) => (
-                <li key={partner.name}>
-                  <a
-                    href={partner.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block py-1 font-exo text-xl font-semibold tracking-wide text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    {partner.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </Reveal>
-        </div>
-      </section>
-
       <section className="bg-primary py-24 text-primary-foreground md:py-32">
         <div className="container relative mx-auto max-w-2xl px-4 text-center md:px-6">
           <Reveal>
@@ -211,10 +188,7 @@ export default function SportPage() {
               Learn how to boost it and reach beyond.
             </p>
             <div className="mt-10">
-              <Button
-                asChild
-                size="lg"
-              >
+              <Button asChild size="lg" variant="inverse">
                 <Link href="/contact">
                   Talk to us!
                 </Link>
