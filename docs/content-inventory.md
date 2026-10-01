@@ -279,3 +279,11 @@ Fonte: gravação de ecrã do protótipo `Neroes.dc.html` (claude.ai/design, ace
 - "Com o apoio de" → **"Confiados por" / "Trusted by"**. O Duarte vai enviar mais logótipos.
 - Painéis do fundador: **"Missão"** (headset, texto da missão do Pedro) e **"Visão"** (foto do Pedro, texto pessoal dele). A frase do Pedro volta a ser o título da secção 06.
 - Hero: o cérebro volta às cores da versão 2 (#3B82F6 / #22D3EE / #00F0FF) e ao fundo azul-marinho; o texto entra antes da explosão e não fica por baixo da navegação em ecrãs baixos.
+
+**Feedback do Pedro (chamada de 30 set. 2026, transcrita localmente):**
+- **Fundador:** secção retirada da Início ("tira isso do fundador, isso tudo"). Fotos dos painéis apagadas.
+- **Rodapé:** "Treino mental com neurotecnologia." — sem "para clínica, desporto e trabalho" ("isto é só sobre a tecnologia").
+- **Páginas Ciência e Sobre:** eliminadas ("essa página elimina"); `/science` e `/about` redirecionam para a Início (307). A navegação fica Início · Contacto.
+- **Contacto:** sem formulário — só marcação por Calendly ("põe para já um Calendly do André; fala com ele"). O link é configurado em `NEXT_PUBLIC_CALENDLY_URL`. ⚠️ O link antigo (`calendly.com/pedro-ebw/brain-experience-event`, usado no botão "Marcar uma demonstração" até agora) responde **"Este evento está indisponível no momento"** — o botão estava partido. Sem link configurado, a página mostra email e telefone.
+- Sem formulário, saem também a API `/api/contact`, o envio por SMTP e as dependências nodemailer, react-hook-form e zod.
+- **Para depois:** "pôr uma musiquinha" (ideia da Joana) — se avançar, nunca com autoplay de som (WCAG 1.4.2), só com um botão de play.

@@ -46,23 +46,9 @@ interface Right {
   desc: string;
 }
 
-interface SciencePillar {
-  title: string;
-  desc: string;
-}
-
-/** A headline result on the Science page, with where it comes from. */
-interface ScienceStat {
-  value: string;
-  label: string;
-  source: string;
-}
-
 export interface Translations {
   nav: {
     home: string;
-    science: string;
-    about: string;
     contact: string;
     schedule: string;
     skipToContent: string;
@@ -119,20 +105,6 @@ export interface Translations {
       quoteCaption: string;
       pillars: [NamedItem, NamedItem, NamedItem];
     };
-    /** The founder panels: his line split across the device (left) and Pedro (right). */
-    founders: {
-      eyebrow: string;
-      /** Pedro's line from the prototype — the section title. */
-      title: string;
-      missionTitle: string;
-      visionTitle: string;
-      pedroMission: string;
-      pedroPersonal: string;
-      deviceAlt: string;
-      pedroAlt: string;
-      /** Prefix for the keyboard control that brings a panel forward. */
-      showPanel: string;
-    };
     neurorights: {
       eyebrow: string;
       title: string;
@@ -166,7 +138,7 @@ export interface Translations {
     testimonialsPause: string;
     testimonialsPlay: string;
     partnersHeading: string;
-    /** The Home's evidence section. science.stats repeats four of these figures — change both together. */
+    /** The Home's evidence section. */
     evidence: {
       eyebrow: string;
       title: string;
@@ -186,71 +158,30 @@ export interface Translations {
     body: string;
     retry: string;
   };
-  science: {
-    eyebrow: string;
-    title: string;
-    subtitle: string;
-    pillars: [SciencePillar, SciencePillar, SciencePillar];
-    statsHeading: string;
-    /** Same figures as shared.evidence (the −41% lead and the studies) — change both together. */
-    stats: [ScienceStat, ScienceStat, ScienceStat, ScienceStat];
-    sportCtaText: string;
-    sportCtaButton: string;
-  };
-  about: {
-    eyebrow: string;
-    title: string;
-    visionEyebrow: string;
-    visionTitle: string;
-    visionIntro: string;
-    teamEyebrow: string;
-    teamTitle: string;
-    teamIntro: string;
-    partnershipsEyebrow: string;
-    partnershipsTitle: string;
-    testimonialsTitle: string;
-    testimonialQuote: string;
-    testimonialAuthor: string;
-    ctaButton: string;
-  };
+  /** The Contacto page: scheduling only (Pedro, 30 Sept 2026). */
   contact: {
     eyebrow: string;
     title: string;
     subtitle: string;
-    infoHeading: string;
-    emailLabel: string;
+    /** Accessible name of the embedded Calendly calendar. */
+    calendarTitle: string;
+    /** Under the calendar, for when it doesn't load. */
+    calendarFallbackPrefix: string;
+    calendarFallbackLink: string;
+    /** Shown instead of the calendar while no booking link is configured. */
+    noCalendarTitle: string;
+    noCalendarBody: string;
+    noCalendarEmailButton: string;
+    noCalendarSubject: string;
     phoneLabel: string;
-    addressLabel: string;
-    address: string;
-    form: {
-      nameLabel: string;
-      emailLabel: string;
-      phoneLabel: string;
-      messageLabel: string;
-      gdprPrefix: string;
-      gdprLink: string;
-      gdprSuffix: string;
-      submitLabel: string;
-      submittingLabel: string;
-      successMessage: string;
-      errorFallback: string;
-      /** Opens the visitor's own email app with the message filled in. */
-      mailtoButton: string;
-      mailtoSubject: string;
-      nameError: string;
-      emailError: string;
-      gdprError: string;
-    };
   };
 }
 
-// Full-site PT/EN dictionary: Navbar, Footer, Home, Science, About and Contact.
+// Full-site PT/EN dictionary: Navbar, Footer, Home and Contact (scheduling).
 export const translations: Record<Locale, Translations> = {
   pt: {
     nav: {
       home: "Início",
-      science: "Ciência",
-      about: "Sobre",
       contact: "Contacto",
       schedule: "Marcar uma demonstração",
       skipToContent: "Saltar para o conteúdo",
@@ -366,21 +297,8 @@ export const translations: Record<Locale, Translations> = {
           },
         ],
       },
-      founders: {
-        eyebrow: "06 — Fundador",
-        title: "Neurotecnologia rigorosa numa mão. As profundezas da mente na outra.",
-        missionTitle: "Missão",
-        visionTitle: "Visão",
-        pedroMission:
-          "A missão do Pedro, nas suas palavras, é **despoletar a excelência** — uma carreira a juntar neurofeedback, IA, interfaces cérebro-computador, EEG e ciência de dados para potenciar a mente humana, com três startups fundadas antes desta.",
-        pedroPersonal:
-          "E é pessoal: pratica meditação e visualização todos os dias e estuda a consciência há toda a vida. **A Neroes é onde as duas linhas se encontram.**",
-        deviceAlt: "O headset EEG da Neroes, visto de baixo, com os elétrodos",
-        pedroAlt: "Pedro Pestana, fundador da Neroes, de pé, a falar ao microfone de olhos fechados",
-        showPanel: "Mostrar",
-      },
       neurorights: {
-        eyebrow: "07 — Neurodireitos",
+        eyebrow: "06 — Neurodireitos",
         title: "A mente é o lugar mais privado que existe.",
         body: "Os dados neurais são os dados mais sensíveis que existem. Construímos segundo o primeiro padrão ético global da neurotecnologia — o da UNESCO — desde a conceção, não como remendo.",
         rights: [
@@ -398,7 +316,7 @@ export const translations: Record<Locale, Translations> = {
       },
     },
     footer: {
-      tagline: "Treino mental com neurofeedback por EEG, para clínica, desporto e trabalho.",
+      tagline: "Treino mental com neurotecnologia.",
       subtagline: "A Neroes é uma plataforma de treino e investigação — não um tratamento médico.",
       navigationHeading: "Navegação",
       legalHeading: "Legal",
@@ -498,95 +416,30 @@ export const translations: Record<Locale, Translations> = {
           "Numa sessão, vês o teu próprio sinal de regulação a mexer à medida que acalmas a mente. **Um avião no ar, não uma promessa.**",
       },
     },
+    contact: {
+      eyebrow: "Contacto",
+      title: "Marca uma conversa connosco",
+      subtitle:
+        "Escolhe o dia e a hora que te dão mais jeito para falarmos sobre a plataforma. A confirmação chega-te por email.",
+      calendarTitle: "Calendário para marcar uma conversa com a Neroes",
+      calendarFallbackPrefix: "O calendário não abriu?",
+      calendarFallbackLink: "Abrir numa nova janela",
+      noCalendarTitle: "Diz-nos quando te dá jeito",
+      noCalendarBody:
+        "Escreve-nos com dois ou três dias e horas que te deem jeito e respondemos a confirmar a conversa. Também podes ligar-nos.",
+      noCalendarEmailButton: "Marcar por email",
+      noCalendarSubject: "Marcar uma conversa",
+      phoneLabel: "Telefone",
+    },
     errorPage: {
       title: "Algo correu mal ao abrir esta página.",
       body: "Tenta outra vez. Se o problema continuar, escreve-nos para info@neroes.tech.",
       retry: "Tentar outra vez",
     },
-    science: {
-      eyebrow: "Ciência",
-      title: "A neurociência por trás da Neroes",
-      subtitle:
-        "A Plataforma de Treino Mental Neroes™ não seria possível sem investigação aprofundada e estudos validados sobre saúde mental e os seus efeitos no rendimento humano.",
-      pillars: [
-        {
-          title: "Captação de sinal EEG",
-          desc: "Um headset vestível de eletroencefalografia (EEG) lê a atividade elétrica do cérebro em tempo real.",
-        },
-        {
-          title: "Treino de Neurofeedback",
-          desc: "Esses sinais controlam um videojogo que só se ganha ao atingir genuinamente um estado mental mais calmo e focado.",
-        },
-        {
-          title: "Progresso Mensurável",
-          desc: "Algoritmos adaptativos acompanham a evolução de cada utilizador ao longo das sessões, tornando o treino mais exigente à medida que as competências melhoram.",
-        },
-      ],
-      statsHeading: "Resultados medidos até agora",
-      stats: [
-        { value: "−41%", label: "Ansiedade", source: "Média de 3 clientes · 8+ sessões" },
-        { value: "+21,7%", label: "Processamento de informação", source: "Equipa desportiva profissional · N=32" },
-        { value: "+18,8%", label: "Tomada de decisão", source: "Piloto em desporto de elite · N=10" },
-        { value: "+9,4%", label: "Autoconfiança", source: "Equipa desportiva profissional · N=32" },
-      ],
-      sportCtaText: "Tens curiosidade sobre como isto funciona em equipas de desporto de elite?",
-      sportCtaButton: "Ver o caso de estudo de Ciência do Desporto",
-    },
-    about: {
-      eyebrow: "Quem Somos",
-      title: "Sobre a Neroes",
-      visionEyebrow: "A nossa visão",
-      visionTitle: "A nossa visão: capacitação humana",
-      visionIntro:
-        "A Neroes começou como uma ideia desenvolvida por Pedro Pestana e Hugo Ferreira enquanto trabalhavam na Faculdade de Ciências da Universidade de Lisboa. Ambos trazem uma paixão pelo desempenho humano e o desejo de colocar o conhecimento científico e tecnológico ao serviço da capacitação humana.",
-      teamEyebrow: "As pessoas",
-      teamTitle: "A Nossa Equipa",
-      teamIntro:
-        "Somos movidos pela exploração do potencial humano, numa harmonia perfeita entre emoção e lógica, já que as competências da nossa equipa correspondem exatamente às necessidades do projeto: neurociência, psicologia, desenvolvimento de videojogos e software, análise de dados e tradução do conhecimento académico para o mundo empresarial.",
-      partnershipsEyebrow: "A trabalhar em conjunto",
-      partnershipsTitle: "Parcerias",
-      testimonialsTitle: "O que dizem sobre nós",
-      testimonialQuote:
-        "O objetivo do jogo é simples e claro: focar e focar melhor, eliminando a ansiedade. E o jogo cumpre esse objetivo.",
-      testimonialAuthor: "— Inês, 21 anos",
-      ctaButton: "Fala connosco!",
-    },
-    contact: {
-      eyebrow: "Contacto",
-      title: "Bem-vindo. Estamos gratos pelo seu contacto",
-      subtitle:
-        "Perguntas sobre a plataforma, a ciência, ou uma demonstração ao vivo — envie-nos uma mensagem e entraremos em contacto brevemente.",
-      infoHeading: "Informações de Contacto",
-      emailLabel: "Email",
-      phoneLabel: "Telefone",
-      addressLabel: "Localização",
-      address: "Lisboa, Portugal",
-      form: {
-        nameLabel: "Nome *",
-        emailLabel: "Email *",
-        phoneLabel: "Telefone",
-        messageLabel: "Mensagem",
-        gdprPrefix: "Concordo com o tratamento dos meus dados pessoais conforme descrito na ",
-        gdprLink: "Política de Privacidade",
-        gdprSuffix: ". *",
-        submitLabel: "Enviar Mensagem",
-        submittingLabel: "A enviar...",
-        successMessage: "Obrigado. A sua mensagem foi enviada com sucesso. Entraremos em contacto brevemente.",
-        errorFallback:
-          "Não foi possível enviar a mensagem agora. Tente outra vez daqui a pouco, ou envie-a do seu email — já fica preenchida.",
-        mailtoButton: "Enviar pelo meu email",
-        mailtoSubject: "Contacto através do site",
-        nameError: "O nome é obrigatório",
-        emailError: "Endereço de email inválido",
-        gdprError: "Tem de aceitar a política de privacidade",
-      },
-    },
   },
   en: {
     nav: {
       home: "Home",
-      science: "Science",
-      about: "About",
       contact: "Contact",
       schedule: "Schedule a demo",
       skipToContent: "Skip to main content",
@@ -699,21 +552,8 @@ export const translations: Record<Locale, Translations> = {
           { title: "Human potential", desc: "Attention, intuition, equanimity — capacities most of us never train, and could." },
         ],
       },
-      founders: {
-        eyebrow: "06 — Founder",
-        title: "Rigorous neurotechnology in one hand. The depths of the mind in the other.",
-        missionTitle: "Mission",
-        visionTitle: "Vision",
-        pedroMission:
-          "Pedro's mission, in his own words, is **to trigger excellence** — a career spent merging neurofeedback, AI, brain-computer interfaces, EEG, and data science to enhance the human mind, with three startups founded before this one.",
-        pedroPersonal:
-          "And it's personal: a daily practitioner of meditation and visualisation, a lifelong student of consciousness. **Neroes is where the two threads meet.**",
-        deviceAlt: "The Neroes EEG headset, seen from below, with its electrodes",
-        pedroAlt: "Pedro Pestana, founder of Neroes, standing and speaking into a microphone with his eyes closed",
-        showPanel: "Show",
-      },
       neurorights: {
-        eyebrow: "07 — Neurorights",
+        eyebrow: "06 — Neurorights",
         title: "The mind is the most private place there is.",
         body: "Neural data is the most sensitive data there is. We build to neurotechnology's first global ethics standard — UNESCO's — by design, not as an afterthought.",
         rights: [
@@ -731,7 +571,7 @@ export const translations: Record<Locale, Translations> = {
       },
     },
     footer: {
-      tagline: "EEG neurofeedback mental training for clinic, sport and work.",
+      tagline: "Mental training with neurotechnology.",
       subtagline: "Neroes is a training and research platform — not a medical treatment.",
       navigationHeading: "Navigation",
       legalHeading: "Legal",
@@ -830,88 +670,25 @@ export const translations: Record<Locale, Translations> = {
         liveBody: "In a session you watch your own regulation signal move as you calm your mind. **A plane in the air, not a promise.**",
       },
     },
+    contact: {
+      eyebrow: "Contact",
+      title: "Book a conversation with us",
+      subtitle:
+        "Pick the day and time that suit you best to talk about the platform. The confirmation arrives by email.",
+      calendarTitle: "Calendar to book a conversation with Neroes",
+      calendarFallbackPrefix: "Calendar didn't load?",
+      calendarFallbackLink: "Open it in a new window",
+      noCalendarTitle: "Tell us when suits you",
+      noCalendarBody:
+        "Write to us with two or three days and times that work for you and we'll reply to confirm the conversation. You can also call us.",
+      noCalendarEmailButton: "Book by email",
+      noCalendarSubject: "Book a conversation",
+      phoneLabel: "Phone",
+    },
     errorPage: {
       title: "Something went wrong opening this page.",
       body: "Please try again. If it keeps happening, write to us at info@neroes.tech.",
       retry: "Try again",
-    },
-    science: {
-      eyebrow: "Science",
-      title: "The neuroscience behind Neroes",
-      subtitle:
-        "The Neroes Mental Training Platform™ would be impossible without extensive research and validated studies about mental health and its effects on human performance.",
-      pillars: [
-        {
-          title: "EEG signal capture",
-          desc: "A wearable electroencephalography (EEG) headset reads the brain's electrical activity in real time.",
-        },
-        {
-          title: "Neurofeedback training",
-          desc: "Those signals control a videogame that can only be won by genuinely reaching a calmer, more focused state of mind.",
-        },
-        {
-          title: "Measured progress",
-          desc: "Adaptive algorithms track each user's evolution across sessions, making training more demanding as skills improve.",
-        },
-      ],
-      statsHeading: "Results measured so far",
-      stats: [
-        { value: "−41%", label: "Anxiety", source: "Average of 3 clients · 8+ sessions" },
-        { value: "+21.7%", label: "Information processing", source: "Professional sports team · N=32" },
-        { value: "+18.8%", label: "Decision-making", source: "Elite sport pilot · N=10" },
-        { value: "+9.4%", label: "Self-confidence", source: "Professional sports team · N=32" },
-      ],
-      sportCtaText: "Curious how this works for elite sports teams instead?",
-      sportCtaButton: "See the Sport Science case study",
-    },
-    about: {
-      eyebrow: "Who we are",
-      title: "About Neroes",
-      visionEyebrow: "Our vision",
-      visionTitle: "Our vision: human empowerment",
-      visionIntro:
-        "Neroes started as an idea developed by Pedro Pestana and Hugo Ferreira while working at the Faculty of Sciences of the University of Lisbon. They both bring a passion for human performance and the desire to use scientific and technological knowledge in service of human empowerment.",
-      teamEyebrow: "The people",
-      teamTitle: "Our Team",
-      teamIntro:
-        "We are driven to explore human potential, in a perfect harmony between emotion and logic since our team skills match perfectly the needs of the project: neuroscience, psychology, videogame and software development, data analytics, and translation of academic knowledge into business.",
-      partnershipsEyebrow: "Working together",
-      partnershipsTitle: "Partnerships",
-      testimonialsTitle: "What people say about us",
-      testimonialQuote:
-        "The goal of the game is simple and clear: focus and focus better, eliminating anxiety. And the game hits that goal.",
-      testimonialAuthor: "— Inês, 21 years old",
-      ctaButton: "Talk to us!",
-    },
-    contact: {
-      eyebrow: "Contact",
-      title: "Welcome. We are happy to hear from you",
-      subtitle:
-        "Questions about the platform, the science, or a live demo — send us a message and we will get back to you shortly.",
-      infoHeading: "Contact Information",
-      emailLabel: "Email",
-      phoneLabel: "Phone",
-      addressLabel: "Location",
-      address: "Lisbon, Portugal",
-      form: {
-        nameLabel: "Name *",
-        emailLabel: "Email *",
-        phoneLabel: "Phone",
-        messageLabel: "Message",
-        gdprPrefix: "I agree to the processing of my personal data as described in the ",
-        gdprLink: "Privacy Policy",
-        gdprSuffix: ". *",
-        submitLabel: "Send Message",
-        submittingLabel: "Sending...",
-        successMessage: "Thank you. Your message has been sent successfully. We will get back to you shortly.",
-        errorFallback:
-          "We couldn't send your message just now. Please try again shortly, or send it from your own email — it's already filled in.",
-        mailtoButton: "Send from my email",
-        mailtoSubject: "Contact from the website",
-        nameError: "Name is required",
-        emailError: "Invalid email address",
-        gdprError: "You must accept the privacy policy",
-      },
     },
   },
 };

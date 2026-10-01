@@ -8,7 +8,6 @@ import { BlurReveal } from "@/components/motion/BlurReveal";
 import { WordReveal } from "@/components/motion/WordReveal";
 import { ClientTestimonials } from "@/components/sections/ClientTestimonials";
 import { Evidence } from "@/components/sections/Evidence";
-import { ExpandingPanels } from "@/components/sections/ExpandingPanels";
 import { ProductVideo } from "@/components/sections/ProductVideo";
 import { Button } from "@/components/ui/button";
 import { Eyebrow } from "@/components/ui/Eyebrow";
@@ -24,7 +23,6 @@ const HEADSET_VIDEO = {
   poster: "/media/neroes-headset-poster.webp",
 } as const;
 
-
 // The "believed / vision" register: italic in the logo's vivid blue on
 // black (7.4:1) and the brand blue on white (5.1:1). No gold.
 const VISION_ON_BLACK = "italic text-[#00A5E9]";
@@ -38,24 +36,16 @@ const STATEMENT = "font-exo text-5xl font-medium leading-[0.95] tracking-[-0.04e
 // The two lines either side of the register shift, a step smaller.
 const SHIFT = "font-exo text-4xl font-medium leading-[1.02] tracking-[-0.035em] md:text-6xl";
 
-// Founder panels: the device (left) and Pedro (right).
-const FOUNDER_IMAGES = {
-  device: "/media/founder-device.webp",
-  pedro: "/media/founder-pedro.webp",
-} as const;
-
 /**
  * The Home, laid out after the Neurable company page the team picked as the
  * reference, with the content of Pedro's prototype (docs/content-inventory.md,
  * section 6) and the headset film. Black and white chapters alternate; every
  * statement is one large, tightly set line that comes into focus on scroll.
+ * The founder section was removed at Pedro's request (30 Sept 2026).
  */
 export function HomeContent() {
   const { t } = useLanguage();
   const h = t.home;
-  // Pedro's line has two halves ("… numa mão." / "… na outra."); the second
-  // takes the vision register, like "measured" / "believed" above.
-  const [founderLineA, founderLineB] = h.founders.title.split(/(?<=\.)\s+/);
 
   return (
     <>
@@ -258,46 +248,7 @@ export function HomeContent() {
         </div>
       </section>
 
-      {/* 06 — Founder: his line as the title, then Mission (the device) and Vision (Pedro) */}
-      <section aria-labelledby="founders-heading" className="bg-black pb-24 pt-16 text-white md:pb-36 md:pt-24">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="mx-auto max-w-4xl border-t border-white/15 pt-20 text-center md:pt-28">
-            <Eyebrow tone="inverse" className="mb-6">
-              {h.founders.eyebrow}
-            </Eyebrow>
-            <BlurReveal>
-              <h2 id="founders-heading" className={SHIFT}>
-                {founderLineA}{" "}
-                {founderLineB && <span className={cn("block", VISION_ON_BLACK)}>{founderLineB}</span>}
-              </h2>
-            </BlurReveal>
-            <p className="mt-8 text-lg font-medium text-white/80">Pedro Pestana</p>
-          </div>
-          <div className="mt-14 md:mt-20">
-            <ExpandingPanels
-              showLabel={h.founders.showPanel}
-              panels={[
-                {
-                  image: FOUNDER_IMAGES.device,
-                  alt: h.founders.deviceAlt,
-                  focus: "center 35%",
-                  title: h.founders.missionTitle,
-                  body: h.founders.pedroMission,
-                },
-                {
-                  image: FOUNDER_IMAGES.pedro,
-                  alt: h.founders.pedroAlt,
-                  focus: "center 18%",
-                  title: h.founders.visionTitle,
-                  body: h.founders.pedroPersonal,
-                },
-              ]}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* 07 — Neurorights */}
+      {/* 06 — Neurorights */}
       <section aria-labelledby="neurorights-heading" className="bg-muted py-24 md:py-36">
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-4xl text-center">

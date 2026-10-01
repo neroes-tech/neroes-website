@@ -1,64 +1,69 @@
 "use client";
 
+import { CalendlyEmbed } from "@/components/sections/CalendlyEmbed";
+import { Button } from "@/components/ui/button";
 import { PageHero } from "@/components/ui/PageHero";
+import { CALENDLY_URL, CONTACT_INFO } from "@/lib/constants";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { CONTACT_INFO } from "@/lib/constants";
-import { ContactForm } from "./ContactForm";
 
-const labelClass = "text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground";
-
+/**
+ * Contacto = scheduling only (Pedro, 30 Sept 2026): the visitor picks a slot
+ * in Calendly and that's it — no form. Until a booking link is configured
+ * (NEXT_PUBLIC_CALENDLY_URL, see constants.ts), the page offers email and
+ * phone instead of an empty or dead calendar.
+ */
 export function ContactPageContent() {
   const { t } = useLanguage();
+  const c = t.contact;
 
   return (
     <>
-      <PageHero
-        eyebrow={t.contact.eyebrow}
-        title={t.contact.title}
-        subtitle={t.contact.subtitle}
-        size="compact"
-        maxWidth="3xl"
-      />
+      <PageHero eyebrow={c.eyebrow} title={c.title} subtitle={c.subtitle} size="compact" maxWidth="3xl" />
 
-      <section className="bg-background py-16 md:py-20">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-16">
-            <div className="lg:col-span-5">
-              <h2 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">{t.contact.infoHeading}</h2>
-              <dl className="mt-8 divide-y divide-border border-y border-border">
-                <div className="py-5">
-                  <dt className={labelClass}>{t.contact.emailLabel}</dt>
-                  <dd className="mt-1.5">
-                    <a
-                      href={`mailto:${CONTACT_INFO.email}`}
-                      className="text-lg font-medium text-secondary underline-offset-4 hover:underline"
-                    >
-                      {CONTACT_INFO.email}
-                    </a>
-                  </dd>
-                </div>
-                <div className="py-5">
-                  <dt className={labelClass}>{t.contact.phoneLabel}</dt>
-                  <dd className="mt-1.5">
-                    <a
-                      href={`tel:${CONTACT_INFO.phone.replace(/\s+/g, "")}`}
-                      className="text-lg font-medium text-foreground underline-offset-4 hover:underline"
-                    >
-                      {CONTACT_INFO.phone}
-                    </a>
-                  </dd>
-                </div>
-                <div className="py-5">
-                  <dt className={labelClass}>{t.contact.addressLabel}</dt>
-                  <dd className="mt-1.5 text-lg text-foreground">{t.contact.address}</dd>
-                </div>
-              </dl>
+      <section className="bg-background pb-20 md:pb-28">
+        <div className="container mx-auto max-w-5xl px-4 md:px-6">
+          {CALENDLY_URL ? (
+            <>
+              <CalendlyEmbed url={CALENDLY_URL} title={c.calendarTitle} />
+              <p className="mt-5 text-center text-sm text-muted-foreground">
+                {c.calendarFallbackPrefix}{" "}
+                <a
+                  href={CALENDLY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-secondary underline-offset-4 hover:underline"
+                >
+                  {c.calendarFallbackLink}
+                </a>
+              </p>
+            </>
+          ) : (
+            <div className="mx-auto max-w-2xl rounded-3xl border border-border bg-card p-8 text-center md:p-12">
+              <h2 className="font-exo text-3xl font-medium tracking-[-0.03em] text-foreground md:text-4xl">
+                {c.noCalendarTitle}
+              </h2>
+              <p className="mx-auto mt-4 max-w-lg text-lg font-light leading-relaxed text-muted-foreground">
+                {c.noCalendarBody}
+              </p>
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                <Button asChild size="lg">
+                  <a href={`mailto:${CONTACT_INFO.email}?subject=${encodeURIComponent(c.noCalendarSubject)}`}>
+                    {c.noCalendarEmailButton}
+                  </a>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <a href={`tel:${CONTACT_INFO.phone.replace(/\s+/g, "")}`}>
+                    {c.phoneLabel}: {CONTACT_INFO.phone}
+                  </a>
+                </Button>
+              </div>
+              <p className="mt-6 text-sm text-muted-foreground">
+                <a href={`mailto:${CONTACT_INFO.email}`} className="underline-offset-4 hover:underline">
+                  {CONTACT_INFO.email}
+                </a>
+              </p>
             </div>
-
-            <div className="lg:col-span-7">
-              <ContactForm />
-            </div>
-          </div>
+          )}
         </div>
       </section>
     </>

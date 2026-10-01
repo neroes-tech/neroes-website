@@ -4,12 +4,10 @@ import { SITE_URL } from "@/lib/constants";
 
 const ROUTES = [
   "",
-  "/science",
   "/sport",
   "/sport/science",
   "/sport/services",
   "/sport/about",
-  "/about",
   "/contact",
   "/privacy-policy",
   "/terms-conditions",

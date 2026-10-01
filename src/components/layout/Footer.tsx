@@ -22,8 +22,6 @@ export function Footer() {
 
   const navItems = [
     { href: "/", label: t.nav.home },
-    { href: "/science", label: t.nav.science },
-    { href: "/about", label: t.nav.about },
     { href: "/contact", label: t.nav.contact },
   ];
 

@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     template: "%s — Neroes",
   },
   description:
-    "Neroes: treino mental com neurofeedback por EEG — um circuito fechado entre o teu cérebro e um jogo, com biomarcadores objetivos a registar a mudança. Uma plataforma de treino e investigação para clínica, desporto e trabalho.",
+    "Neroes: treino mental com neurotecnologia — um circuito fechado entre o teu cérebro e um jogo, com biomarcadores objetivos a registar a mudança.",
   icons: {
     icon: { url: "/favicon-brain-transparent.png", type: "image/png" },
     shortcut: { url: "/favicon-brain-transparent.png", type: "image/png" },

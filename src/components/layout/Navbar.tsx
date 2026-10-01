@@ -10,7 +10,6 @@ import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { useSegment } from "@/lib/segment/SegmentProvider";
-import { CALENDLY_URL } from "@/lib/constants";
 import { NEROES_LOCKUP } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +24,7 @@ const SPORTS_LOGO = {
  * Floating pill navigation: one near-opaque black bar that sits over every
  * page (the Hero runs underneath it) — opaque enough that the multicolour
  * logo keeps its contrast over white sections too — logo left, sections centre, language
- * and the demo booking right. On phones the pill keeps the logo and a menu
+ * and the booking button right (it opens the Contacto page, where the calendar is). On phones the pill keeps the logo and a menu
  * button; the menu opens as a panel under it.
  */
 export function Navbar() {
@@ -50,8 +49,6 @@ export function Navbar() {
 
   const links = [
     { href: "/", label: t.nav.home },
-    { href: "/science", label: t.nav.science },
-    { href: "/about", label: t.nav.about },
     { href: "/contact", label: t.nav.contact },
   ];
 
@@ -102,9 +99,7 @@ export function Navbar() {
         <div className="hidden items-center gap-4 md:flex">
           <LanguageSwitcher />
           <Button asChild variant="inverse">
-            <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">
-              {t.nav.schedule}
-            </a>
+            <Link href="/contact">{t.nav.schedule}</Link>
           </Button>
         </div>
 
@@ -141,9 +136,9 @@ export function Navbar() {
           <div className="mt-6 flex items-center justify-between gap-4">
             <LanguageSwitcher />
             <Button asChild variant="inverse">
-              <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">
+              <Link href="/contact" onClick={closeMenu}>
                 {t.nav.schedule}
-              </a>
+              </Link>
             </Button>
           </div>
         </div>

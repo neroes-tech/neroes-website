@@ -1,5 +1,3 @@
-import type { Locale } from "@/lib/i18n/translations";
-
 export const CONTACT_INFO = {
   email: "info@neroes.tech",
   phone: "+351 914 796 058",
@@ -11,25 +9,38 @@ export const CONTACT_INFO = {
   },
 };
 
-export const CALENDLY_URL = "https://calendly.com/pedro-ebw/brain-experience-event";
-
-// Original source links for the Calculator page's Deloitte/WHO citations —
-// carried over from the WordPress site (_referencia/wordpress/mhc), not
-// invented. The Deloitte one points to the Drive-hosted PDF copy the
-// original site itself linked to (no stable public URL was ever published
-// on deloitte.com for this report).
-export const EXTERNAL_REPORTS = {
-  deloitte: "https://drive.google.com/file/d/1ifG3h_swbY6-xwz8RoHj_vRUtYg5LrZP/view?usp=drive_link",
-  who: "https://www.who.int/news-room/fact-sheets/detail/mental-health-at-work",
-};
+/**
+ * Booking link embedded on the Contacto page (and behind every "Marcar"
+ * button, which all lead there). Set NEXT_PUBLIC_CALENDLY_URL — on Vercel and
+ * in .env.local — to a public Calendly event link, e.g.
+ * https://calendly.com/<user>/<event>. Only calendly.com links are embedded;
+ * anything else (or nothing) shows the email/phone fallback instead.
+ *
+ * Why not a default: the previous link
+ * (calendly.com/pedro-ebw/brain-experience-event) now answers "Este evento
+ * está indisponível no momento" — embedding it would show a dead calendar.
+ * Pedro asked (30 Sept 2026) for André's Calendly.
+ */
+export const CALENDLY_URL = (() => {
+  const raw = process.env.NEXT_PUBLIC_CALENDLY_URL?.trim();
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    return url.protocol === "https:" && (url.hostname === "calendly.com" || url.hostname.endsWith(".calendly.com"))
+      ? url.toString()
+      : null;
+  } catch {
+    return null;
+  }
+})();
 
 export const SITE_URL = "https://neroes.tech";
 
 // Client and athlete testimonials live in the dictionary (t.shared.testimonials):
 // verbatim from the old WordPress site in English, faithfully translated in PT.
 
-// Unified across About/Team/Sport About — the previous WordPress site listed
-// three different, inconsistent rosters across these pages.
+// One roster for the /sport/about page — the previous WordPress site listed
+// three different, inconsistent rosters.
 export const TEAM_MEMBERS = [
   { name: "Pedro Pestana", role: "Co-Founder & CEO" },
   { name: "Hugo Ferreira", role: "Co-Founder & CMO / Lead Scientific Advisor" },
@@ -41,83 +52,6 @@ export const TEAM_MEMBERS = [
   { name: "Rudy Jeanne", role: "Research & Development Manager" },
   { name: "André Vilela", role: "Head of Operations & Business Development" },
 ];
-
-// Bio bullet points, verbatim from the old Team page (only available for these 6 members).
-export const TEAM_BIOS: Record<string, string[]> = {
-  "Pedro Pestana": [
-    "Biomedical Engineer",
-    "Experience in different startups",
-    "Developer of neurofeedback algorithms",
-    "Data Scientist",
-  ],
-  "Hugo Ferreira": [
-    "Graduated in Medicine",
-    "PhD in Physics",
-    "Founder and CMO (Medical) of NeuropsyAi",
-    "Business Development",
-    "Judo athlete",
-  ],
-  "Valter Costa": [
-    "Software engineer",
-    "Worked 4 years at CERN in software development with real-time data",
-    "Game developer",
-  ],
-  "Mafalda Neves": [
-    "Master in scientific Illustration",
-    "Concept artist in 2D and 3D",
-    "Published work in books and weekly newspapers",
-  ],
-  "Ana Monteiro": [
-    "Specialist in neuromodulation",
-    "One of the greatest neurofeedback specialists in Portugal",
-    "Master in Psychology",
-  ],
-  "Rafael Ramos": [
-    "Graduated in Biomedical Engineering",
-    "Experience developing games and biomedical applications in Unity",
-  ],
-};
-
-// Portuguese rendering of TEAM_BIOS, line for line, so PT pages don't show
-// English lists mid-page.
-export const TEAM_BIOS_PT: Record<string, string[]> = {
-  "Pedro Pestana": [
-    "Engenheiro biomédico",
-    "Experiência em várias startups",
-    "Desenvolvimento de algoritmos de neurofeedback",
-    "Cientista de dados",
-  ],
-  "Hugo Ferreira": [
-    "Licenciado em Medicina",
-    "Doutorado em Física",
-    "Fundador e CMO (área médica) da NeuropsyAi",
-    "Desenvolvimento de negócio",
-    "Atleta de judo",
-  ],
-  "Valter Costa": [
-    "Engenheiro de software",
-    "4 anos no CERN a desenvolver software com dados em tempo real",
-    "Programador de jogos",
-  ],
-  "Mafalda Neves": [
-    "Mestre em Ilustração Científica",
-    "Concept artist em 2D e 3D",
-    "Trabalho publicado em livros e jornais semanais",
-  ],
-  "Ana Monteiro": [
-    "Especialista em neuromodulação",
-    "Uma das maiores especialistas em neurofeedback em Portugal",
-    "Mestre em Psicologia",
-  ],
-  "Rafael Ramos": [
-    "Licenciado em Engenharia Biomédica",
-    "Experiência a desenvolver jogos e aplicações biomédicas em Unity",
-  ],
-};
-
-export function teamBios(locale: Locale): Record<string, string[]> {
-  return locale === "pt" ? TEAM_BIOS_PT : TEAM_BIOS;
-}
 
 // The logo files are trimmed to their visible mark (no built-in padding, no
 // white boxes), so sizes can be set directly. Heights are balanced by area,
