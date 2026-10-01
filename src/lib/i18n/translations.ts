@@ -64,7 +64,6 @@ export interface Translations {
     heroHudBiosignals: string;
     heroHudActive: string;
     heroHudAnxiety: string;
-    heroHudAnxietySource: string;
     heroKpis: [HeroKpi, HeroKpi, HeroKpi];
     heroScrollHint: string;
     platform: {
@@ -198,7 +197,6 @@ export const translations: Record<Locale, Translations> = {
       heroHudBiosignals: "Biossinais em tempo real",
       heroHudActive: "Ativo",
       heroHudAnxiety: "Redução média da ansiedade",
-      heroHudAnxietySource: "3 clientes · 8+ sessões",
       heroKpis: [
         { value: "+21,7%", label: "Processamento de informação" },
         { value: "+18,8%", label: "Tomada de decisão" },
@@ -390,7 +388,7 @@ export const translations: Record<Locale, Translations> = {
         title: "Não descrevemos resultados. Medimo-los.",
         leadValue: "−41%",
         leadLabel: "redução média dos sintomas de ansiedade",
-        leadSource: "Média de 3 clientes — CCA Law Firm, Metro Lisboa e Bayer · 8+ sessões · 30 min de treino por semana",
+        leadSource: "Média nos clientes CCA Law Firm, Metro Lisboa e Bayer · 30 min de treino por semana",
         studies: [
           {
             value: "+21,7%",
@@ -456,7 +454,6 @@ export const translations: Record<Locale, Translations> = {
       heroHudBiosignals: "Real-time biosignals",
       heroHudActive: "Active",
       heroHudAnxiety: "Average anxiety reduction",
-      heroHudAnxietySource: "3 clients · 8+ sessions",
       heroKpis: [
         { value: "+21.7%", label: "Information processing" },
         { value: "+18.8%", label: "Decision-making" },
@@ -645,7 +642,7 @@ export const translations: Record<Locale, Translations> = {
         title: "We don't describe results. We measure them.",
         leadValue: "−41%",
         leadLabel: "average reduction in anxiety symptoms",
-        leadSource: "Average across 3 clients — CCA Law Firm, Metro Lisboa and Bayer · 8+ sessions · 30 min of training per week",
+        leadSource: "Average across clients CCA Law Firm, Metro Lisboa and Bayer · 30 min of training per week",
         studies: [
           {
             value: "+21.7%",

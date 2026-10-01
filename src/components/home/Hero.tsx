@@ -99,7 +99,7 @@ function HeartbeatCard({ reduced, className }: { reduced: boolean; className?: s
   );
 }
 
-/** The headline result, with its source. */
+/** The headline result. */
 function AnxietyCard({ className }: { className?: string }) {
   const { t } = useLanguage();
   const h = t.home;
@@ -109,7 +109,6 @@ function AnxietyCard({ className }: { className?: string }) {
       <p className="mt-1.5 font-exo text-3xl font-medium leading-none tracking-[-0.03em] tabular-nums text-white">
         {t.shared.evidence.leadValue}
       </p>
-      <p className="mt-1.5 text-xs text-white/60">{h.heroHudAnxietySource}</p>
     </div>
   );
 }
