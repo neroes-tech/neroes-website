@@ -135,7 +135,7 @@ export function ProductVideo({
     <figure>
       <div
         ref={boxRef}
-        className="relative aspect-[4/3] w-full overflow-hidden bg-[#5b544c] sm:aspect-video lg:max-h-[88svh]"
+        className="relative aspect-[4/3] w-full overflow-hidden bg-film sm:aspect-video lg:max-h-[88svh]"
       >
         {!hasError && (
           <video

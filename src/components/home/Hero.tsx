@@ -28,11 +28,7 @@ import { cn } from "@/lib/utils";
 const BrainHero = dynamic(() => import("@/components/BrainHero"), { ssr: false });
 
 // The logo's vivid blue, solid (no gradient): 6.5:1 on the dark background.
-const HERO_ACCENT = "text-[#00A5E9]";
-
-// Deep-navy backdrop of version 2 — lit centre falling off to near-black —
-// which gives the particle brain its depth.
-const HERO_BG = "radial-gradient(ellipse 80% 70% at 50% 45%, #0D1B2A 0%, #0A192F 35%, #040711 100%)";
+const HERO_ACCENT = "text-brand-vivid";
 
 // Small labels on the dark background (white/60: 7.4:1).
 const LABEL = "text-[11px] font-bold uppercase tracking-[0.14em] text-white/60";
@@ -40,7 +36,7 @@ const LABEL = "text-[11px] font-bold uppercase tracking-[0.14em] text-white/60";
 // Translucent readouts with a hairline border, square corners. No blur
 // (backdrop-filter over the WebGL canvas in a sticky section left them blank
 // after scrolling back in Chrome), no glow, no float.
-const HUD_CARD = "border border-[#F4F3F0]/30 bg-[#F4F3F0]/[0.07] p-3";
+const HUD_CARD = "border border-white/30 bg-white/[0.07] p-3";
 
 // Scroll progress (0..1) windows. The text is in and sharp well before the
 // brain starts to break apart at 0.55 (BrainHero's Ato III), so it is never
@@ -96,7 +92,7 @@ function HeartbeatCard({ reduced, className }: { reduced: boolean; className?: s
       <p className={cn(LABEL, "mt-2 flex items-center gap-2 whitespace-nowrap")}>
         <motion.span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: HEART_RED, opacity: dotOpacity }} />
         <span>
-          {h.heroHudBiosignals}: <span className="text-[#FF6B84]">{h.heroHudActive}</span>
+          {h.heroHudBiosignals}: <span className="text-heart-soft">{h.heroHudActive}</span>
         </span>
       </p>
     </div>
@@ -167,12 +163,15 @@ export function Hero() {
     <section
       ref={sectionRef}
       aria-labelledby="hero-heading"
-      className="relative bg-[#040711] text-white"
+      className="relative bg-hero text-white"
       style={{ height: reduced ? undefined : "260vh" }}
     >
       <div
-        className={cn("relative flex h-svh min-h-[560px] w-full flex-col overflow-hidden", !reduced && "sticky top-0")}
-        style={{ background: HERO_BG }}
+        // Deep-navy backdrop of version 2, which gives the particle brain its depth.
+        className={cn(
+          "relative flex h-svh min-h-[560px] w-full flex-col overflow-hidden bg-hero-gradient",
+          !reduced && "sticky top-0",
+        )}
       >
         {/* A failing WebGL brain must never take the Hero down with it. */}
         <ErrorBoundary label="BrainHero">
@@ -183,11 +182,8 @@ export function Hero() {
             comes in with the text, so the brain opens unshaded. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-10"
-          style={{
-            background: "radial-gradient(ellipse 58% 46% at 50% 45%, rgba(4,7,17,0.82), transparent 74%)",
-            opacity: headlineReveal,
-          }}
+          className="pointer-events-none absolute inset-0 z-10 bg-hero-scrim"
+          style={{ opacity: headlineReveal }}
         />
 
         {/* The copy, centred between the navigation (pt) and the bottom band */}
@@ -195,7 +191,7 @@ export function Hero() {
           <div className="mx-auto max-w-6xl text-center" onFocus={() => setFocusReveal(true)}>
             <h1
               id="hero-heading"
-              className="font-exo text-[length:clamp(2.75rem,min(8vw,11.5svh),6.5rem)] font-medium leading-[0.94] tracking-[-0.045em]"
+              className="font-exo text-[length:clamp(2.75rem,min(8vw,11.5svh),6.5rem)] font-light leading-[1.05] tracking-[-0.045em]"
               style={revealStyle(headlineReveal)}
             >
               <span className="block">{h.heroHeadlineLine1}</span>{" "}

@@ -39,7 +39,7 @@ export function SectionHeading({
       <h2
         id={id}
         className={cn(
-          "font-exo text-4xl font-medium leading-[1.02] tracking-[-0.035em] md:text-6xl",
+          "font-exo text-4xl font-light leading-[1.05] tracking-[-0.035em] md:text-6xl",
           inverted ? "text-white" : "text-foreground",
         )}
       >

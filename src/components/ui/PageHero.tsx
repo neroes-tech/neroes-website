@@ -62,7 +62,7 @@ export function PageHero({
           )}
           <h1
             className={cn(
-              "font-exo text-5xl font-medium leading-[0.98] tracking-[-0.04em] md:text-7xl",
+              "font-exo text-5xl font-light leading-[1.05] tracking-[-0.04em] md:text-7xl",
               dark ? "text-white" : "text-foreground",
             )}
           >

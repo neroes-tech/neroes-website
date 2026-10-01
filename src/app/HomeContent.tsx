@@ -23,18 +23,19 @@ const HEADSET_VIDEO = {
   poster: "/media/neroes-headset-poster.webp",
 } as const;
 
-// The "believed / vision" register: italic in the logo's vivid blue on
-// black (7.4:1) and the brand blue on white (5.1:1). No gold.
-const VISION_ON_BLACK = "italic text-[#00A5E9]";
+// The "believed / vision" register: italic in the brand blue on white
+// (5.1:1) and the logo's vivid blue on the dark closing card (7.4:1). No gold.
+const VISION_ON_BLACK = "italic text-brand-vivid";
 const VISION_ON_WHITE = "italic text-secondary";
 
 // Today → next → the frontier.
 const STAGE_DOT = ["bg-foreground", "bg-secondary", "bg-accent"] as const;
 
-// One statement per section, set large and tight.
-const STATEMENT = "font-exo text-5xl font-medium leading-[0.95] tracking-[-0.04em] md:text-7xl lg:text-[5.5rem]";
+// One statement per section, set large and tight — Light, as DESIGN.md asks
+// for display titles.
+const STATEMENT = "font-exo text-5xl font-light leading-[1.05] tracking-[-0.04em] md:text-7xl lg:text-[5.5rem]";
 // The two lines either side of the register shift, a step smaller.
-const SHIFT = "font-exo text-4xl font-medium leading-[1.02] tracking-[-0.035em] md:text-6xl";
+const SHIFT = "font-exo text-4xl font-light leading-[1.05] tracking-[-0.035em] md:text-6xl";
 
 /**
  * The Home, laid out after the Neurable company page the team picked as the
@@ -91,7 +92,7 @@ export function HomeContent() {
             {h.platform.steps.map((step) => (
               <li key={step.index}>
                 <span className="text-sm font-bold text-secondary">{step.index}</span>
-                <h3 className="mt-3 text-3xl font-medium tracking-[-0.03em] text-foreground">{step.title}</h3>
+                <h3 className="mt-3 text-3xl font-bold tracking-[-0.02em] text-foreground">{step.title}</h3>
                 <p className="mt-3 text-lg font-light leading-relaxed text-muted-foreground">{step.desc}</p>
               </li>
             ))}
@@ -138,7 +139,7 @@ export function HomeContent() {
           <div className="mt-16 grid gap-12 sm:grid-cols-2 md:mt-24 md:gap-10 lg:grid-cols-4">
             {h.where.items.map((item) => (
               <div key={item.title} className="border-t border-foreground pt-6">
-                <h3 className="text-3xl font-medium tracking-[-0.03em] text-foreground">{item.title}</h3>
+                <h3 className="text-3xl font-bold tracking-[-0.02em] text-foreground">{item.title}</h3>
                 <p className="mt-3 text-lg font-light leading-relaxed text-muted-foreground">{item.desc}</p>
               </div>
             ))}
@@ -173,7 +174,7 @@ export function HomeContent() {
                 <p className="mt-6 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">{stage.label}</p>
                 <h3
                   className={cn(
-                    "mt-3 text-4xl font-medium tracking-[-0.03em] text-foreground md:text-5xl",
+                    "mt-3 text-4xl font-light tracking-[-0.03em] text-foreground md:text-5xl",
                     i === 2 && VISION_ON_WHITE,
                   )}
                 >
@@ -186,8 +187,8 @@ export function HomeContent() {
         </div>
       </section>
 
-      {/* Vision — measured above the line, believed below; one black chapter */}
-      <section aria-labelledby="register-shift" className="bg-black pb-8 pt-28 text-white md:pb-12 md:pt-40">
+      {/* Vision — measured above the line, believed below */}
+      <section aria-labelledby="register-shift" className="bg-background pb-24 pt-28 text-foreground md:pb-32 md:pt-40">
         <div className="container mx-auto px-4 md:px-6">
           {/* The register shift: everything above this line on the page is measured */}
           <div className="mx-auto max-w-5xl text-center">
@@ -195,16 +196,16 @@ export function HomeContent() {
               <p className={SHIFT}>{h.vision.measured}</p>
             </BlurReveal>
             <div className="my-10 flex items-center gap-5 md:my-12">
-              <span aria-hidden="true" className="h-px flex-1 bg-white/25" />
-              <span id="register-shift" className="text-xs font-bold uppercase tracking-[0.14em] text-white/55">
+              <span aria-hidden="true" className="h-px flex-1 bg-foreground/20" />
+              <span id="register-shift" className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
                 {h.vision.shiftLabel}
               </span>
-              <span aria-hidden="true" className="h-px flex-1 bg-white/25" />
+              <span aria-hidden="true" className="h-px flex-1 bg-foreground/20" />
             </div>
             <BlurReveal>
-              <p className={cn(SHIFT, VISION_ON_BLACK)}>{h.vision.believed}</p>
+              <p className={cn(SHIFT, VISION_ON_WHITE)}>{h.vision.believed}</p>
             </BlurReveal>
-            <p className="mt-10 text-xs font-bold uppercase tracking-[0.14em] text-white/55">{h.vision.note}</p>
+            <p className="mt-10 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">{h.vision.note}</p>
           </div>
 
           {/* The honest bridge, read word by word */}
@@ -215,7 +216,7 @@ export function HomeContent() {
                 className="font-exo text-3xl font-light leading-[1.2] tracking-[-0.02em] md:text-5xl"
               />
             </blockquote>
-            <figcaption className="mt-8 text-sm text-white/55">— {h.vision.quoteCaption}</figcaption>
+            <figcaption className="mt-8 text-sm text-muted-foreground">— {h.vision.quoteCaption}</figcaption>
           </figure>
         </div>
       </section>
@@ -224,7 +225,7 @@ export function HomeContent() {
       <ClientTestimonials />
 
       {/* The north star, and what it opens up */}
-      <section aria-labelledby="vision-heading" className="bg-black pb-20 pt-16 text-white md:pb-28 md:pt-24">
+      <section aria-labelledby="vision-heading" className="bg-background py-24 text-foreground md:py-36">
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-4xl text-center">
             <BlurReveal>
@@ -232,7 +233,7 @@ export function HomeContent() {
                 {h.vision.title}
               </h2>
             </BlurReveal>
-            <p className="mx-auto mt-8 max-w-2xl text-lg font-light leading-relaxed text-white/70 md:text-xl">
+            <p className="mx-auto mt-8 max-w-2xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
               {h.vision.body}
             </p>
           </div>
@@ -240,8 +241,8 @@ export function HomeContent() {
           <div className="mt-24 grid gap-12 md:mt-32 md:grid-cols-3 md:gap-12">
             {h.vision.pillars.map((pillar) => (
               <div key={pillar.title}>
-                <h3 className={cn("text-xl font-bold", VISION_ON_BLACK)}>{pillar.title}</h3>
-                <p className="mt-3 leading-relaxed text-white/65">{pillar.desc}</p>
+                <h3 className={cn("text-xl font-bold", VISION_ON_WHITE)}>{pillar.title}</h3>
+                <p className="mt-3 leading-relaxed text-muted-foreground">{pillar.desc}</p>
               </div>
             ))}
           </div>
@@ -266,7 +267,7 @@ export function HomeContent() {
             {h.neurorights.rights.map((right) => (
               <li key={right.code} className="rounded-2xl bg-background p-7">
                 <span className="text-xs font-bold tracking-[0.1em] text-secondary">{right.code}</span>
-                <h3 className="mt-3 text-xl font-medium tracking-[-0.02em] text-foreground">{right.title}</h3>
+                <h3 className="mt-3 text-xl font-bold tracking-[-0.01em] text-foreground">{right.title}</h3>
                 <p className="mt-2 leading-relaxed text-muted-foreground">{right.desc}</p>
               </li>
             ))}

@@ -206,7 +206,7 @@ export const translations: Record<Locale, Translations> = {
       ],
       heroScrollHint: "Desliza para ver",
       platform: {
-        eyebrow: "02 — A plataforma",
+        eyebrow: "A plataforma",
         title: "Um circuito fechado entre o teu cérebro e um jogo.",
         lead: "Não invasivo. Adaptativo. Para jogares bem, aprendes a conduzir o teu próprio estado — **mais calmo, mais atento, mais equilibrado** — enquanto biomarcadores objetivos registam a mudança.",
         steps: [
@@ -236,7 +236,7 @@ export const translations: Record<Locale, Translations> = {
           "O mesmo circuito vai além da ansiedade — incluindo investigação em fase inicial sobre declínio cognitivo e envelhecimento saudável. **Não é um produto, nem um resultado comprovado:** é uma linha de investigação séria.",
       },
       where: {
-        eyebrow: "04 — Serviços",
+        eyebrow: "Serviços",
         title: "Onde funciona hoje",
         items: [
           {
@@ -258,7 +258,7 @@ export const translations: Record<Locale, Translations> = {
         ],
       },
       journey: {
-        eyebrow: "05 — O percurso",
+        eyebrow: "O percurso",
         title: "Cada etapa conquista a seguinte.",
         stages: [
           {
@@ -298,7 +298,7 @@ export const translations: Record<Locale, Translations> = {
         ],
       },
       neurorights: {
-        eyebrow: "06 — Neurodireitos",
+        eyebrow: "Neurodireitos",
         title: "A mente é o lugar mais privado que existe.",
         body: "Os dados neurais são os dados mais sensíveis que existem. Construímos segundo o primeiro padrão ético global da neurotecnologia — o da UNESCO — desde a conceção, não como remendo.",
         rights: [
@@ -386,7 +386,7 @@ export const translations: Record<Locale, Translations> = {
       ],
       partnersHeading: "Confiados por",
       evidence: {
-        eyebrow: "03 — A evidência",
+        eyebrow: "A evidência",
         title: "Não descrevemos resultados. Medimo-los.",
         leadValue: "−41%",
         leadLabel: "redução média dos sintomas de ansiedade",
@@ -464,7 +464,7 @@ export const translations: Record<Locale, Translations> = {
       ],
       heroScrollHint: "Scroll to explore",
       platform: {
-        eyebrow: "02 — The platform",
+        eyebrow: "The platform",
         title: "A closed loop between your brain and a game.",
         lead: "Non-invasive. Adaptive. To play well, you learn to steer your own state — **calmer, sharper, more balanced** — while objective biomarkers record the change.",
         steps: [
@@ -494,7 +494,7 @@ export const translations: Record<Locale, Translations> = {
           "The same loop reaches beyond anxiety — including early-stage research into cognitive decline and healthy aging. **Not a product, and not a proven outcome:** a direction of serious research.",
       },
       where: {
-        eyebrow: "04 — Services",
+        eyebrow: "Services",
         title: "Where it works today",
         items: [
           {
@@ -516,7 +516,7 @@ export const translations: Record<Locale, Translations> = {
         ],
       },
       journey: {
-        eyebrow: "05 — The journey",
+        eyebrow: "The journey",
         title: "Each stage earns the next.",
         stages: [
           {
@@ -553,7 +553,7 @@ export const translations: Record<Locale, Translations> = {
         ],
       },
       neurorights: {
-        eyebrow: "06 — Neurorights",
+        eyebrow: "Neurorights",
         title: "The mind is the most private place there is.",
         body: "Neural data is the most sensitive data there is. We build to neurotechnology's first global ethics standard — UNESCO's — by design, not as an afterthought.",
         rights: [
@@ -641,7 +641,7 @@ export const translations: Record<Locale, Translations> = {
       ],
       partnersHeading: "Trusted by",
       evidence: {
-        eyebrow: "03 — The evidence",
+        eyebrow: "The evidence",
         title: "We don't describe results. We measure them.",
         leadValue: "−41%",
         leadLabel: "average reduction in anxiety symptoms",

@@ -41,8 +41,16 @@
      logo artwork itself. */
   --color-brand-blue: #1270b0;
   --color-brand-teal: #0f9cac;
+  --color-brand-vivid: #00a5e9;
   --color-brand-violet: #00a5e9;
   --color-brand-ink: #0e1624;
+
+  /* Hero (the one dark stage besides the footer): deep navy of version 2,
+     the heart-red of the vital-sign readout, and the warm grey the headset
+     film sits on while it loads. */
+  --color-hero: #040711;
+  --color-heart-soft: #ff6b84;
+  --color-film: #5b544c;
 
   --font-sans: var(--app-font-sans);
   --font-exo: var(--app-font-heading);
@@ -135,6 +143,16 @@
   to {
     transform: translate3d(-50%, 0, 0);
   }
+}
+
+/* Hero backdrop — lit navy centre falling off to near-black (version 2). */
+@utility bg-hero-gradient {
+  background: radial-gradient(ellipse 80% 70% at 50% 45%, #0d1b2a 0%, #0a192f 35%, #040711 100%);
+}
+
+/* Readability scrim behind the Hero copy, over the brightest particles. */
+@utility bg-hero-scrim {
+  background: radial-gradient(ellipse 58% 46% at 50% 45%, rgb(4 7 17 / 0.82), transparent 74%);
 }
 
 @utility animate-marquee {

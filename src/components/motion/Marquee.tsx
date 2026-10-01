@@ -10,8 +10,9 @@ import { cn } from "@/lib/utils";
  * Endless horizontal strip. The items render twice (the copy is hidden from
  * assistive technology) and the track slides by half its width, so the loop
  * is seamless. It moves for longer than 5 seconds, so it has a visible pause
- * control under it (WCAG 2.2.2); pointing at the strip also holds it still,
- * to read. Under reduced motion nothing moves: the items wrap into a grid.
+ * control under it (WCAG 2.2.2); pointing at the strip, or focusing inside
+ * it, also holds it still, to read. Under reduced motion nothing moves: the
+ * items wrap into a grid.
  */
 export function Marquee({
   items,
@@ -44,7 +45,7 @@ export function Marquee({
       <div className="group overflow-hidden">
         <div
           className={cn(
-            "flex w-max animate-marquee group-hover:[animation-play-state:paused]",
+            "flex w-max animate-marquee group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]",
             paused && "[animation-play-state:paused]",
           )}
           style={{ ["--marquee-duration" as string]: `${durationSeconds}s` }}
@@ -68,7 +69,7 @@ export function Marquee({
           type="button"
           onClick={() => setPaused((p) => !p)}
           aria-label={paused ? playLabel : pauseLabel}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-foreground/15 bg-background text-foreground transition-colors hover:bg-foreground/[0.05] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           {paused ? <Play className="h-4 w-4" aria-hidden="true" /> : <Pause className="h-4 w-4" aria-hidden="true" />}
         </button>

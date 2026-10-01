@@ -39,7 +39,7 @@ export function ContactPageContent() {
             </>
           ) : (
             <div className="mx-auto max-w-2xl rounded-3xl border border-border bg-card p-8 text-center md:p-12">
-              <h2 className="font-exo text-3xl font-medium tracking-[-0.03em] text-foreground md:text-4xl">
+              <h2 className="font-exo text-3xl font-light tracking-[-0.03em] text-foreground md:text-4xl">
                 {c.noCalendarTitle}
               </h2>
               <p className="mx-auto mt-4 max-w-lg text-lg font-light leading-relaxed text-muted-foreground">
