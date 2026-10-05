@@ -54,6 +54,8 @@ export interface Translations {
     skipToContent: string;
     /** aria-label of the main navigation landmark. */
     mainLabel: string;
+    /** aria-label of the language switcher group. */
+    languageLabel: string;
     openMenu: string;
     closeMenu: string;
   };
@@ -206,6 +208,7 @@ export const translations: Record<Locale, Translations> = {
       schedule: "Marcar uma demonstração",
       skipToContent: "Saltar para o conteúdo",
       mainLabel: "Principal",
+      languageLabel: "Idioma",
       openMenu: "Abrir menu",
       closeMenu: "Fechar menu",
     },
@@ -475,6 +478,7 @@ export const translations: Record<Locale, Translations> = {
       schedule: "Schedule a demo",
       skipToContent: "Skip to main content",
       mainLabel: "Main",
+      languageLabel: "Language",
       openMenu: "Open menu",
       closeMenu: "Close menu",
     },

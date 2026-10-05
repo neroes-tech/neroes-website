@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, startTransition, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
 import { translations, type Locale, type Translations } from "@/lib/i18n/translations";
@@ -85,13 +85,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const enTitles: Record<string, string> = { "/": translations.en.meta.home, "/contact": translations.en.meta.contact };
   useDocumentTitle(locale === "en" ? enTitles[pathname] : undefined);
 
-  const setLocale = (next: Locale) => {
-    setLocaleState(next);
+  // A transition: switching re-renders the whole page and reshapes every line
+  // of text, which inside the click delayed its paint by 0.3–0.8 s (INP). The
+  // click now paints first and the re-render follows, interruptibly.
+  const setLocale = useCallback((next: Locale) => {
     storeLocale(next);
-  };
+    startTransition(() => setLocaleState(next));
+  }, []);
+  const value = useMemo(() => ({ locale, setLocale, t: translations[locale] }), [locale, setLocale]);
 
   return (
-    <LanguageContext.Provider value={{ locale, setLocale, t: translations[locale] }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );

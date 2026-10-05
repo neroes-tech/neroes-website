@@ -14,7 +14,8 @@ function Word({ progress, range, reduced, children }: {
   const opacity = useTransform(progress, range, [0.2, 1]);
   return (
     <>
-      <motion.span style={reduced ? undefined : { opacity }}>{children}</motion.span>{" "}
+      {/* Explicit 1 under reduced motion: a dropped style prop left the first frame (0.2) frozen. */}
+      <motion.span style={{ opacity: reduced ? 1 : opacity }}>{children}</motion.span>{" "}
     </>
   );
 }
@@ -22,7 +23,8 @@ function Word({ progress, range, reduced, children }: {
 /**
  * A long statement read word by word as it scrolls past: each word goes from
  * dim to full white in turn. Plain text for assistive technology (the words
- * are ordinary spans with their spaces); fully lit under reduced motion.
+ * are ordinary spans with their spaces); fully lit under reduced motion
+ * (data-reveal: CSS net for the server HTML, see globals.css).
  */
 export function WordReveal({ text, className }: { text: string; className?: string }) {
   const ref = useRef<HTMLParagraphElement>(null);
@@ -31,7 +33,7 @@ export function WordReveal({ text, className }: { text: string; className?: stri
   const words = text.split(" ");
 
   return (
-    <p ref={ref} className={className}>
+    <p ref={ref} data-reveal="" className={className}>
       {words.map((word, i) => (
         <Word
           key={`${word}-${i}`}

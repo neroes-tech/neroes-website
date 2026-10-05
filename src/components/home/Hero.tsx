@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
-import { motion, useAnimationFrame, useMotionValue } from "framer-motion";
 
 import {
   ECG_HEIGHT_PX,
@@ -13,8 +12,8 @@ import {
   ECG_SYNC_OFFSET_PX,
   ECG_WINDOW_PX,
   HEART_RED,
+  HEARTBEAT_PERIOD_S,
   heartbeatBlink,
-  heartbeatPhase,
 } from "@/components/hero/heartbeat";
 import { useScrollNarrative } from "@/components/hero/useScrollNarrative";
 import { Button } from "@/components/ui/button";
@@ -48,49 +47,74 @@ function smoothstep(edge0: number, edge1: number, x: number) {
   return t * t * (3 - 2 * t);
 }
 
-/** Scroll-coupled focus-in: blurred, faint and a little low at 0, sharp at 1. */
+/**
+ * Scroll-coupled reveal: faint and a little low at 0, in place at 1. Opacity
+ * and transform only — a blur() here, re-set ten times a second while
+ * scrolling, made frames GPU-bound and delayed the paint after clicks (INP).
+ */
 function revealStyle(revealed: number): CSSProperties {
   return {
     opacity: revealed,
-    filter: revealed < 1 ? `blur(${(1 - revealed) * 12}px)` : undefined,
     transform: `translateY(${(1 - revealed) * 18}px)`,
-    transition: "opacity 150ms linear, filter 150ms linear, transform 150ms linear",
+    transition: "opacity 150ms linear, transform 150ms linear",
   };
 }
+
+/** The status dot over one beat (heartbeat.ts blink envelope), as keyframes. */
+const DOT_KEYFRAMES = [0, 0.06, 0.12, 0.2, 0.3, 0.45, 0.65, 1].map((offset) => ({
+  offset,
+  opacity: 0.3 + 0.7 * heartbeatBlink(offset),
+}));
 
 /** Heartbeat monitor, in lockstep with the brain's red vital points (heartbeat.ts). */
 function HeartbeatCard({ reduced, className }: { reduced: boolean; className?: string }) {
   const { t } = useLanguage();
   const h = t.home;
 
-  // The R spike crosses the trace's centre line as the brain's red points flash.
-  const ecgX = useMotionValue(ECG_SYNC_OFFSET_PX);
-  const dotOpacity = useMotionValue(1);
-  useAnimationFrame(() => {
+  const ecgRef = useRef<SVGSVGElement>(null);
+  const dotRef = useRef<HTMLSpanElement>(null);
+
+  // Web Animations, run by the compositor: the per-frame JS loop this replaced
+  // kept the main thread busy on every section of the page. startTime 0 puts
+  // both on the page clock (document.timeline shares performance.now()'s
+  // origin), the clock heartbeatPhase() gives the brain — so the R spike still
+  // crosses the trace's centre line as the brain's red points flash.
+  useEffect(() => {
     if (reduced) return;
-    const phase = heartbeatPhase(performance.now());
-    ecgX.set(ECG_SYNC_OFFSET_PX - ECG_PERIOD_PX * phase);
-    dotOpacity.set(0.3 + 0.7 * heartbeatBlink(phase));
-  });
+    const timing: KeyframeAnimationOptions = { duration: HEARTBEAT_PERIOD_S * 1000, iterations: Infinity };
+    const animations = [
+      ecgRef.current?.animate(
+        [
+          { transform: `translateX(${ECG_SYNC_OFFSET_PX}px)` },
+          { transform: `translateX(${ECG_SYNC_OFFSET_PX - ECG_PERIOD_PX}px)` },
+        ],
+        timing,
+      ),
+      dotRef.current?.animate(DOT_KEYFRAMES, timing),
+    ];
+    for (const animation of animations) if (animation) animation.startTime = 0;
+    return () => animations.forEach((animation) => animation?.cancel());
+  }, [reduced]);
 
   return (
     <div aria-hidden="true" className={cn(HUD_CARD, className)}>
       <div className="relative h-8 overflow-hidden" style={{ width: ECG_WINDOW_PX, maxWidth: "100%" }}>
-        <motion.svg
+        <svg
+          ref={ecgRef}
           viewBox={`0 0 ${ECG_PERIOD_PX * 2} ${ECG_HEIGHT_PX}`}
           width={ECG_PERIOD_PX * 2}
           height={ECG_HEIGHT_PX}
           className="max-w-none"
           fill="none"
-          style={{ x: ecgX }}
+          style={{ transform: `translateX(${ECG_SYNC_OFFSET_PX}px)` }}
         >
           <path d={ECG_PATH} stroke={HEART_RED} strokeOpacity="0.3" strokeWidth="1" strokeLinejoin="round" />
           <path d={ECG_PATH} stroke={HEART_RED} strokeWidth="2.2" strokeLinecap="round" strokeDasharray="0.1 4.5" />
-        </motion.svg>
+        </svg>
         <div className="absolute inset-y-0 left-1/2 w-px bg-white/15" />
       </div>
       <p className={cn(LABEL, "mt-2 flex items-center gap-2 whitespace-nowrap")}>
-        <motion.span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: HEART_RED, opacity: dotOpacity }} />
+        <span ref={dotRef} className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: HEART_RED }} />
         <span>
           {h.heroHudBiosignals}: <span className="text-heart-soft">{h.heroHudActive}</span>
         </span>
@@ -136,7 +160,7 @@ export function Hero() {
   const reduced = useReducedMotionSafe();
 
   const sectionRef = useRef<HTMLElement>(null);
-  const { progressRef, act, progress } = useScrollNarrative(reduced ? undefined : sectionRef);
+  const { progressRef, act, progress } = useScrollNarrative(sectionRef, !reduced);
 
   // Give the brain a beat on its own before any text can appear, even if
   // the visitor scrolls straight away.
@@ -257,9 +281,9 @@ export function Hero() {
             style={{ opacity: act === 1 && headlineReveal < 0.05 ? 1 : 0 }}
           >
             <span className={LABEL}>{h.heroScrollHint}</span>
-            <motion.span animate={{ y: [0, 6, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+            <span className="animate-nudge">
               <ChevronDown className="h-5 w-5 text-white/60" />
-            </motion.span>
+            </span>
           </div>
         )}
       </div>

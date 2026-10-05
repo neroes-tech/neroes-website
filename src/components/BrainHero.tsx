@@ -663,6 +663,16 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       console.warn("[BrainHero] WebGL unavailable — rendering the Hero without the brain.", error);
       return;
     }
+    // None of the ShaderMaterials below convert colour spaces (no
+    // <colorspace_fragment>) and the canvas clears to transparent, so this
+    // changes no pixel. It makes the canvas pass and the Ato III render-target
+    // pass share one shader program per material: with the default sRGB output
+    // the first aberration frame compiled a second set on the main thread
+    // (~0.7 s of blocked input, the INP the Vercel toolbar flagged).
+    renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+    // Reading the link status/log after every compile forces it to finish
+    // synchronously (150–220 ms per program); keep that check for development.
+    renderer.debug.checkShaderErrors = process.env.NODE_ENV !== "production";
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     const pixelRatio = Math.min(window.devicePixelRatio, 2);
     renderer.setPixelRatio(pixelRatio);
@@ -961,7 +971,22 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       }
       if (running) raf = requestAnimationFrame(render);
     };
-    raf = requestAnimationFrame(render);
+
+    // Compile every shader before the first frame, without blocking: with
+    // KHR_parallel_shader_compile the driver links them off the main thread
+    // (linking inside the first frame blocked input for ~0.6 s at load). The
+    // gradient backdrop shows meanwhile; a failed compile still starts the
+    // loop, whose try/catch then keeps the Hero intact.
+    let ready = false;
+    let disposed = false;
+    const compiles: Promise<unknown>[] = [renderer.compileAsync(scene, camera)];
+    if (renderTarget) compiles.push(renderer.compileAsync(postScene, postCamera));
+    void Promise.all(compiles)
+      .catch(() => undefined)
+      .then(() => {
+        ready = true;
+        if (running && !disposed && !broken) raf = requestAnimationFrame(render);
+      });
 
     // Pause the RAF loop entirely once the visual scrolls out of view.
     const observer = new IntersectionObserver(
@@ -972,7 +997,8 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
         if (broken || visible === running) return;
         running = visible;
         if (running) {
-          raf = requestAnimationFrame(render);
+          // Before the shaders are ready the compile promise starts the loop.
+          if (ready) raf = requestAnimationFrame(render);
         } else {
           cancelAnimationFrame(raf);
         }
@@ -984,6 +1010,7 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     window.addEventListener("resize", resize);
 
     return () => {
+      disposed = true;
       cancelAnimationFrame(raf);
       window.clearTimeout(resizeTimer);
       observer.disconnect();

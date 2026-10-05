@@ -1,6 +1,6 @@
 "use client";
 
-import { BlurReveal } from "@/components/motion/BlurReveal";
+import { FocusReveal } from "@/components/motion/FocusReveal";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Rich } from "@/components/ui/Rich";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
@@ -25,14 +25,14 @@ export function Evidence({ className }: { className?: string }) {
       <div className="container mx-auto px-4 md:px-6">
         <div className="mx-auto max-w-5xl text-center">
           <Eyebrow className="mb-6">{ev.eyebrow}</Eyebrow>
-          <BlurReveal>
+          <FocusReveal>
             <h2
               id="evidence-heading"
               className="font-exo text-5xl font-light leading-[1.05] tracking-[-0.04em] md:text-7xl lg:text-[5.5rem]"
             >
               {ev.title}
             </h2>
-          </BlurReveal>
+          </FocusReveal>
         </div>
 
         {/* Lead result */}

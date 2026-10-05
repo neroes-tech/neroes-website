@@ -30,15 +30,18 @@ function FlagGB() {
 }
 
 export function LanguageSwitcher() {
-  const { locale, setLocale } = useLanguage();
+  const { locale, setLocale, t } = useLanguage();
 
+  // Each language is named in itself, marked with its own lang so screen
+  // readers pronounce it right whatever the page language (WCAG 3.1.2).
   return (
-    <div role="group" aria-label="Selecionar idioma / Select language" className="flex items-center gap-0.5">
+    <div role="group" aria-label={t.nav.languageLabel} className="flex items-center gap-0.5">
       <button
         type="button"
         onClick={() => setLocale("pt")}
         aria-pressed={locale === "pt"}
         aria-label="Português"
+        lang="pt-PT"
         className={cn(
           "inline-flex h-8 w-8 items-center justify-center rounded-md transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-white",
           locale === "pt" ? "opacity-100" : "opacity-45 hover:opacity-80",
@@ -54,6 +57,7 @@ export function LanguageSwitcher() {
         onClick={() => setLocale("en")}
         aria-pressed={locale === "en"}
         aria-label="English"
+        lang="en"
         className={cn(
           "inline-flex h-8 w-8 items-center justify-center rounded-md transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-white",
           locale === "en" ? "opacity-100" : "opacity-45 hover:opacity-80",

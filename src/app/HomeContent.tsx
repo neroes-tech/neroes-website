@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { Hero } from "@/components/home/Hero";
 import { PartnerLogos } from "@/components/layout/PartnerLogos";
-import { BlurReveal } from "@/components/motion/BlurReveal";
+import { FocusReveal } from "@/components/motion/FocusReveal";
 import { WordReveal } from "@/components/motion/WordReveal";
 import { ClientTestimonials } from "@/components/sections/ClientTestimonials";
 import { Evidence } from "@/components/sections/Evidence";
@@ -61,11 +61,11 @@ export function HomeContent() {
       >
         <div className="container mx-auto px-4 text-center md:px-6">
           <Eyebrow className="mb-6">{h.platform.eyebrow}</Eyebrow>
-          <BlurReveal>
+          <FocusReveal>
             <h2 id="platform-heading" className={cn(STATEMENT, "mx-auto max-w-5xl text-foreground")}>
               {h.platform.title}
             </h2>
-          </BlurReveal>
+          </FocusReveal>
           <p className="mx-auto mt-8 max-w-2xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
             <Rich text={h.platform.lead} />
           </p>
@@ -131,11 +131,11 @@ export function HomeContent() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-4xl text-center">
             <Eyebrow className="mb-6">{h.where.eyebrow}</Eyebrow>
-            <BlurReveal>
+            <FocusReveal>
               <h2 id="where-heading" className={cn(STATEMENT, "text-foreground")}>
                 {h.where.title}
               </h2>
-            </BlurReveal>
+            </FocusReveal>
           </div>
           <div className="mt-16 grid gap-12 sm:grid-cols-2 md:mt-24 md:gap-10 lg:grid-cols-4">
             {h.where.items.map((item) => (
@@ -161,11 +161,11 @@ export function HomeContent() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-4xl text-center">
             <Eyebrow className="mb-6">{h.journey.eyebrow}</Eyebrow>
-            <BlurReveal>
+            <FocusReveal>
               <h2 id="journey-heading" className={cn(STATEMENT, "text-foreground")}>
                 {h.journey.title}
               </h2>
-            </BlurReveal>
+            </FocusReveal>
           </div>
           <ol className="relative mt-16 grid gap-12 md:mt-24 md:grid-cols-3 md:gap-10">
             <span aria-hidden="true" className="absolute inset-x-0 top-[7px] hidden h-px bg-foreground/20 md:block" />
@@ -193,9 +193,9 @@ export function HomeContent() {
         <div className="container mx-auto px-4 md:px-6">
           {/* The register shift: everything above this line on the page is measured */}
           <div className="mx-auto max-w-5xl text-center">
-            <BlurReveal>
+            <FocusReveal>
               <p className={SHIFT}>{h.vision.measured}</p>
-            </BlurReveal>
+            </FocusReveal>
             <div className="my-10 flex items-center gap-5 md:my-12">
               <span aria-hidden="true" className="h-px flex-1 bg-foreground/20" />
               <span id="register-shift" className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
@@ -203,9 +203,9 @@ export function HomeContent() {
               </span>
               <span aria-hidden="true" className="h-px flex-1 bg-foreground/20" />
             </div>
-            <BlurReveal>
+            <FocusReveal>
               <p className={cn(SHIFT, VISION_ON_WHITE)}>{h.vision.believed}</p>
-            </BlurReveal>
+            </FocusReveal>
             <p className="mt-10 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">{h.vision.note}</p>
           </div>
 
@@ -229,11 +229,11 @@ export function HomeContent() {
       <section aria-labelledby="vision-heading" className="bg-background py-24 text-foreground md:py-36">
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-4xl text-center">
-            <BlurReveal>
+            <FocusReveal>
               <h2 id="vision-heading" className={STATEMENT}>
                 {h.vision.title}
               </h2>
-            </BlurReveal>
+            </FocusReveal>
             <p className="mx-auto mt-8 max-w-2xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
               {h.vision.body}
             </p>
@@ -255,11 +255,11 @@ export function HomeContent() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto max-w-4xl text-center">
             <Eyebrow className="mb-6">{h.neurorights.eyebrow}</Eyebrow>
-            <BlurReveal>
+            <FocusReveal>
               <h2 id="neurorights-heading" className={cn(STATEMENT, "text-foreground")}>
                 {h.neurorights.title}
               </h2>
-            </BlurReveal>
+            </FocusReveal>
             <p className="mx-auto mt-8 max-w-2xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
               {h.neurorights.body}
             </p>

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
@@ -25,16 +25,27 @@ export function Navbar() {
   const pathname = usePathname();
   const { t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
   const closeMenu = () => setIsMobileMenuOpen(false);
+  // A link to the page already open changes no route, so nothing would move
+  // focus: hand it back to the menu button instead of dropping it on <body>.
+  const closeMenuFrom = (href: string) => {
+    closeMenu();
+    if (href === pathname) toggleRef.current?.focus();
+  };
 
-  // A route change closes the menu; so does Escape.
+  // A route change closes the menu; so does Escape, returning focus to the
+  // menu button when it was inside the menu (WCAG 2.4.3).
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
   useEffect(() => {
     if (!isMobileMenuOpen) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsMobileMenuOpen(false);
+      if (event.key !== "Escape") return;
+      const inMenu = document.getElementById("mobile-menu")?.contains(document.activeElement);
+      setIsMobileMenuOpen(false);
+      if (inMenu) toggleRef.current?.focus();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -86,6 +97,7 @@ export function Navbar() {
         </div>
 
         <button
+          ref={toggleRef}
           type="button"
           className="mr-1 inline-flex h-10 w-10 items-center justify-center rounded-full text-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white md:hidden"
           onClick={() => setIsMobileMenuOpen((open) => !open)}
@@ -109,7 +121,7 @@ export function Navbar() {
                 href={link.href}
                 aria-current={pathname === link.href ? "page" : undefined}
                 className="border-b border-white/10 py-3 text-2xl font-medium tracking-[-0.02em] last:border-b-0"
-                onClick={closeMenu}
+                onClick={() => closeMenuFrom(link.href)}
               >
                 {link.label}
               </Link>
@@ -118,7 +130,7 @@ export function Navbar() {
           <div className="mt-6 flex items-center justify-between gap-4">
             <LanguageSwitcher />
             <Button asChild variant="inverse">
-              <Link href="/contact" onClick={closeMenu}>
+              <Link href="/contact" onClick={() => closeMenuFrom("/contact")}>
                 {t.nav.schedule}
               </Link>
             </Button>
