@@ -68,11 +68,24 @@ const ORBIT_RADIUS = 4.3;
 // back) keeps the point cloud proportionally smaller on mobile instead.
 const MOBILE_ORBIT_RADIUS = 5.6;
 const ORBIT_PHASE = Math.PI / 2;
-// The brain itself is turned 80° to the right of that pure profile (Duarte's
-// call), so the frontal lobe — and the red vital spot on it — faces the
-// viewer instead of sitting on the silhouette's edge. The hemisphere split
-// then also reads as a visible left/right opening rather than along depth.
-const BRAIN_YAW = THREE.MathUtils.degToRad(80);
+// The brain's own turn on top of that profile. 0 = a true side view (asked
+// for on 6 Oct 2026, replacing the near-frontal 80° pose): frontal lobe to
+// the left, cerebellum and brainstem to the right, and the red vital spot on
+// the upper front of the hemisphere facing the camera.
+const BRAIN_YAW = THREE.MathUtils.degToRad(0);
+// Seen from the side the brain is wider than tall: about 3.1 world units from
+// frontal lobe to cerebellum. On portrait screens (phones, tablets) the start
+// distance is pushed back until that width fills at most ~86% of the screen.
+const CAMERA_FOV = 55;
+const PROFILE_FIT_WIDTH = 3.6;
+
+function startRadius(isMobile: boolean, width: number, height: number): number {
+  const base = isMobile ? MOBILE_ORBIT_RADIUS : ORBIT_RADIUS;
+  const aspect = width / height || 1;
+  const fit = PROFILE_FIT_WIDTH / (2 * Math.tan(THREE.MathUtils.degToRad(CAMERA_FOV / 2)) * aspect);
+  return Math.max(base, fit);
+}
+
 // Closest the camera ever dollies in to — kept positive and well clear of
 // zero so it never crosses through the point cloud's origin (crossing zero
 // flips the camera to the opposite side, which read as a sudden pirouette).
@@ -229,7 +242,7 @@ type VitalSpot = {
 
 /**
  * Picks the vital-sign spot (see VITAL_* above) among the cerebrum's glow
- * hubs on the +x hemisphere — the side BRAIN_YAW turns toward the camera.
+ * hubs on the +x hemisphere — the side that faces the camera.
  * Must run before buildConnections: the caller zeroes these points' glow,
  * which keeps them out of the cyan hub graph.
  */
@@ -243,13 +256,13 @@ function pickVitalSpot(brain: BrainData): VitalSpot {
     if (brain.glow[i] === 1 && p[i * 3]! > 0) pool.push(i);
   }
 
-  // Anchor: upper front of the frontal lobe. +z is the front, +y up; a
-  // slight lateral (+x) bias keeps it on the visible face instead of down in
-  // the longitudinal fissure between the hemispheres.
+  // Anchor: on the frontal lobe's outer face. +z is the front, +y up, +x
+  // toward the camera: weighting x first keeps it on the face the side view
+  // looks at, instead of on the silhouette's front edge.
   let anchor = pool[0] ?? 0;
   let best = -Infinity;
   for (const i of pool) {
-    const score = p[i * 3 + 2]! + 0.5 * p[i * 3 + 1]! + 0.3 * p[i * 3]!;
+    const score = p[i * 3]! + 0.6 * p[i * 3 + 2]! + 0.4 * p[i * 3 + 1]!;
     if (score > best) {
       best = score;
       anchor = i;
@@ -639,10 +652,10 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     if (!mount) return;
 
     const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
-    const orbitStart = isMobile ? MOBILE_ORBIT_RADIUS : ORBIT_RADIUS;
+    let orbitStart = startRadius(isMobile, mount.clientWidth, mount.clientHeight);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(55, mount.clientWidth / mount.clientHeight, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(CAMERA_FOV, mount.clientWidth / mount.clientHeight, 0.1, 100);
     // Lateral/profile view, not frontal: the brain's front-back axis (z) is
     // its longest (rz=1.42 vs rx=1.15, ry=0.92 in buildBrain), so viewing
     // along world +X reads that length as the horizontal silhouette —
@@ -835,6 +848,7 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       const h = mount.clientHeight;
       camera.aspect = w / h || 1;
       camera.updateProjectionMatrix();
+      orbitStart = startRadius(isMobile, w, h);
       renderer.setSize(w, h);
       if (renderTarget) {
         renderTarget.dispose();
@@ -975,18 +989,29 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     // Compile every shader before the first frame, without blocking: with
     // KHR_parallel_shader_compile the driver links them off the main thread
     // (linking inside the first frame blocked input for ~0.6 s at load). The
-    // gradient backdrop shows meanwhile; a failed compile still starts the
-    // loop, whose try/catch then keeps the Hero intact.
+    // gradient backdrop shows meanwhile. Polled here rather than with
+    // renderer.compileAsync: its timer throws once the materials are disposed
+    // (an unmount before the shaders finish — React StrictMode's double mount
+    // in development, or leaving the page in the first half second).
     let ready = false;
     let disposed = false;
-    const compiles: Promise<unknown>[] = [renderer.compileAsync(scene, camera)];
-    if (renderTarget) compiles.push(renderer.compileAsync(postScene, postCamera));
-    void Promise.all(compiles)
-      .catch(() => undefined)
-      .then(() => {
-        ready = true;
-        if (running && !disposed && !broken) raf = requestAnimationFrame(render);
-      });
+    let compileTimer = 0;
+    const compiling = new Set<THREE.Material>(renderer.compile(scene, camera));
+    if (renderTarget) renderer.compile(postScene, postCamera).forEach((material) => compiling.add(material));
+    const waitForShaders = () => {
+      if (disposed) return;
+      for (const material of compiling) {
+        const { currentProgram: program } = renderer.properties.get(material) as { currentProgram?: { isReady(): boolean } };
+        if (!program || program.isReady()) compiling.delete(material);
+      }
+      if (compiling.size > 0) {
+        compileTimer = window.setTimeout(waitForShaders, 10);
+        return;
+      }
+      ready = true;
+      if (running && !broken) raf = requestAnimationFrame(render);
+    };
+    waitForShaders();
 
     // Pause the RAF loop entirely once the visual scrolls out of view.
     const observer = new IntersectionObserver(
@@ -1012,6 +1037,7 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
     return () => {
       disposed = true;
       cancelAnimationFrame(raf);
+      window.clearTimeout(compileTimer);
       window.clearTimeout(resizeTimer);
       observer.disconnect();
       window.removeEventListener("resize", resize);
