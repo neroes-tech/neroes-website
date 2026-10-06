@@ -50,8 +50,8 @@ Website Neroes/
 Cria um ficheiro `.env.local` na raiz a partir do `.env.example` (valores fornecidos pelo Head of Tech):
 
 ```
-# Página Contacto → calendário de marcação (link público de um evento Calendly)
-NEXT_PUBLIC_CALENDLY_URL=
+# Página Contacto → calendário de marcação (agenda de marcações do Google Calendar ou Calendly)
+NEXT_PUBLIC_BOOKING_URL=
 
 # Supabase — reservado para uso futuro (hoje o site não o usa)
 NEXT_PUBLIC_SUPABASE_URL=
@@ -59,7 +59,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-- Sem `NEXT_PUBLIC_CALENDLY_URL`, a página Contacto mostra email e telefone em vez do calendário.
+- `NEXT_PUBLIC_BOOKING_URL`: o link da agenda de marcações do Google Calendar (Partilhar → Incorporar no site; pode colar-se o código `<iframe>` inteiro) ou de um evento Calendly. Sem ele, a página Contacto mostra email e telefone em vez do calendário. (`NEXT_PUBLIC_CALENDLY_URL`, o nome antigo, continua a funcionar.)
 - As variáveis `NEXT_PUBLIC_*` entram no build: depois de as mudar na Vercel (Settings → Environment Variables), é preciso fazer **redeploy**.
 - ⚠️ **As chaves do Supabase nunca vão para o GitHub** — só para o `.env.local` (local) e para as Environment Variables da Vercel.
 

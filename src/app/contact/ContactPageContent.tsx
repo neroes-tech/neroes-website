@@ -1,16 +1,17 @@
 "use client";
 
-import { CalendlyEmbed } from "@/components/sections/CalendlyEmbed";
+import { BookingEmbed } from "@/components/sections/BookingEmbed";
 import { Button } from "@/components/ui/button";
 import { PageHero } from "@/components/ui/PageHero";
-import { CALENDLY_URL, CONTACT_INFO } from "@/lib/constants";
+import { BOOKING, CONTACT_INFO } from "@/lib/constants";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
 /**
- * Contacto = scheduling only (Pedro, 30 Sept 2026): the visitor picks a slot
- * in Calendly and that's it — no form. Until a booking link is configured
- * (NEXT_PUBLIC_CALENDLY_URL, see constants.ts), the page offers email and
- * phone instead of an empty or dead calendar.
+ * Contacto = scheduling only (Pedro, 30 Sept 2026): the visitor picks a free
+ * day and time in the team's booking calendar (Google Calendar appointment
+ * schedule, or Calendly) and that's it — no form. Until a booking link is
+ * configured (NEXT_PUBLIC_BOOKING_URL, see constants.ts), the page offers
+ * email and phone instead of an empty or dead calendar.
  */
 export function ContactPageContent() {
   const { t } = useLanguage();
@@ -22,20 +23,20 @@ export function ContactPageContent() {
         eyebrow={c.eyebrow}
         title={c.title}
         // The calendar subtitle promises a slot picker; without one, say what happens instead.
-        subtitle={CALENDLY_URL ? c.subtitle : c.subtitleNoCalendar}
+        subtitle={BOOKING ? c.subtitle : c.subtitleNoCalendar}
         size="compact"
         maxWidth="3xl"
       />
 
       <section className="bg-background pb-20 md:pb-28">
         <div className="container mx-auto max-w-5xl px-4 md:px-6">
-          {CALENDLY_URL ? (
+          {BOOKING ? (
             <>
-              <CalendlyEmbed url={CALENDLY_URL} title={c.calendarTitle} />
+              <BookingEmbed booking={BOOKING} title={c.calendarTitle} />
               <p className="mt-5 text-center text-sm text-muted-foreground">
                 {c.calendarFallbackPrefix}{" "}
                 <a
-                  href={CALENDLY_URL}
+                  href={BOOKING.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-medium text-secondary underline-offset-4 hover:underline"

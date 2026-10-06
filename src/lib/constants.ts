@@ -1,3 +1,5 @@
+import { parseBookingUrl } from "@/lib/booking";
+
 export const CONTACT_INFO = {
   email: "info@neroes.tech",
   phone: "+351 914 796 058",
@@ -10,29 +12,18 @@ export const CONTACT_INFO = {
 };
 
 /**
- * Booking link embedded on the Contacto page (and behind every "Marcar"
- * button, which all lead there). Set NEXT_PUBLIC_CALENDLY_URL — on Vercel and
- * in .env.local — to a public Calendly event link, e.g.
- * https://calendly.com/<user>/<event>. Only calendly.com links are embedded;
- * anything else (or nothing) shows the email/phone fallback instead.
+ * Booking calendar on the Contacto page (and behind every "Marcar" button,
+ * which all lead there): a Google Calendar appointment schedule — the team's
+ * choice on 6 Oct 2026 — or a Calendly event. Set NEXT_PUBLIC_BOOKING_URL on
+ * Vercel and in .env.local to the schedule's link, or paste the whole
+ * <iframe> code from Google's "Website embed" dialog (see src/lib/booking.ts
+ * and .env.example). NEXT_PUBLIC_CALENDLY_URL is still read as a fallback.
+ * Nothing (or an unsupported link) shows the email/phone fallback instead.
  *
- * Why not a default: the previous link
- * (calendly.com/pedro-ebw/brain-experience-event) now answers "Este evento
- * está indisponível no momento" — embedding it would show a dead calendar.
- * Pedro asked (30 Sept 2026) for André's Calendly.
+ * Why not a default: the old link (calendly.com/pedro-ebw/brain-experience-event)
+ * answers "Este evento está indisponível no momento".
  */
-export const CALENDLY_URL = (() => {
-  const raw = process.env.NEXT_PUBLIC_CALENDLY_URL?.trim();
-  if (!raw) return null;
-  try {
-    const url = new URL(raw);
-    return url.protocol === "https:" && (url.hostname === "calendly.com" || url.hostname.endsWith(".calendly.com"))
-      ? url.toString()
-      : null;
-  } catch {
-    return null;
-  }
-})();
+export const BOOKING = parseBookingUrl(process.env.NEXT_PUBLIC_BOOKING_URL || process.env.NEXT_PUBLIC_CALENDLY_URL);
 
 export const SITE_URL = "https://neroes.tech";
 

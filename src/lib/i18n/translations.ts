@@ -181,9 +181,9 @@ export interface Translations {
     eyebrow: string;
     title: string;
     subtitle: string;
-    /** Accessible name of the embedded Calendly calendar. */
     /** Subtitle while no booking link is configured (no calendar on the page). */
     subtitleNoCalendar: string;
+    /** Accessible name of the embedded booking calendar. */
     calendarTitle: string;
     /** Under the calendar, for when it doesn't load. */
     calendarFallbackPrefix: string;
