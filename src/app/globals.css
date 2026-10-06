@@ -134,11 +134,10 @@
 }
 
 /* Reduced motion, before hydration: the server HTML carries the first frame
-   of the scroll reveals (faint, shifted). FocusReveal and WordReveal mark
-   themselves with data-reveal so these visitors never see that frame. */
+   of the scroll reveals (faint, shifted). FocusReveal marks itself with
+   data-reveal so these visitors never see that frame. */
 @media (prefers-reduced-motion: reduce) {
-  [data-reveal],
-  [data-reveal] > span {
+  [data-reveal] {
     opacity: 1 !important;
     transform: none !important;
   }

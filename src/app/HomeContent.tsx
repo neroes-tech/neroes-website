@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Hero } from "@/components/home/Hero";
 import { PartnerLogos } from "@/components/layout/PartnerLogos";
 import { FocusReveal } from "@/components/motion/FocusReveal";
-import { WordReveal } from "@/components/motion/WordReveal";
 import { ClientTestimonials } from "@/components/sections/ClientTestimonials";
 import { Evidence } from "@/components/sections/Evidence";
 import { ProductVideo } from "@/components/sections/ProductVideo";
@@ -208,17 +207,6 @@ export function HomeContent() {
             </FocusReveal>
             <p className="mt-10 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">{h.vision.note}</p>
           </div>
-
-          {/* The honest bridge, read word by word */}
-          <figure className="mx-auto mt-32 max-w-5xl md:mt-44">
-            <blockquote>
-              <WordReveal
-                text={`“${h.vision.quote}”`}
-                className="font-exo text-3xl font-light leading-[1.2] tracking-[-0.02em] md:text-5xl"
-              />
-            </blockquote>
-            <figcaption className="mt-8 text-sm text-muted-foreground">— {h.vision.quoteCaption}</figcaption>
-          </figure>
         </div>
       </section>
 

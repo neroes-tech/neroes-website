@@ -43,13 +43,13 @@ export function LanguageSwitcher() {
         aria-label="Português"
         lang="pt-PT"
         className={cn(
-          "inline-flex h-8 w-8 items-center justify-center rounded-md transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-white",
+          "inline-flex h-8 w-8 items-center justify-center rounded-md transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ring",
           locale === "pt" ? "opacity-100" : "opacity-45 hover:opacity-80",
         )}
       >
         <FlagPT />
       </button>
-      <span aria-hidden="true" className="text-white/25">
+      <span aria-hidden="true" className="text-foreground/25">
         |
       </span>
       <button
@@ -59,7 +59,7 @@ export function LanguageSwitcher() {
         aria-label="English"
         lang="en"
         className={cn(
-          "inline-flex h-8 w-8 items-center justify-center rounded-md transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-white",
+          "inline-flex h-8 w-8 items-center justify-center rounded-md transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ring",
           locale === "en" ? "opacity-100" : "opacity-45 hover:opacity-80",
         )}
       >

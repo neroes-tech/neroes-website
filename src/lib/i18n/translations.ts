@@ -104,8 +104,6 @@ export interface Translations {
       note: string;
       title: string;
       body: string;
-      quote: string;
-      quoteCaption: string;
       pillars: [NamedItem, NamedItem, NamedItem];
     };
     neurorights: {
@@ -308,9 +306,6 @@ export const translations: Record<Locale, Translations> = {
         note: "Visão e filosofia — nunca alegações clínicas",
         title: "A nossa estrela‑guia é a consciência humana.",
         body: "A mesma tecnologia que acalma a ansiedade pode ajudar as pessoas a alcançar os estados de foco profundo, clareza e ligação que as tradições contemplativas descrevem há milhares de anos. Sem os reduzir a nada, sem os tornar místicos — tornando-os alcançáveis.",
-        quote:
-          "Conseguimos medir o estado cerebral de calma profunda ou de autotranscendência, e ajudar alguém a alcançá-lo de forma fiável. O que isso significa para cada pessoa é seu.",
-        quoteCaption: "A ponte honesta entre a nossa ciência e a nossa visão",
         pillars: [
           { title: "Estados expandidos", desc: "Meditação, flow e deslumbramento — medidos e treináveis quando precisas." },
           { title: "Significado e ligação", desc: "A clareza e a ligação que se sentem nos limites da experiência comum." },
@@ -578,9 +573,6 @@ export const translations: Record<Locale, Translations> = {
         note: "Vision and philosophy — never clinical claims",
         title: "Our north star is human consciousness.",
         body: "The same technology that quiets anxiety can help people reach the states of deep focus, clarity, and connection that contemplative traditions have described for thousands of years. Not explained away, not made mystical — made reachable.",
-        quote:
-          "We can measure the brain-state of deep calm or self-transcendence, and help someone reach it reliably. What it means to them is theirs.",
-        quoteCaption: "The honest bridge between our science and our vision",
         pillars: [
           { title: "Expanded states", desc: "Meditation, flow, and awe — measured, trainable on demand." },
           { title: "Meaning and connection", desc: "The clarity and connectedness felt at the edges of ordinary experience." },
