@@ -9,10 +9,14 @@
  *   outside the project, so neither the dev server's file watcher nor
  *   OneDrive react to every booking — same behaviour. BOOKING_FILE overrides it.
  *
+ * - Memory (demo): Vercel preview deployments with no database, so the team
+ *   can try the agenda before Supabase exists. Nothing is kept or emailed.
+ *
  * BOOKING_STORE picks one: "supabase" (needs NEXT_PUBLIC_SUPABASE_URL and
- * SUPABASE_SERVICE_ROLE_KEY), "file", or "off". Unset: "file" in local
- * development, off in production — the agenda only goes live when asked to,
- * so stale Supabase variables can't switch on a calendar that fails to load.
+ * SUPABASE_SERVICE_ROLE_KEY), "file", "demo", or "off". Unset: "file" in local
+ * development, "demo" on Vercel previews, off in production — the live agenda
+ * only goes on when asked to, so stale Supabase variables can't switch on a
+ * calendar that fails to load.
  */
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
@@ -50,7 +54,7 @@ export interface Usage {
 }
 
 export interface BookingStore {
-  readonly kind: "supabase" | "file";
+  readonly kind: "supabase" | "file" | "memory";
   /** Taken time — confirmed bookings and blocks set by the team — overlapping the range. */
   busy(range: Interval): Promise<Interval[]>;
   usage(email: string, now: Date): Promise<Usage>;
@@ -226,11 +230,53 @@ export function createFileStore(file: string): BookingStore {
     }
   };
 
+  return createDataStore("file", { load, save, exclusive });
+}
+
+// ── Memory (demo on Vercel previews) ───────────────────────────────────────
+
+/**
+ * Demo store for Vercel preview deployments with no database: bookings live
+ * in this server instance's memory (gone on a restart, not shared between
+ * instances) and no email goes out. Previews sit behind Vercel's login, so
+ * only the team sees them, and the page says it is a demo.
+ */
+export function createMemoryStore(): BookingStore {
+  const state: FileData = ((globalThis as { __neroesDemoBookings?: FileData }).__neroesDemoBookings ??= {
+    bookings: [],
+    blocks: [],
+  });
+  let queue: Promise<unknown> = Promise.resolve();
+  const exclusive = <T>(task: () => Promise<T>): Promise<T> => {
+    const run = queue.then(task, task);
+    queue = run.catch(() => undefined);
+    return run;
+  };
+  return createDataStore("memory", {
+    load: async () => ({ bookings: state.bookings.map((b) => ({ ...b })), blocks: [...state.blocks] }),
+    save: async (data) => {
+      state.bookings = data.bookings;
+      state.blocks = data.blocks;
+    },
+    exclusive,
+  });
+}
+
+// ── Shared by the file and memory stores ──────────────────────────────────
+
+interface DataIO {
+  load(): Promise<FileData>;
+  save(data: FileData): Promise<void>;
+  /** Runs one read-modify-write at a time. */
+  exclusive<T>(task: () => Promise<T>): Promise<T>;
+}
+
+function createDataStore(kind: "file" | "memory", { load, save, exclusive }: DataIO): BookingStore {
   const overlapsRange = (start: string, end: string, range: Interval) =>
     new Date(start) < range.end && new Date(end) > range.start;
 
   return {
-    kind: "file",
+    kind,
 
     async busy(range) {
       const data = await load();
@@ -309,7 +355,8 @@ export function getBookingStore(env: NodeJS.ProcessEnv = process.env): BookingSt
   const url = env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "";
   const key = env.SUPABASE_SERVICE_ROLE_KEY?.trim() ?? "";
   const local = env.NODE_ENV !== "production" && !env.VERCEL;
-  const cacheKey = [mode, url, key ? "k" : "", local, env.BOOKING_FILE ?? ""].join("|");
+  const preview = env.VERCEL_ENV === "preview";
+  const cacheKey = [mode, url, key ? "k" : "", local, preview, env.BOOKING_FILE ?? ""].join("|");
   if (cached?.key === cacheKey) return cached.store;
 
   let store: BookingStore | null = null;
@@ -318,6 +365,8 @@ export function getBookingStore(env: NodeJS.ProcessEnv = process.env): BookingSt
   } else if (mode === "file" || (mode === "" && local)) {
     // Never on Vercel: its file system is read-only and not shared between instances.
     store = env.VERCEL ? null : createFileStore(env.BOOKING_FILE?.trim() || defaultBookingFile());
+  } else if (mode === "demo" || (mode === "" && preview)) {
+    store = createMemoryStore();
   }
   cached = { key: cacheKey, store };
   return store;
@@ -333,11 +382,12 @@ function emailConfigured(env: NodeJS.ProcessEnv): boolean {
  * Online (production/Vercel) it also needs email: without it a booking would be
  * saved with nobody at Neroes being told, and the visitor would wait in vain.
  * BOOKING_ALLOW_WITHOUT_EMAIL=1 lifts that, for trying a preview out only.
+ * The demo store needs no email: it books nothing real.
  */
 export function getSchedulerStore(env: NodeJS.ProcessEnv = process.env): BookingStore | null {
   const store = getBookingStore(env);
   if (!store) return null;
   const local = env.NODE_ENV !== "production" && !env.VERCEL;
-  if (!local && !emailConfigured(env) && env.BOOKING_ALLOW_WITHOUT_EMAIL !== "1") return null;
+  if (store.kind !== "memory" && !local && !emailConfigured(env) && env.BOOKING_ALLOW_WITHOUT_EMAIL !== "1") return null;
   return store;
 }

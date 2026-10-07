@@ -12,6 +12,8 @@ import type { BookedResult } from "./BookingForm";
 import { fill, formatDayLong, formatTime, formatVisitorTime } from "./format";
 
 interface Props {
+  /** Preview demo: nothing was saved or emailed. */
+  demo?: boolean;
   result: BookedResult;
   timeZone: string;
   visitorTimeZone: string | null;
@@ -20,7 +22,7 @@ interface Props {
 
 /** Confirmation, with the event ready for the visitor's own calendar. */
 export const BookingDone = forwardRef<HTMLHeadingElement, Props>(function BookingDone(
-  { result, timeZone, visitorTimeZone, onAnother },
+  { demo = false, result, timeZone, visitorTimeZone, onAnother },
   headingRef,
 ) {
   const { t, locale } = useLanguage();
@@ -67,7 +69,9 @@ export const BookingDone = forwardRef<HTMLHeadingElement, Props>(function Bookin
           {fill(s.yourTime, { time: formatVisitorTime(result.start, visitorTimeZone, result.date, locale) })}
         </p>
       )}
-      <p className="mt-4 text-muted-foreground">{result.emailSent ? fill(d.emailSent, { email: result.email }) : d.saved}</p>
+      <p className="mt-4 text-muted-foreground">
+        {demo ? s.demoDone : result.emailSent ? fill(d.emailSent, { email: result.email }) : d.saved}
+      </p>
 
       <div className="mt-7 flex flex-wrap gap-3">
         <Button asChild>

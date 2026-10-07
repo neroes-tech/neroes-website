@@ -99,12 +99,16 @@ export async function POST(request: NextRequest) {
     });
     if (!created.ok) return json({ error: "taken" }, 409);
 
-    const email = await sendBookingEmails(created.booking);
+    // The preview demo books nothing real, so it emails nobody.
+    const email =
+      store.kind === "memory"
+        ? { configured: false, team: false, visitor: false }
+        : await sendBookingEmails(created.booking);
     // Bookings whose team email failed stay team_notified = false, so they
     // can be found and followed up (docs/sql/bookings.sql).
     if (email.team) {
       await store.markNotified(created.booking.id).catch((error: unknown) => console.error("[bookings] markNotified", error));
-    } else {
+    } else if (store.kind !== "memory") {
       console.error(`[bookings] team NOT notified of booking ${created.booking.id} (email ${email.configured ? "failed" : "not configured"})`);
     }
     return json(

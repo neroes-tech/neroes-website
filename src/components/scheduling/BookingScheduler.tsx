@@ -22,7 +22,7 @@ type Load = { status: "loading" } | { status: "error" } | { status: "ready"; dat
  * Availability comes from GET /api/availability; bookings go to
  * POST /api/bookings, which re-checks everything server-side.
  */
-export function BookingScheduler() {
+export function BookingScheduler({ demo = false }: { demo?: boolean }) {
   const { t } = useLanguage();
   const s = t.contact.scheduler;
 
@@ -125,6 +125,11 @@ export function BookingScheduler() {
       <h2 id="scheduler-heading" className="sr-only">
         {s.heading}
       </h2>
+      {demo && (
+        <p className="border-b border-border bg-muted px-5 py-3 text-sm font-medium text-foreground sm:px-8">
+          {s.demoNotice}
+        </p>
+      )}
       {load.status === "loading" && (
         <p role="status" className="sr-only">
           {s.loading}
@@ -175,6 +180,7 @@ export function BookingScheduler() {
           {done && data ? (
             <BookingDone
               ref={headingRef}
+              demo={demo}
               result={done}
               timeZone={data.timeZone}
               visitorTimeZone={visitorTimeZone}

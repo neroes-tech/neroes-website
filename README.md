@@ -82,6 +82,7 @@ A página Contacto tem uma agenda própria: um calendário com os dias **com hor
   2. Na Vercel (Production e Preview): `BOOKING_STORE=supabase`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, e para os emails `SMTP_USER` + `SMTP_PASS`.
   3. Redeploy.
 - **Localmente** (`npm run dev`) a agenda funciona sem configurar nada: as marcações ficam num ficheiro na pasta temporária do sistema (`BOOKING_FILE` muda o caminho).
+- **Nos previews da Vercel** (branches que não são `main`), enquanto não houver Supabase, a agenda corre em **modo de demonstração**: funciona toda, mas as marcações ficam só na memória do servidor e não se envia email — a página avisa. Os previews pedem login da Vercel, por isso só a equipa os vê. Em produção, sem configuração, a página mostra email e telefone.
 - **Testes:** `npm test` (lógica de horários, feriados, validação, armazenamento) e, com `npm run dev` a correr, `npm run test:e2e` (API de ponta a ponta).
 
 ---

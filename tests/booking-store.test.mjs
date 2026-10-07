@@ -8,7 +8,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, describe, it } from "node:test";
 
-import { createFileStore, createSupabaseStore, getBookingStore, getSchedulerStore } from "../src/lib/scheduling/store.ts";
+import { createFileStore, createMemoryStore, createSupabaseStore, getBookingStore, getSchedulerStore } from "../src/lib/scheduling/store.ts";
 
 const booking = (start, over = {}) => ({
   slotStart: new Date(start),
@@ -227,5 +227,39 @@ describe("agenda switch (store + email)", () => {
   });
   it("works locally without email (file store)", () => {
     assert.equal(getSchedulerStore({ NODE_ENV: "development" })?.kind, "file");
+  });
+});
+
+describe("preview demo (memory store)", () => {
+  it("books once, refuses twice, shows busy", async () => {
+    const store = createMemoryStore();
+    assert.equal(store.kind, "memory");
+    const first = await store.create(booking("2026-10-20T09:00:00Z"));
+    assert.ok(first.ok);
+    assert.deepEqual(await store.create(booking("2026-10-20T09:00:00Z")), { ok: false, reason: "taken" });
+    const busy = await store.busy({ start: new Date("2026-10-20T00:00:00Z"), end: new Date("2026-10-21T00:00:00Z") });
+    assert.equal(busy.length, 1);
+  });
+
+  it("is what Vercel previews get without a database — and only previews", () => {
+    const preview = { NODE_ENV: "production", VERCEL: "1", VERCEL_ENV: "preview" };
+    assert.equal(getBookingStore(preview)?.kind, "memory");
+    assert.equal(getSchedulerStore(preview)?.kind, "memory", "no email needed: nothing real is booked");
+    assert.equal(getSchedulerStore({ NODE_ENV: "production", VERCEL: "1", VERCEL_ENV: "production" }), null);
+    assert.equal(getSchedulerStore({ ...preview, BOOKING_STORE: "off" }), null);
+  });
+
+  it("gives way to the real database when one is configured", () => {
+    const env = {
+      NODE_ENV: "production",
+      VERCEL: "1",
+      VERCEL_ENV: "preview",
+      BOOKING_STORE: "supabase",
+      NEXT_PUBLIC_SUPABASE_URL: "https://x.supabase.co",
+      SUPABASE_SERVICE_ROLE_KEY: "k",
+      SMTP_USER: "info@neroes.tech",
+      SMTP_PASS: "x",
+    };
+    assert.equal(getSchedulerStore(env)?.kind, "supabase");
   });
 });

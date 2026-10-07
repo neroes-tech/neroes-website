@@ -264,6 +264,9 @@ export interface Translations {
         eventDescription: string;
       };
       yourTime: string;
+      /** Shown on Vercel previews, where the agenda runs as a demo. */
+      demoNotice: string;
+      demoDone: string;
     };
   };
 }
@@ -594,6 +597,9 @@ export const translations: Record<Locale, Translations> = {
           eventDescription: "Conversa com a Neroes sobre a plataforma.",
         },
         yourTime: "{time} no teu fuso horário",
+        demoNotice:
+          "Pré-visualização — agenda em modo de demonstração: as marcações não ficam guardadas e não se envia nenhum email.",
+        demoDone: "Demonstração: esta marcação não ficou guardada e ninguém recebeu email.",
       },
     },
     errorPage: {
@@ -931,6 +937,8 @@ export const translations: Record<Locale, Translations> = {
           eventDescription: "Conversation with Neroes about the platform.",
         },
         yourTime: "{time} in your time zone",
+        demoNotice: "Preview — the calendar is in demo mode: bookings aren't saved and no email is sent.",
+        demoDone: "Demo: this booking wasn't saved and no one was emailed.",
       },
     },
     errorPage: {

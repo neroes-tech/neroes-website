@@ -14,5 +14,12 @@ export default function ContactPage() {
   // Read on the server (at build time on Vercel): whether the built-in agenda
   // is on (somewhere to save bookings, and email in production), and whether
   // the visitor gets a confirmation email.
-  return <ContactPageContent scheduler={getSchedulerStore() !== null} emailConfirm={getMailConfig().configured} />;
+  const store = getSchedulerStore();
+  return (
+    <ContactPageContent
+      scheduler={store !== null}
+      demo={store?.kind === "memory"}
+      emailConfirm={getMailConfig().configured && store?.kind !== "memory"}
+    />
+  );
 }

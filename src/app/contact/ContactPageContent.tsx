@@ -16,7 +16,16 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
  *    (NEXT_PUBLIC_BOOKING_URL, see constants.ts);
  * 3. email and phone, rather than an empty or dead calendar.
  */
-export function ContactPageContent({ scheduler, emailConfirm }: { scheduler: boolean; emailConfirm: boolean }) {
+export function ContactPageContent({
+  scheduler,
+  demo = false,
+  emailConfirm,
+}: {
+  scheduler: boolean;
+  /** Vercel preview without a database: the agenda runs as a demo. */
+  demo?: boolean;
+  emailConfirm: boolean;
+}) {
   const { t } = useLanguage();
   const c = t.contact;
   const subtitle = scheduler
@@ -43,7 +52,7 @@ export function ContactPageContent({ scheduler, emailConfirm }: { scheduler: boo
         <div className="container mx-auto max-w-5xl px-4 md:px-6">
           {scheduler ? (
             <>
-              <BookingScheduler />
+              <BookingScheduler demo={demo} />
               <p className="mt-5 text-center text-sm text-muted-foreground">
                 {c.scheduler.fallbackPrefix}{" "}
                 <a href={`mailto:${CONTACT_INFO.email}`} className="font-medium text-secondary underline-offset-4 hover:underline">
