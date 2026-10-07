@@ -194,6 +194,77 @@ export interface Translations {
     noCalendarEmailButton: string;
     noCalendarSubject: string;
     phoneLabel: string;
+    /** Subtitle with the built-in scheduler when no confirmation email goes out. */
+    subtitleNoEmail: string;
+    /** The built-in booking scheduler (src/components/scheduling). "{n}", "{email}", "{time}" are filled in. */
+    scheduler: {
+      heading: string;
+      prevMonth: string;
+      nextMonth: string;
+      weekdaysShort: [string, string, string, string, string, string, string];
+      legendAvailable: string;
+      legendBusy: string;
+      legendClosed: string;
+      today: string;
+      freeOne: string;
+      freeMany: string;
+      busyDay: string;
+      closedDay: string;
+      closedReasons: { weekend: string; holiday: string; past: string; beyond: string; closed: string };
+      pickDay: string;
+      dayBusy: string;
+      dayClosed: string;
+      lisbonTime: string;
+      slotBusy: string;
+      slotFree: string;
+      noneThisMonth: string;
+      loading: string;
+      loadError: string;
+      retry: string;
+      fallbackPrefix: string;
+      form: {
+        heading: string;
+        change: string;
+        name: string;
+        email: string;
+        company: string;
+        phone: string;
+        message: string;
+        optional: string;
+        consentBefore: string;
+        consentLink: string;
+        submit: string;
+        submitting: string;
+        honeypot: string;
+        /** Screen-reader note on links that open a new tab. */
+        newTab: string;
+      };
+      errors: {
+        required: string;
+        email: string;
+        phone: string;
+        name: string;
+        tooLong: string;
+        consent: string;
+        summary: string;
+        taken: string;
+        unavailable: string;
+        rate: string;
+        emailLimit: string;
+        generic: string;
+      };
+      done: {
+        title: string;
+        emailSent: string;
+        saved: string;
+        addGoogle: string;
+        downloadIcs: string;
+        another: string;
+        eventTitle: string;
+        eventDescription: string;
+      };
+      yourTime: string;
+    };
   };
 }
 
@@ -450,6 +521,80 @@ export const translations: Record<Locale, Translations> = {
       noCalendarEmailButton: "Marcar por email",
       noCalendarSubject: "Marcar uma conversa",
       phoneLabel: "Telefone",
+      subtitleNoEmail: "Escolhe o dia e a hora que te dão mais jeito para falarmos sobre a plataforma.",
+      scheduler: {
+        heading: "Escolhe o dia e a hora",
+        prevMonth: "Mês anterior",
+        nextMonth: "Mês seguinte",
+        weekdaysShort: ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
+        legendAvailable: "Com horários livres",
+        legendBusy: "Ocupado",
+        legendClosed: "Sem conversas",
+        today: "hoje",
+        freeOne: "1 horário livre",
+        freeMany: "{n} horários livres",
+        busyDay: "ocupado",
+        closedDay: "sem conversas",
+        closedReasons: {
+          weekend: "Fim de semana",
+          holiday: "Feriado",
+          past: "Já não há horários neste dia",
+          beyond: "Ainda não abrimos a agenda para este dia",
+          closed: "Sem conversas neste dia",
+        },
+        pickDay: "Escolhe um dia no calendário para ver os horários.",
+        dayBusy: "Este dia está ocupado: todos os horários já estão marcados. Escolhe outro dia.",
+        dayClosed: "Não há conversas neste dia.",
+        lisbonTime: "Hora de Lisboa",
+        slotBusy: "Ocupado",
+        slotFree: "livre",
+        noneThisMonth: "Já não há horários livres este mês. Vê o mês seguinte.",
+        loading: "A carregar a agenda…",
+        loadError: "Não foi possível carregar a agenda.",
+        retry: "Tentar outra vez",
+        fallbackPrefix: "Também podes escrever-nos para",
+        form: {
+          heading: "Os teus dados",
+          change: "Alterar",
+          name: "Nome",
+          email: "Email",
+          company: "Empresa",
+          phone: "Telefone",
+          message: "Sobre o que queres falar?",
+          optional: "opcional",
+          consentBefore: "Aceito que a Neroes use estes dados para marcar e confirmar esta conversa, como descrito na",
+          consentLink: "Política de Privacidade",
+          submit: "Confirmar marcação",
+          submitting: "A marcar…",
+          honeypot: "Não preencher este campo",
+          newTab: "(abre noutro separador)",
+        },
+        errors: {
+          required: "Campo obrigatório.",
+          email: "Escreve um email válido, por exemplo nome@empresa.pt.",
+          phone: "Escreve um número de telefone válido.",
+          name: "Escreve o teu nome.",
+          tooLong: "Texto demasiado longo.",
+          consent: "Para marcar, tens de aceitar.",
+          summary: "Corrige os campos assinalados.",
+          taken: "Esse horário acabou de ser marcado por outra pessoa. Escolhe outro.",
+          unavailable: "Esse horário já não está disponível. Escolhe outro.",
+          rate: "Demasiadas tentativas seguidas. Tenta outra vez daqui a uns minutos.",
+          emailLimit: "Já tens conversas marcadas com este email. Para marcar outra, escreve-nos.",
+          generic: "Não foi possível concluir a marcação. Tenta outra vez ou escreve-nos para",
+        },
+        done: {
+          title: "Conversa marcada",
+          emailSent: "Enviámos a confirmação para {email}.",
+          saved: "A tua marcação ficou registada.",
+          addGoogle: "Adicionar ao Google Calendar",
+          downloadIcs: "Descarregar convite (.ics)",
+          another: "Marcar outra conversa",
+          eventTitle: "Conversa com a Neroes",
+          eventDescription: "Conversa com a Neroes sobre a plataforma.",
+        },
+        yourTime: "{time} no teu fuso horário",
+      },
     },
     errorPage: {
       title: "Algo correu mal ao abrir esta página.",
@@ -713,6 +858,80 @@ export const translations: Record<Locale, Translations> = {
       noCalendarEmailButton: "Book by email",
       noCalendarSubject: "Book a conversation",
       phoneLabel: "Phone",
+      subtitleNoEmail: "Pick the day and time that suit you best to talk about the platform.",
+      scheduler: {
+        heading: "Pick a day and time",
+        prevMonth: "Previous month",
+        nextMonth: "Next month",
+        weekdaysShort: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        legendAvailable: "Free times",
+        legendBusy: "Fully booked",
+        legendClosed: "No conversations",
+        today: "today",
+        freeOne: "1 free time",
+        freeMany: "{n} free times",
+        busyDay: "fully booked",
+        closedDay: "no conversations",
+        closedReasons: {
+          weekend: "Weekend",
+          holiday: "Public holiday",
+          past: "No times left on this day",
+          beyond: "This day isn't open for booking yet",
+          closed: "No conversations on this day",
+        },
+        pickDay: "Pick a day in the calendar to see the times.",
+        dayBusy: "This day is fully booked: every time is taken. Please pick another day.",
+        dayClosed: "There are no conversations on this day.",
+        lisbonTime: "Lisbon time",
+        slotBusy: "Booked",
+        slotFree: "free",
+        noneThisMonth: "No free times left this month. See next month.",
+        loading: "Loading the calendar…",
+        loadError: "The calendar couldn't be loaded.",
+        retry: "Try again",
+        fallbackPrefix: "You can also write to us at",
+        form: {
+          heading: "Your details",
+          change: "Change",
+          name: "Name",
+          email: "Email",
+          company: "Company",
+          phone: "Phone",
+          message: "What would you like to talk about?",
+          optional: "optional",
+          consentBefore: "I agree that Neroes uses these details to book and confirm this conversation, as described in the",
+          consentLink: "Privacy Policy",
+          submit: "Confirm booking",
+          submitting: "Booking…",
+          honeypot: "Leave this field empty",
+          newTab: "(opens in a new tab)",
+        },
+        errors: {
+          required: "Required.",
+          email: "Enter a valid email, e.g. name@company.com.",
+          phone: "Enter a valid phone number.",
+          name: "Enter your name.",
+          tooLong: "Too long.",
+          consent: "Please agree in order to book.",
+          summary: "Please fix the highlighted fields.",
+          taken: "Someone just booked that time. Please pick another.",
+          unavailable: "That time is no longer available. Please pick another.",
+          rate: "Too many attempts in a row. Please try again in a few minutes.",
+          emailLimit: "You already have conversations booked with this email. To book another, please write to us.",
+          generic: "The booking couldn't be completed. Please try again or write to us at",
+        },
+        done: {
+          title: "Conversation booked",
+          emailSent: "We've sent the confirmation to {email}.",
+          saved: "Your booking has been saved.",
+          addGoogle: "Add to Google Calendar",
+          downloadIcs: "Download invite (.ics)",
+          another: "Book another conversation",
+          eventTitle: "Conversation with Neroes",
+          eventDescription: "Conversation with Neroes about the platform.",
+        },
+        yourTime: "{time} in your time zone",
+      },
     },
     errorPage: {
       title: "Something went wrong opening this page.",

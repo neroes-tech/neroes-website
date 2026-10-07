@@ -1,5 +1,6 @@
 "use client";
 
+import { BookingScheduler } from "@/components/scheduling/BookingScheduler";
 import { BookingEmbed } from "@/components/sections/BookingEmbed";
 import { Button } from "@/components/ui/button";
 import { PageHero } from "@/components/ui/PageHero";
@@ -7,30 +8,54 @@ import { BOOKING, CONTACT_INFO } from "@/lib/constants";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
 /**
- * Contacto = scheduling only (Pedro, 30 Sept 2026): the visitor picks a free
- * day and time in the team's booking calendar (Google Calendar appointment
- * schedule, or Calendly) and that's it — no form. Until a booking link is
- * configured (NEXT_PUBLIC_BOOKING_URL, see constants.ts), the page offers
- * email and phone instead of an empty or dead calendar.
+ * Contacto = scheduling only (Pedro, 30 Sept 2026). In order of preference:
+ * 1. the site's own agenda (src/components/scheduling) — free and fully
+ *    booked days, the day's times, the booking — when bookings have
+ *    somewhere to be saved (BOOKING_STORE, see src/lib/scheduling/store.ts);
+ * 2. an embedded Google Calendar appointment schedule or Calendly event
+ *    (NEXT_PUBLIC_BOOKING_URL, see constants.ts);
+ * 3. email and phone, rather than an empty or dead calendar.
  */
-export function ContactPageContent() {
+export function ContactPageContent({ scheduler, emailConfirm }: { scheduler: boolean; emailConfirm: boolean }) {
   const { t } = useLanguage();
   const c = t.contact;
+  const subtitle = scheduler
+    ? emailConfirm
+      ? c.subtitle
+      : c.subtitleNoEmail
+    : BOOKING
+      ? c.subtitle
+      : c.subtitleNoCalendar;
 
   return (
     <>
       <PageHero
         eyebrow={c.eyebrow}
         title={c.title}
-        // The calendar subtitle promises a slot picker; without one, say what happens instead.
-        subtitle={BOOKING ? c.subtitle : c.subtitleNoCalendar}
+        // The calendar subtitle promises a slot picker (and an email only when
+        // one goes out); without a calendar, say what happens instead.
+        subtitle={subtitle}
         size="compact"
         maxWidth="3xl"
       />
 
       <section className="bg-background pb-20 md:pb-28">
         <div className="container mx-auto max-w-5xl px-4 md:px-6">
-          {BOOKING ? (
+          {scheduler ? (
+            <>
+              <BookingScheduler />
+              <p className="mt-5 text-center text-sm text-muted-foreground">
+                {c.scheduler.fallbackPrefix}{" "}
+                <a href={`mailto:${CONTACT_INFO.email}`} className="font-medium text-secondary underline-offset-4 hover:underline">
+                  {CONTACT_INFO.email}
+                </a>{" "}
+                · {c.phoneLabel}{" "}
+                <a href={`tel:${CONTACT_INFO.phone.replace(/\s+/g, "")}`} className="font-medium text-secondary underline-offset-4 hover:underline">
+                  {CONTACT_INFO.phone}
+                </a>
+              </p>
+            </>
+          ) : BOOKING ? (
             <>
               <BookingEmbed booking={BOOKING} title={c.calendarTitle} />
               <p className="mt-5 text-center text-sm text-muted-foreground">
