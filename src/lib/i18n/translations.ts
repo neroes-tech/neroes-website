@@ -68,6 +68,13 @@ export interface Translations {
     heroHudBiosignals: string;
     heroHudActive: string;
     heroHudAnxiety: string;
+    /** "1 in 8" — the problem, from Pedro's design (8 Oct 2026). Source of the figure to confirm. */
+    problem: {
+      eyebrow: string;
+      value: string;
+      body: string;
+      line: string;
+    };
     heroKpis: [HeroKpi, HeroKpi, HeroKpi];
     heroScrollHint: string;
     platform: {
@@ -287,8 +294,8 @@ export const translations: Record<Locale, Translations> = {
     home: {
       heroHeadlineLine1: "Treinamos o cérebro",
       heroHeadlineLine2: "como treinas o corpo.",
-      heroSubtitle:
-        "Um headset EEG lê as tuas ondas cerebrais enquanto jogas um jogo que só se ganha mantendo a calma e a concentração — treinando foco, controlo emocional e resiliência, sessão após sessão.",
+      // Pedro, 8 Oct 2026: "Neroes reads the brain in real time and trains it — objective feedback instead of guesswork."
+      heroSubtitle: "A Neroes lê o cérebro em tempo real e treina-o — feedback objetivo em vez de suposições.",
       heroPrimaryCta: "Ver a evidência",
       heroSecondaryCta: "Falar connosco",
       heroHudBiosignals: "Biossinais em tempo real",
@@ -300,6 +307,12 @@ export const translations: Record<Locale, Translations> = {
         { value: "+9,4%", label: "Autoconfiança" },
       ],
       heroScrollHint: "Desliza para ver",
+      problem: {
+        eyebrow: "O problema",
+        value: "1 em 8",
+        body: "pessoas no mundo vivem com uma doença mental ou neurológica — enfrentada com ferramentas lentas, autoavaliação subjetiva e treino às escuras.",
+        line: "A Neroes torna o invisível mensurável — o treino passa a ser um ciclo com feedback real.",
+      },
       platform: {
         eyebrow: "A plataforma",
         title: "Um circuito fechado entre o teu cérebro e um jogo.",
@@ -631,8 +644,7 @@ export const translations: Record<Locale, Translations> = {
     home: {
       heroHeadlineLine1: "We train the brain",
       heroHeadlineLine2: "like you train the body.",
-      heroSubtitle:
-        "An EEG headset reads your brainwaves while you play a game that's only won by staying calm and focused — training focus, emotional control, and resilience, session after session.",
+      heroSubtitle: "Neroes reads the brain in real time and trains it — objective feedback instead of guesswork.",
       heroPrimaryCta: "See the evidence",
       heroSecondaryCta: "Talk to us",
       heroHudBiosignals: "Real-time biosignals",
@@ -644,6 +656,12 @@ export const translations: Record<Locale, Translations> = {
         { value: "+9.4%", label: "Self-confidence" },
       ],
       heroScrollHint: "Scroll to explore",
+      problem: {
+        eyebrow: "The problem",
+        value: "1 in 8",
+        body: "people worldwide live with a mental or neurological disorder — met with slow tools, subjective self-report, and training in the dark.",
+        line: "Neroes makes the invisible measurable — training becomes a loop with real feedback.",
+      },
       platform: {
         eyebrow: "The platform",
         title: "A closed loop between your brain and a game.",

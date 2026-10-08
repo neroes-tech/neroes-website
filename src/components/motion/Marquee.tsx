@@ -19,10 +19,13 @@ export function Marquee({
   pauseLabel,
   playLabel,
   durationSeconds = 70,
+  tone = "light",
   className,
 }: {
   items: ReactNode[];
   pauseLabel: string;
+  /** Surface the strip sits on — styles the pause button. */
+  tone?: "light" | "dark";
   playLabel: string;
   durationSeconds?: number;
   className?: string;
@@ -69,7 +72,12 @@ export function Marquee({
           type="button"
           onClick={() => setPaused((p) => !p)}
           aria-label={paused ? playLabel : pauseLabel}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-foreground/15 bg-background text-foreground transition-colors hover:bg-foreground/[0.05] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          className={cn(
+            "inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+            tone === "dark"
+              ? "border-white/20 bg-white/[0.06] text-white hover:bg-white/[0.12] focus-visible:outline-white"
+              : "border-foreground/15 bg-background text-foreground hover:bg-foreground/[0.05] focus-visible:outline-ring",
+          )}
         >
           {paused ? <Play className="h-4 w-4" aria-hidden="true" /> : <Pause className="h-4 w-4" aria-hidden="true" />}
         </button>

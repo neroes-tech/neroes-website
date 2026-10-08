@@ -13,7 +13,8 @@ export function Eyebrow({
   as: Tag = "p",
 }: {
   children: ReactNode;
-  tone?: "brand" | "muted" | "inverse";
+  /** "vivid": the logo's bright blue, for black surfaces (7.4:1 — the brand blue is too dark there). */
+  tone?: "brand" | "muted" | "inverse" | "vivid";
   className?: string;
   as?: "p" | "span" | "div";
 }) {
@@ -24,6 +25,7 @@ export function Eyebrow({
         tone === "brand" && "text-secondary",
         tone === "muted" && "text-muted-foreground",
         tone === "inverse" && "text-white/60",
+        tone === "vivid" && "text-brand-vivid",
         className,
       )}
     >

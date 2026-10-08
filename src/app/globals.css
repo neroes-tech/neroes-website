@@ -37,8 +37,10 @@
      Cromáticas" table (Web hex column) and the logo. Kept as fixed hexes
      for the places that need the literal brand colour (the dark Hero).
      brand-violet is a legacy alias of the vivid blue — there is no violet
-     in the brand. No gold anywhere in the interface: it only lives in the
-     logo artwork itself. */
+     in the brand. Gold (brand manual, #db9b1d) only on the dark Home, at
+     Pedro's request (8 Oct 2026): the "believed" register and the golden
+     sparks of the star field — never on white. */
+  --color-brand-gold: #db9b1d;
   --color-brand-blue: #1270b0;
   --color-brand-teal: #0f9cac;
   --color-brand-vivid: #00a5e9;

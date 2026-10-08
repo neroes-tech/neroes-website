@@ -130,7 +130,7 @@ function AnxietyCard({ className }: { className?: string }) {
   return (
     <div aria-hidden="true" className={cn(HUD_CARD, "min-w-56", className)}>
       <p className={LABEL}>{h.heroHudAnxiety}</p>
-      <p className="mt-1.5 font-exo text-3xl font-medium leading-none tracking-[-0.03em] tabular-nums text-white">
+      <p className="mt-1.5 font-exo text-4xl font-bold leading-none tracking-[-0.03em] tabular-nums text-white">
         {t.shared.evidence.leadValue}
       </p>
     </div>
@@ -186,20 +186,23 @@ export function Hero() {
     <section
       ref={sectionRef}
       aria-labelledby="hero-heading"
-      className="relative bg-hero text-white"
+      className="relative text-white"
       style={{ height: reduced ? undefined : "260vh" }}
     >
-      <div
-        // Deep-navy backdrop of version 2, which gives the particle brain its depth.
-        className={cn(
-          "relative flex h-svh min-h-[560px] w-full flex-col overflow-hidden bg-hero-gradient",
-          !reduced && "sticky top-0",
-        )}
-      >
+      {/* The brain, and then the star field it explodes into, sit fixed behind
+          the whole Home (Pedro, 8 Oct 2026: the stars never stop — scrolling
+          on is navigating inside them). It stays inside the Home: the page
+          wrapper clips it (data-starfield-scope in HomeContent). Under reduced
+          motion it is one still frame, inside the Hero only. */}
+      <div aria-hidden="true" className={reduced ? "absolute inset-0" : "pointer-events-none fixed inset-0 -z-10"}>
         {/* A failing WebGL brain must never take the Hero down with it. */}
         <ErrorBoundary label="BrainHero">
-          <BrainHero progressRef={progressRef} />
+          <BrainHero progressRef={progressRef} heroRef={sectionRef} continuous={!reduced} />
         </ErrorBoundary>
+      </div>
+      <div
+        className={cn("relative flex h-svh min-h-[560px] w-full flex-col overflow-hidden", !reduced && "sticky top-0")}
+      >
 
         {/* Readability behind the copy over the brightest particles; it only
             comes in with the text, so the brain opens unshaded. */}
@@ -261,7 +264,7 @@ export function Hero() {
                   // labels drop to 10px and tighter tracking so long words fit the cell.
                   <div key={kpi.label} className="flex flex-col-reverse justify-end gap-1.5 px-1.5 py-3 text-center sm:px-3 md:py-4">
                     <dt className={cn(LABEL, "max-sm:text-[10px] max-sm:tracking-[0.06em]")}>{kpi.label}</dt>
-                    <dd className="font-exo text-2xl font-medium tracking-[-0.03em] tabular-nums text-white md:text-4xl">
+                    <dd className="font-exo text-[1.65rem] font-bold leading-none tracking-[-0.03em] tabular-nums text-white sm:text-3xl md:text-5xl">
                       {kpi.value}
                     </dd>
                   </div>

@@ -35,8 +35,8 @@ const LINK_MAX_DEGREE = 3;
 // heartbeat clock — the brain-side echo of the ECG in the Hero's HUD card.
 // The anchor blinks first; the signal then travels along red edges to the
 // neighbours, each blinking as it arrives.
-const VITAL_NEIGHBOURS = 4; // extra points around the anchor (0 = a single red point)
-const VITAL_SPREAD = 0.26; // max distance of a neighbour from the anchor (world units)
+const VITAL_NEIGHBOURS = 7; // extra points around the anchor (0 = a single red point)
+const VITAL_SPREAD = 0.36; // max distance of a neighbour from the anchor (world units)
 const VITAL_MIN_GAP = 0.07; // keeps the constellation spread out rather than clumped
 const VITAL_DELAY_PER_UNIT = 0.35; // signal travel time, in beat fractions per world unit
 const VITAL_ANCHOR_SIZE = 5.5;
@@ -85,6 +85,14 @@ function startRadius(isMobile: boolean, width: number, height: number): number {
   const fit = PROFILE_FIT_WIDTH / (2 * Math.tan(THREE.MathUtils.degToRad(CAMERA_FOV / 2)) * aspect);
   return Math.max(base, fit);
 }
+
+// ── The star field (Pedro, 8 Oct 2026): after the explosion the points stay
+// as stars behind the whole Home instead of dissolving to nothing, and
+// scrolling on "navigates" inside them.
+// Share of points the Ato IV dissolve removes when the field continues.
+const STAR_DISSOLVE = 0.32;
+// Connections never fade below this once they are stars' links.
+const STAR_LINE_FLOOR = 0.2;
 
 // Closest the camera ever dollies in to — kept positive and well clear of
 // zero so it never crosses through the point cloud's origin (crossing zero
@@ -429,6 +437,7 @@ const POINT_VERT = `
   uniform vec2 uCursorNDC;
   uniform float uCursorActive;
   uniform float uBeatPhase;
+  uniform float uField;
   attribute vec3 aColor;
   attribute float aSize;
   attribute float aGlow;
@@ -469,10 +478,11 @@ const POINT_VERT = `
     vVital = isVital;
     vSpark *= 1.0 - isVital;
 
-    float size = aSize * (1.0 + aGlow * pulse * 0.35 + vSpark * 0.6);
+    float size = aSize * (1.0 + aGlow * pulse * 0.35 + vSpark * 0.6) * (1.0 + uField * 0.7);
     size = mix(size, aSize * (1.2 + vBlink * 1.4), isVital);
     // Vital points get a higher cap (in CSS px) so they stay bold on retina too.
-    gl_PointSize = clamp(size * uPixelRatio * (4.6 / -mv.z), 1.1, mix(18.0, 40.0 * uPixelRatio, isVital));
+    // In the star field even far points stay visible as stars.
+    gl_PointSize = clamp(size * uPixelRatio * (4.6 / -mv.z), mix(1.1, 1.9, uField), mix(18.0, 40.0 * uPixelRatio, isVital));
     gl_Position = projectionMatrix * mv;
     vColor = aColor;
     vGlow = aGlow * pulse;
@@ -499,7 +509,8 @@ const POINT_FRAG = `
   varying float vVital;
   varying float vBlink;
   void main() {
-    if (vPhase < uDissolve) discard;
+    // The red vital points stay through the dissolve.
+    if (vPhase < uDissolve && vVital < 0.5) discard;
     vec2 uv = gl_PointCoord - 0.5;
     float d = length(uv);
     if (d > 0.5) discard;
@@ -567,6 +578,7 @@ const LINE_VERT = `
 const LINE_FRAG = `
   uniform float uTime;
   uniform float uLineFade;
+  uniform float uActivity;
   varying float vEnd;
   varying float vEdgePhase;
   varying float vVital;
@@ -580,14 +592,23 @@ const LINE_FRAG = `
       gl_FragColor = vec4(vitalCol, (0.34 + vVitalGlow * 0.3 + signal * 0.75) * uLineFade);
       return;
     }
-    float breathe = 0.07 + 0.06 * (0.5 + 0.5 * sin(uTime * 1.4 + vEdgePhase * 6.2831853));
+    float breathe = (0.07 + 0.06 * (0.5 + 0.5 * sin(uTime * 1.4 + vEdgePhase * 6.2831853))) * (1.0 - uActivity * 0.55);
     float cycle = uTime * 0.45 + vEdgePhase;
     float head = fract(cycle);
-    float gate = step(0.6, fract(sin(floor(cycle) * 12.9898 + vEdgePhase * 78.233) * 43758.5453));
-    float pulse = exp(-pow((vEnd - head) * 8.0, 2.0)) * gate;
-    // #3B82F6 royal blue → #00F0FF electric cyan as a pulse passes.
+    // uActivity (the star field) fires more edges; a few pulses are "strong"
+    // (wider and brighter) and a few golden — electricity crossing the field.
+    float seed = floor(cycle) * 12.9898 + vEdgePhase * 78.233;
+    float gate = step(0.6 - uActivity * 0.22, fract(sin(seed) * 43758.5453));
+    float strong = step(0.9, fract(sin(seed * 1.7 + 3.1) * 24634.6345));
+    float gold = step(0.8, fract(sin(seed * 2.3 + 7.7) * 15731.743)) * uActivity;
+    float width = mix(8.0, 3.5, strong);
+    float pulse = exp(-pow((vEnd - head) * width, 2.0)) * gate;
+    // #3B82F6 royal blue → #00F0FF electric cyan as a pulse passes; golden ones
+    // in the brand gold #D99921.
     vec3 col = mix(vec3(0.231, 0.51, 0.965), vec3(0.0, 0.941, 1.0), 0.4 + pulse * 0.6);
-    gl_FragColor = vec4(col, (breathe + pulse * 0.75) * uLineFade);
+    col = mix(col, vec3(1.0, 0.72, 0.2), gold * pulse);
+    float lift = 1.0 + strong * 0.8 + uActivity * 0.6;
+    gl_FragColor = vec4(col, (breathe + pulse * 0.75 * lift) * uLineFade);
   }
 `;
 
@@ -599,11 +620,8 @@ const LINE_FRAG = `
 // soft red glow around it. Shares POINT_VERT, so size and position match
 // the additive pass exactly.
 const VITAL_FRAG = `
-  uniform float uDissolve;
-  varying float vPhase;
   varying float vBlink;
   void main() {
-    if (vPhase < uDissolve) discard;
     float d = length(gl_PointCoord - 0.5);
     float disc = 1.0 - smoothstep(0.3, 0.4, d);
     if (disc <= 0.0) discard;
@@ -639,7 +657,17 @@ const POST_FRAG = `
   }
 `;
 
-export default function BrainHero({ progressRef }: { progressRef?: RefObject<number> }) {
+export default function BrainHero({
+  progressRef,
+  heroRef,
+  continuous = false,
+}: {
+  progressRef?: RefObject<number>;
+  /** The Hero section: where its scroll ends, the star-field "navigation" starts. */
+  heroRef?: RefObject<HTMLElement | null>;
+  /** Keep the exploded points as a living star field (the Home's fixed backdrop). */
+  continuous?: boolean;
+}) {
   const mountRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const reduced = prefersReducedMotion ?? false;
@@ -755,6 +783,7 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
         uCursorNDC: { value: new THREE.Vector2(0, 0) },
         uCursorActive: { value: 0 },
         uBeatPhase: { value: 0 },
+        uField: { value: 0 },
       },
       vertexShader: POINT_VERT,
       fragmentShader: POINT_FRAG,
@@ -784,6 +813,7 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
         uHemisphereSplit: pointMat.uniforms.uHemisphereSplit!,
         uBeatPhase: pointMat.uniforms.uBeatPhase!,
         uLineFade: { value: 1 },
+        uActivity: { value: 0 },
       },
       vertexShader: LINE_VERT,
       fragmentShader: LINE_FRAG,
@@ -897,6 +927,21 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
+    // Where the Hero's own scroll ends, in page pixels — cached, re-measured
+    // when the Hero resizes, so a frame only reads window.scrollY (no layout).
+    let heroEnd = Number.POSITIVE_INFINITY;
+    const measureHero = () => {
+      const hero = heroRef?.current;
+      if (!hero) return;
+      const rect = hero.getBoundingClientRect();
+      heroEnd = rect.top + window.scrollY + rect.height - window.innerHeight;
+    };
+    measureHero();
+    const heroResize = heroRef?.current ? new ResizeObserver(measureHero) : null;
+    if (heroRef?.current) heroResize?.observe(heroRef.current);
+    // Viewport heights scrolled past the Hero, smoothed like the narrative.
+    let travel = 0;
+
     const drawFrame = () => {
       timer.update();
       const t = timer.getElapsed();
@@ -910,12 +955,20 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       // ── ATO IV (0.85–1.0): emergência de dados — dissolve em pontos ──
       const act4 = smoothstep(ACT4_START, 1.0, progress);
 
-      const fly = act3; // macro dive, driven by scroll
+      // Past the Hero the camera keeps "navigating" through the field.
+      const travelTarget = continuous ? Math.max(0, (window.scrollY - heroEnd) / window.innerHeight) : 0;
+      travel = lerp(travel, Number.isFinite(travelTarget) ? travelTarget : 0, 0.08);
+      const field = continuous ? act4 : 0; // 0 → 1 as the brain becomes the star field
+
+      // The field slowly expands as you go, so the points stream past the camera.
+      const fly = act3 + Math.min(travel * 0.045, 0.6);
       const hemisphereOpen = smoothstep(0, HEMISPHERE_OPEN_END, progress);
       pointMat.uniforms.uTime!.value = t;
       pointMat.uniforms.uFly!.value = fly;
       pointMat.uniforms.uBloom!.value = act2 * (1 - act4);
-      pointMat.uniforms.uDissolve!.value = act4;
+      pointMat.uniforms.uDissolve!.value = continuous ? act4 * STAR_DISSOLVE : act4;
+      lineMat.uniforms.uActivity!.value = field;
+      pointMat.uniforms.uField!.value = field;
       pointMat.uniforms.uDisplace!.value = isMobile ? 0 : act3 * 0.04;
       pointMat.uniforms.uHemisphereSplit!.value = hemisphereOpen * HEMISPHERE_SPLIT_MAX;
       pointMat.uniforms.uCursorNDC!.value.set(parallax.xRef.current, -parallax.yRef.current);
@@ -924,7 +977,8 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       // same phase, so the red points flash as its R spike crosses centre.
       pointMat.uniforms.uBeatPhase!.value = heartbeatPhase(performance.now());
       // Edges fade out as the cloud explodes (Ato III) and dissolves (Ato IV).
-      lineMat.uniforms.uLineFade!.value = (1 - act3 * 0.85) * (1 - act4);
+      const lineFade = (1 - act3 * 0.85) * (1 - act4);
+      lineMat.uniforms.uLineFade!.value = continuous ? Math.max(lineFade, STAR_LINE_FLOOR * act3) : lineFade;
 
       // Micro-tremor idle (±0.4px equivalent, ~0.6Hz) on the core when the
       // narrative is resting (Ato I) and the pointer parallax is near zero —
@@ -938,8 +992,10 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       // faces the viewer — a spinning brain would carry it round to the back.
       // Only the pointer parallax tilts it, ±0.25 rad at most, which keeps
       // the spot on the visible face.
-      points.rotation.y = BRAIN_YAW + parallax.xRef.current * 0.25;
-      points.rotation.x = parallax.yRef.current * 0.15;
+      // In the star field the cloud also turns with the scroll and drifts on
+      // its own, so the points are always moving around you.
+      points.rotation.y = BRAIN_YAW + parallax.xRef.current * 0.25 + field * (travel * 0.32 + t * 0.012);
+      points.rotation.x = parallax.yRef.current * 0.15 + field * Math.sin(travel * 0.45 + t * 0.05) * 0.12;
       points.position.set(tremorX, tremorY, 0);
       points.updateMatrixWorld();
 
@@ -955,7 +1011,9 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       camera.position.y = 0;
       camera.lookAt(0, 0, 0);
 
-      const aberration = isMobile ? 0 : act3 * 0.0015;
+      // Only during the dive itself: left on in the star field, the extra
+      // render-target pass would double the GPU work on the whole page.
+      const aberration = isMobile ? 0 : act3 * (1 - act4) * 0.0015;
 
       // The render-target + fullscreen-quad pass doubles fill-rate cost —
       // only pay for it while the effect is actually visible (Ato III), and
@@ -1030,7 +1088,8 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       },
       { threshold: 0 },
     );
-    observer.observe(mount);
+    // A fixed backdrop always "intersects": watch the page area it belongs to.
+    observer.observe((mount.closest("[data-starfield-scope]") as HTMLElement | null) ?? mount);
 
     window.addEventListener("resize", resize);
 
@@ -1040,6 +1099,7 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
       window.clearTimeout(compileTimer);
       window.clearTimeout(resizeTimer);
       observer.disconnect();
+      heroResize?.disconnect();
       window.removeEventListener("resize", resize);
       geom.dispose();
       pointMat.dispose();
@@ -1055,7 +1115,7 @@ export default function BrainHero({ progressRef }: { progressRef?: RefObject<num
         mount.removeChild(renderer.domElement);
       }
     };
-  }, [reduced, progressRef, parallax.xRef, parallax.yRef, glEpoch]);
+  }, [reduced, progressRef, heroRef, continuous, parallax.xRef, parallax.yRef, glEpoch]);
 
   return (
     <div

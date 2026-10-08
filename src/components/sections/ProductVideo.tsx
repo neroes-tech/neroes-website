@@ -17,6 +17,12 @@ interface ProductVideoProps {
   pauseLabel: string;
   resumeLabel: string;
   fallback: string;
+  /**
+   * Framed for a dark page: inside the content width, rounded, a hairline
+   * edge and darkened borders, so the film's warm tones sit on black instead
+   * of filling it edge to edge.
+   */
+  framed?: boolean;
 }
 
 type WebkitVideo = HTMLVideoElement & { webkitEnterFullscreen?: () => void };
@@ -52,6 +58,7 @@ export function ProductVideo({
   pauseLabel,
   resumeLabel,
   fallback,
+  framed = false,
 }: ProductVideoProps) {
   const { ref: boxRef, isInView } = useLazyVideoInView<HTMLDivElement>();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -132,10 +139,14 @@ export function ProductVideo({
   };
 
   return (
-    <figure>
+    <figure className={framed ? "container mx-auto px-4 md:px-6" : undefined}>
       <div
         ref={boxRef}
-        className="relative aspect-[4/3] w-full overflow-hidden bg-film sm:aspect-video lg:max-h-[88svh]"
+        className={
+          framed
+            ? "relative mx-auto aspect-[4/3] w-full max-w-6xl overflow-hidden rounded-3xl bg-film ring-1 ring-white/12 sm:aspect-video"
+            : "relative aspect-[4/3] w-full overflow-hidden bg-film sm:aspect-video lg:max-h-[88svh]"
+        }
       >
         {!hasError && (
           <video
@@ -154,9 +165,16 @@ export function ProductVideo({
             {fallback}
           </video>
         )}
+        {framed && (
+          // Darkened edges: the film fades into the black page around it.
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgb(0_0_0/0.55)_100%)]"
+          />
+        )}
         {!hasError && (
           <div className="absolute inset-x-0 bottom-0">
-            <div className="container mx-auto flex flex-wrap gap-2 px-4 pb-4 md:px-6 md:pb-6">
+            <div className={framed ? "flex flex-wrap gap-2 p-4 md:p-6" : "container mx-auto flex flex-wrap gap-2 px-4 pb-4 md:px-6 md:pb-6"}>
               <button
                 type="button"
                 onClick={togglePlay}
@@ -175,7 +193,13 @@ export function ProductVideo({
           </div>
         )}
       </div>
-      <figcaption className="container mx-auto px-4 pt-4 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground md:px-6">
+      <figcaption
+        className={
+          framed
+            ? "mx-auto max-w-6xl pt-4 text-xs font-bold uppercase tracking-[0.14em] text-white/60"
+            : "container mx-auto px-4 pt-4 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground md:px-6"
+        }
+      >
         {caption}
       </figcaption>
     </figure>

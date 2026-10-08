@@ -1,5 +1,6 @@
 "use client";
 
+import { BIG_NUMBER } from "@/components/home/figures";
 import { FocusReveal } from "@/components/motion/FocusReveal";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Rich } from "@/components/ui/Rich";
@@ -7,54 +8,49 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 
 /**
- * The Home's evidence section (Pedro's "The Evidence"), on the stone tint:
- * the statement coming into focus, the lead result very large in the brand
- * blue (5.1:1 on stone — the logo's vivid blue would fail as text here), then
- * each study with what it measures and how, and how to read it all.
+ * The Home's evidence section, on the star field (after Pedro's design of
+ * 8 Oct 2026): the statement, the lead result at monumental size and weight,
+ * then each study as a row — the figure large and bold, what it measured,
+ * and how — and how to read it all.
  */
 export function Evidence({ className }: { className?: string }) {
   const { t } = useLanguage();
   const ev = t.shared.evidence;
 
   return (
-    <section
-      id="evidencia"
-      aria-labelledby="evidence-heading"
-      className={cn("scroll-mt-24 bg-muted py-24 text-foreground md:py-36", className)}
-    >
+    <section id="evidencia" aria-labelledby="evidence-heading" className={cn("scroll-mt-24 py-24 text-white md:py-36", className)}>
       <div className="container mx-auto px-4 md:px-6">
-        <div className="mx-auto max-w-5xl text-center">
-          <Eyebrow className="mb-6">{ev.eyebrow}</Eyebrow>
+        <div className="max-w-5xl">
+          <Eyebrow tone="vivid" className="mb-6">
+            {ev.eyebrow}
+          </Eyebrow>
           <FocusReveal>
-            <h2
-              id="evidence-heading"
-              className="font-exo text-5xl font-light leading-[1.05] tracking-[-0.04em] md:text-7xl lg:text-[5.5rem]"
-            >
+            <h2 id="evidence-heading" className="font-exo text-5xl font-bold leading-[1.02] tracking-[-0.04em] md:text-7xl">
               {ev.title}
             </h2>
           </FocusReveal>
         </div>
 
         {/* Lead result */}
-        <div className="mx-auto mt-20 max-w-3xl text-center md:mt-28">
-          <p className="font-exo text-[6.5rem] font-light leading-none tracking-[-0.05em] text-secondary tabular-nums md:text-[11rem]">
-            {ev.leadValue}
-          </p>
-          <p className="mt-4 text-2xl font-light leading-snug md:text-3xl">{ev.leadLabel}</p>
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">{ev.leadSource}</p>
+        <div className="mt-16 grid items-end gap-8 md:mt-24 lg:grid-cols-12 lg:gap-12">
+          <p className={cn(BIG_NUMBER, "text-[clamp(7rem,26vw,19rem)] lg:col-span-7")}>{ev.leadValue}</p>
+          <div className="lg:col-span-5 lg:pb-6">
+            <p className="text-2xl font-light leading-snug md:text-3xl">{ev.leadLabel}</p>
+            <p className="mt-4 text-xs font-bold uppercase leading-relaxed tracking-[0.12em] text-white/65">{ev.leadSource}</p>
+          </div>
         </div>
 
-        {/* Further studies */}
-        <dl className="mt-20 grid gap-px overflow-hidden rounded-2xl border border-border bg-border md:mt-28 md:grid-cols-3">
+        {/* Further studies, one row each */}
+        <dl className="mt-20 divide-y divide-white/12 border-y border-white/12 md:mt-28">
           {ev.studies.map((study) => (
-            <div key={study.value} className="flex flex-col gap-3 bg-background p-7 md:p-8">
-              <dt className="font-exo text-5xl font-light leading-none tracking-[-0.04em] tabular-nums">{study.value}</dt>
-              <dd className="leading-relaxed text-muted-foreground">
-                <Rich text={study.desc} />
+            <div key={study.value} className="grid gap-4 py-8 md:grid-cols-12 md:items-baseline md:gap-8 md:py-10">
+              <dt className="font-exo text-6xl font-bold leading-none tracking-[-0.04em] tabular-nums text-brand-vivid md:col-span-3 md:text-7xl">
+                {study.value}
+              </dt>
+              <dd className="text-lg font-light leading-relaxed text-white/85 md:col-span-6 md:text-xl">
+                <Rich text={study.desc} tone="inverse" />
               </dd>
-              <dd className="mt-auto pt-2 text-xs font-bold uppercase leading-relaxed tracking-[0.1em] text-muted-foreground">
-                {study.method}
-              </dd>
+              <dd className="text-xs font-bold uppercase leading-relaxed tracking-[0.1em] text-white/60 md:col-span-3">{study.method}</dd>
             </div>
           ))}
         </dl>
@@ -63,14 +59,14 @@ export function Evidence({ className }: { className?: string }) {
         <div className="mt-16 grid gap-10 md:grid-cols-2 md:gap-16">
           <div>
             <h3 className="text-base font-bold">{ev.honestTitle}</h3>
-            <p className="mt-3 leading-relaxed text-muted-foreground">
-              <Rich text={ev.honestBody} />
+            <p className="mt-3 leading-relaxed text-white/75">
+              <Rich text={ev.honestBody} tone="inverse" />
             </p>
           </div>
           <div>
             <h3 className="text-base font-bold">{ev.liveTitle}</h3>
-            <p className="mt-3 leading-relaxed text-muted-foreground">
-              <Rich text={ev.liveBody} />
+            <p className="mt-3 leading-relaxed text-white/75">
+              <Rich text={ev.liveBody} tone="inverse" />
             </p>
           </div>
         </div>
