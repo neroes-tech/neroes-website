@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { NEROES_LOGO_NEGATIVE } from "@/lib/brand";
+import { NEROES_LOCKUP } from "@/lib/brand";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { CONTACT_INFO } from "@/lib/constants";
 
@@ -36,10 +36,10 @@ export function Footer() {
         <div className="grid gap-14 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-5">
             <Image
-              src={NEROES_LOGO_NEGATIVE.src}
-              alt="Neroes corporate"
-              width={NEROES_LOGO_NEGATIVE.width}
-              height={NEROES_LOGO_NEGATIVE.height}
+              src={NEROES_LOCKUP.src}
+              alt="Neroes"
+              width={NEROES_LOCKUP.width}
+              height={NEROES_LOCKUP.height}
               className="h-10 w-auto max-w-none object-contain md:h-12"
             />
             <p className="mt-8 max-w-sm text-xl font-light leading-snug text-white/85">{t.footer.tagline}</p>

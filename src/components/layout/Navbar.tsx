@@ -9,13 +9,13 @@ import { Menu, X } from "lucide-react";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { NEROES_LOGO } from "@/lib/brand";
+import { NEROES_LOCKUP } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 /**
- * Floating pill navigation: one near-opaque white bar that sits over every
- * page (the Hero runs underneath it). White because the "neroes corporate"
- * logo has a dark navy wordmark that disappears on black. Three columns from md up:
+ * Floating pill navigation: one near-opaque black bar that sits over every
+ * page (the Hero runs underneath it) — opaque enough that the multicolour
+ * logo keeps its contrast over white sections too. Three columns from md up:
  * logo left, sections in the true centre of the pill, language and the
  * booking button right (it opens the Contacto page, where the calendar is).
  * On phones the pill keeps the logo and a menu button; the menu opens as a
@@ -58,13 +58,13 @@ export function Navbar() {
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-6 md:pt-4">
-      <div className="pointer-events-auto mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-full border border-foreground/10 bg-background/95 pl-5 pr-2 text-foreground shadow-sm backdrop-blur-md md:grid md:h-16 md:grid-cols-[1fr_auto_1fr] md:pl-7">
-        <Link href="/" aria-label="Neroes corporate" onClick={closeMenu} className="flex shrink-0 items-center md:justify-self-start">
+      <div className="pointer-events-auto mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-full border border-white/15 bg-black/90 pl-5 pr-2 text-white backdrop-blur-md md:grid md:h-16 md:grid-cols-[1fr_auto_1fr] md:pl-7">
+        <Link href="/" aria-label="Neroes" onClick={closeMenu} className="flex shrink-0 items-center md:justify-self-start">
           <Image
-            src={NEROES_LOGO.src}
-            alt=""
-            width={NEROES_LOGO.width}
-            height={NEROES_LOGO.height}
+            src={NEROES_LOCKUP.src}
+            alt="Neroes"
+            width={NEROES_LOCKUP.width}
+            height={NEROES_LOCKUP.height}
             className="h-7 w-auto max-w-none object-contain md:h-8"
             priority
           />
@@ -79,8 +79,8 @@ export function Navbar() {
                 href={link.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "py-2 text-[0.8rem] font-bold uppercase tracking-[0.1em] transition-colors hover:text-foreground",
-                  active ? "text-foreground" : "text-muted-foreground",
+                  "py-2 text-[0.8rem] font-bold uppercase tracking-[0.1em] transition-colors hover:text-white",
+                  active ? "text-white" : "text-white/70",
                 )}
               >
                 {link.label}
@@ -91,7 +91,7 @@ export function Navbar() {
 
         <div className="hidden items-center gap-4 md:flex md:justify-self-end">
           <LanguageSwitcher />
-          <Button asChild>
+          <Button asChild variant="inverse">
             <Link href="/contact">{t.nav.schedule}</Link>
           </Button>
         </div>
@@ -99,7 +99,7 @@ export function Navbar() {
         <button
           ref={toggleRef}
           type="button"
-          className="mr-1 inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground hover:bg-foreground/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring md:hidden"
+          className="mr-1 inline-flex h-10 w-10 items-center justify-center rounded-full text-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white md:hidden"
           onClick={() => setIsMobileMenuOpen((open) => !open)}
           aria-expanded={isMobileMenuOpen}
           aria-controls="mobile-menu"
@@ -112,7 +112,7 @@ export function Navbar() {
       {isMobileMenuOpen && (
         <div
           id="mobile-menu"
-          className="pointer-events-auto mx-auto mt-2 max-w-6xl rounded-3xl border border-foreground/10 bg-background/95 p-6 text-foreground shadow-sm backdrop-blur-md md:hidden"
+          className="pointer-events-auto mx-auto mt-2 max-w-6xl rounded-3xl border border-white/15 bg-black/90 p-6 text-white backdrop-blur-md md:hidden"
         >
           <nav aria-label={t.nav.mainLabel} className="flex flex-col">
             {links.map((link) => (
@@ -120,7 +120,7 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 aria-current={pathname === link.href ? "page" : undefined}
-                className="border-b border-foreground/10 py-3 text-2xl font-medium tracking-[-0.02em] last:border-b-0"
+                className="border-b border-white/10 py-3 text-2xl font-medium tracking-[-0.02em] last:border-b-0"
                 onClick={() => closeMenuFrom(link.href)}
               >
                 {link.label}
@@ -129,7 +129,7 @@ export function Navbar() {
           </nav>
           <div className="mt-6 flex items-center justify-between gap-4">
             <LanguageSwitcher />
-            <Button asChild>
+            <Button asChild variant="inverse">
               <Link href="/contact" onClick={() => closeMenuFrom("/contact")}>
                 {t.nav.schedule}
               </Link>
