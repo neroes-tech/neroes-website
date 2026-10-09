@@ -31,7 +31,6 @@ interface LoopStep {
 interface Study {
   value: string;
   desc: string;
-  method: string;
 }
 
 interface Stage {
@@ -156,8 +155,6 @@ export interface Translations {
       leadLabel: string;
       leadSource: string;
       studies: [Study, Study, Study];
-      honestTitle: string;
-      honestBody: string;
       liveTitle: string;
       liveBody: string;
     };
@@ -304,7 +301,7 @@ export const translations: Record<Locale, Translations> = {
       heroKpis: [
         { value: "+21,7%", label: "Processamento de informação" },
         { value: "+18,8%", label: "Tomada de decisão" },
-        { value: "+9,4%", label: "Autoconfiança" },
+        { value: "−41%", label: "Ansiedade" },
       ],
       heroScrollHint: "Desliza para ver",
       problem: {
@@ -501,22 +498,16 @@ export const translations: Record<Locale, Translations> = {
           {
             value: "+21,7%",
             desc: "processamento de informação mais rápido e **+9,4% de autoconfiança** — equipa desportiva profissional, intervenção vs. controlo.",
-            method: "N=32 · BAI, CSAI-2, Torre de Londres, D2 · Wilcoxon e Kruskal-Wallis",
           },
           {
             value: "+18,8%",
             desc: "na tomada de decisão, com **25% mais decisões ótimas** — piloto em desporto de elite.",
-            method: "N=10 · 30 sessões",
           },
           {
             value: "−62%",
             desc: "de ansiedade, **+10,6% de precisão de atenção** e 31% menos movimentos desperdiçados — caso intensivo, atleta de elite olímpica.",
-            method: "Caso individual · EEG + avaliação psicológica",
           },
         ],
-        honestTitle: "Dito com honestidade",
-        honestBody:
-          "Evidência em fase inicial: amostras pequenas, pilotos, casos individuais. Estão em curso ensaios controlados e longitudinais maiores, a caminho da certificação clínica. **Hoje, a Neroes é uma plataforma de treino e investigação — não um tratamento médico.**",
         liveTitle: "E demonstrável, ao vivo",
         liveBody:
           "Numa sessão, vês o teu próprio sinal de regulação a mexer à medida que acalmas a mente. **Um avião no ar, não uma promessa.**",
@@ -653,7 +644,7 @@ export const translations: Record<Locale, Translations> = {
       heroKpis: [
         { value: "+21.7%", label: "Information processing" },
         { value: "+18.8%", label: "Decision-making" },
-        { value: "+9.4%", label: "Self-confidence" },
+        { value: "−41%", label: "Anxiety" },
       ],
       heroScrollHint: "Scroll to explore",
       problem: {
@@ -847,22 +838,16 @@ export const translations: Record<Locale, Translations> = {
           {
             value: "+21.7%",
             desc: "faster information processing, **+9.4% self-confidence** — professional sports team, intervention vs control.",
-            method: "N=32 · BAI, CSAI-2, Tower of London, D2 · Wilcoxon & Kruskal-Wallis",
           },
           {
             value: "+18.8%",
             desc: "growth in decision-making, with **25% more optimal decisions** — elite-sport pilot.",
-            method: "N=10 · 30 sessions",
           },
           {
             value: "−62%",
             desc: "anxiety, **+10.6% attention accuracy**, 31% fewer wasted movements — an elite Olympic athlete, intensive case.",
-            method: "Single subject · EEG + psychological assessment",
           },
         ],
-        honestTitle: "Stated honestly",
-        honestBody:
-          "Early-stage evidence: small samples, pilots, single-subject cases. Larger controlled and longitudinal trials are underway, on a path toward clinical certification. **Today, Neroes is a training and research platform — not a medical treatment.**",
         liveTitle: "And demonstrable, live",
         liveBody: "In a session you watch your own regulation signal move as you calm your mind. **A plane in the air, not a promise.**",
       },

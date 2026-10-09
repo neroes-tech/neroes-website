@@ -17,7 +17,7 @@ const STORAGE_KEY = "neroes-locale";
 
 // localStorage throws when storage is blocked (Safari private mode, cookies
 // disabled, some embedded browsers). The language choice is a convenience:
-// without storage the site simply starts in Portuguese.
+// without storage the site simply starts in English.
 function readStoredLocale(): Locale | null {
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -64,11 +64,11 @@ export function useDocumentTitle(title: string | undefined) {
   }, [title]);
 }
 
-// Default is Portuguese; persists the user's choice across visits via
+// Default is English (Pedro, 8 Oct 2026); persists the user's choice across visits via
 // localStorage, read once on mount (kept out of the initial render so the
-// server-rendered PT markup always matches the client's first paint).
+// server-rendered EN markup always matches the client's first paint).
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("pt");
+  const [locale, setLocaleState] = useState<Locale>("en");
   const pathname = usePathname();
 
   useEffect(() => {

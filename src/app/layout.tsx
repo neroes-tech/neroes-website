@@ -59,7 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     // Portuguese is what the server renders; LanguageProvider keeps this in
     // step when a visitor switches to English.
-    <html lang="pt-PT" className={robotoCondensed.variable}>
+    <html lang="en" className={robotoCondensed.variable}>
       <body className="flex min-h-screen flex-col">
         <script
           type="application/ld+json"

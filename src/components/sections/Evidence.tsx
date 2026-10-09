@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 /**
  * The Home's evidence section, on the star field (after Pedro's design of
  * 8 Oct 2026): the statement, the lead result at monumental size and weight,
- * then each study as a row — the figure large and bold, what it measured,
- * and how — and how to read it all.
+ * then each study as a row — the figure large and bold and what it measured
+ * — and how to see it live.
  */
 export function Evidence({ className }: { className?: string }) {
   const { t } = useLanguage();
@@ -47,22 +47,15 @@ export function Evidence({ className }: { className?: string }) {
               <dt className="font-exo text-6xl font-bold leading-none tracking-[-0.04em] tabular-nums text-brand-vivid md:col-span-3 md:text-7xl">
                 {study.value}
               </dt>
-              <dd className="text-lg font-light leading-relaxed text-white/85 md:col-span-6 md:text-xl">
+              <dd className="text-lg font-light leading-relaxed text-white/85 md:col-span-9 md:text-xl">
                 <Rich text={study.desc} tone="inverse" />
               </dd>
-              <dd className="text-xs font-bold uppercase leading-relaxed tracking-[0.1em] text-white/60 md:col-span-3">{study.method}</dd>
             </div>
           ))}
         </dl>
 
-        {/* How to read them */}
-        <div className="mt-16 grid gap-10 md:grid-cols-2 md:gap-16">
-          <div>
-            <h3 className="text-base font-bold">{ev.honestTitle}</h3>
-            <p className="mt-3 leading-relaxed text-white/75">
-              <Rich text={ev.honestBody} tone="inverse" />
-            </p>
-          </div>
+        {/* Seeing it live */}
+        <div className="mt-16 max-w-2xl">
           <div>
             <h3 className="text-base font-bold">{ev.liveTitle}</h3>
             <p className="mt-3 leading-relaxed text-white/75">

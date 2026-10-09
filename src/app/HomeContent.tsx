@@ -196,6 +196,9 @@ export function HomeContent() {
         </div>
       </section>
 
+      {/* What clients and athletes say */}
+      <ClientTestimonials tone="dark" />
+
       {/* Vision — measured above the line, believed below */}
       <section aria-labelledby="register-shift" className="pb-24 pt-28 md:pb-32 md:pt-40">
         <div className="container mx-auto px-4 md:px-6">
@@ -218,9 +221,6 @@ export function HomeContent() {
           </div>
         </div>
       </section>
-
-      {/* What clients and athletes say */}
-      <ClientTestimonials tone="dark" />
 
       {/* The north star, and what it opens up */}
       <section aria-labelledby="vision-heading" className="py-24 md:py-36">
