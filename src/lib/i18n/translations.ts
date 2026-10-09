@@ -289,8 +289,9 @@ export const translations: Record<Locale, Translations> = {
       closeMenu: "Fechar menu",
     },
     home: {
-      heroHeadlineLine1: "Treinamos o cérebro",
-      heroHeadlineLine2: "como treinas o corpo.",
+      // Pedro, 9 Oct 2026: "Train the mind like the body." (not everyone trains the body)
+      heroHeadlineLine1: "Treina a mente",
+      heroHeadlineLine2: "como o corpo.",
       // Pedro, 8 Oct 2026: "Neroes reads the brain in real time and trains it — objective feedback instead of guesswork."
       heroSubtitle: "A Neroes lê o cérebro em tempo real e treina-o — feedback objetivo em vez de suposições.",
       heroPrimaryCta: "Ver a evidência",
@@ -633,8 +634,8 @@ export const translations: Record<Locale, Translations> = {
       closeMenu: "Close menu",
     },
     home: {
-      heroHeadlineLine1: "We train the brain",
-      heroHeadlineLine2: "like you train the body.",
+      heroHeadlineLine1: "Train the mind",
+      heroHeadlineLine2: "like the body.",
       heroSubtitle: "Neroes reads the brain in real time and trains it — objective feedback instead of guesswork.",
       heroPrimaryCta: "See the evidence",
       heroSecondaryCta: "Talk to us",
