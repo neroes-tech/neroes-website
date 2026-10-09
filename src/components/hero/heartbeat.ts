@@ -5,9 +5,10 @@
  * lockstep no matter when each one mounted.
  */
 export const HEARTBEAT_PERIOD_S = 1; // 60 BPM
-export const HEART_RED = "#FF3B5C";
+// The logo gold (Pedro, 9 Oct 2026: "o vermelho do cérebro igual ao amarelo da logo").
+export const HEART_RED = "#DB9B1D";
 /** HEART_RED as raw sRGB 0..1 floats — for WebGL, where three.js' hex→linear conversion would darken it. */
-export const HEART_RED_RGB = [0xff / 255, 0x3b / 255, 0x5c / 255] as const;
+export const HEART_RED_RGB = [0xdb / 255, 0x9b / 255, 0x1d / 255] as const;
 
 /** Blink decay, as a fraction of the beat: instant flash at phase 0, ~120ms exponential fade (vital-sign LED feel). */
 export const HEARTBEAT_BLINK_DECAY = 0.12;

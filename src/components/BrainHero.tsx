@@ -527,7 +527,7 @@ const POINT_FRAG = `
     col = mix(col, vec3(1.0), uBloom * 0.35 * (1.0 - d * 1.6) * (1.0 - vVital * 0.8));
     col += vCursorBoost;
     // Vital points flash hot pink-white at the centre on each beat.
-    col = mix(col, vec3(1.0, 0.85, 0.88), vBlink * 0.5 * core);
+    col = mix(col, vec3(1.0, 0.92, 0.7), vBlink * 0.5 * core);
     float alpha = shape * (0.5 + vGlow * 0.3 + vSpark * 0.5);
     alpha = mix(alpha, shape * (0.8 + vBlink * 0.2), vVital);
     gl_FragColor = vec4(col * 1.15 * (1.0 + vBlink * 0.5), alpha);
@@ -591,7 +591,7 @@ const LINE_FRAG = `
     if (vVital > 0.5) {
       float signal = exp(-pow((vEnd - vVitalHead) * 7.0, 2.0)) * (1.0 - step(1.15, vVitalHead));
       vec3 red = vec3(${HEART_RED_RGB.map((c) => c.toFixed(3)).join(", ")});
-      vec3 vitalCol = mix(red, vec3(1.0, 0.8, 0.85), signal * 0.5);
+      vec3 vitalCol = mix(red, vec3(1.0, 0.9, 0.65), signal * 0.5);
       gl_FragColor = vec4(vitalCol, (0.34 + vVitalGlow * 0.3 + signal * 0.75) * uLineFade);
       return;
     }
@@ -631,7 +631,7 @@ const VITAL_FRAG = `
     float disc = 1.0 - smoothstep(0.3, 0.4, d);
     if (disc <= 0.0) discard;
     vec3 red = vec3(${HEART_RED_RGB.map((c) => c.toFixed(3)).join(", ")});
-    vec3 col = mix(red, vec3(1.0, 0.85, 0.88), vBlink * 0.55 * (1.0 - smoothstep(0.0, 0.22, d)));
+    vec3 col = mix(red, vec3(1.0, 0.92, 0.7), vBlink * 0.55 * (1.0 - smoothstep(0.0, 0.22, d)));
     gl_FragColor = vec4(col, disc);
   }
 `;

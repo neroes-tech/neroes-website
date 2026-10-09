@@ -51,7 +51,7 @@
      the heart-red of the vital-sign readout, and the warm grey the headset
      film sits on while it loads. */
   --color-hero: #040711;
-  --color-heart-soft: #ff6b84;
+  --color-heart-soft: #e8b04a; /* logo gold, lifted for small text on black */
   --color-film: #5b544c;
 
   --font-sans: var(--app-font-sans);
