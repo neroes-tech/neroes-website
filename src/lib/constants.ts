@@ -2,7 +2,7 @@ import { parseBookingUrl } from "@/lib/booking";
 
 export const CONTACT_INFO = {
   email: "info@neroes.tech",
-  phone: "+351 914 796 058",
+  phone: "+351 918 443 061", // André (Pedro, 9 Oct 2026), replaces +351 914 796 058
   address: "Lisboa, Portugal",
   social: {
     linkedin: "https://www.linkedin.com/company/neroes/",
