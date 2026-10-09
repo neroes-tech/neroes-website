@@ -18,12 +18,13 @@ type BrainData = {
   cerebrumCount: number;
 };
 
-// The version 2 palette, which the team preferred for the 3D brain: electric
-// cyan → royal blue across the surface, glow hubs toward a bright cyan.
+// The Neroes logo's own brain, sampled from public/neroes-logo-lockup.png
+// (Pedro, 8 Oct 2026: "use sempre referências do nosso logo"): teal-green
+// → logo blue across the surface, glow hubs toward the logo's bright blue.
 // Additive blending (see pointMat) lets dense regions bloom on the dark Hero.
-const C_BLUE = new THREE.Color("#3B82F6");
-const C_TEAL = new THREE.Color("#22D3EE");
-const C_CYAN = new THREE.Color("#00F0FF");
+const C_BLUE = new THREE.Color("#0C84C0");
+const C_TEAL = new THREE.Color("#00C0A8");
+const C_CYAN = new THREE.Color("#00A8E4");
 
 // Neural-connection graph: a subset of glow hubs linked to their nearest
 // same-hemisphere neighbours (see buildConnections).
@@ -519,9 +520,9 @@ const POINT_FRAG = `
     float core = 1.0 - smoothstep(0.18, 0.34, d);
     float halo = pow(1.0 - d * 2.0, 2.0);
     float shape = max(core, halo * 0.55);
-    // vec3(0.0, 0.941, 1.0) = #00F0FF electric cyan.
-    vec3 col = mix(vColor, vec3(0.0, 0.941, 1.0), vGlow * 0.6);
-    col = mix(col, vec3(0.75, 0.98, 1.0), vSpark * 0.7);
+    // vec3(0.0, 0.659, 0.894) = #00A8E4, the logo's bright blue.
+    vec3 col = mix(vColor, vec3(0.0, 0.659, 0.894), vGlow * 0.6);
+    col = mix(col, vec3(0.7, 0.95, 0.98), vSpark * 0.7);
     // Ato II bloom whitens the cloud; vital points keep most of their red.
     col = mix(col, vec3(1.0), uBloom * 0.35 * (1.0 - d * 1.6) * (1.0 - vVital * 0.8));
     col += vCursorBoost;
@@ -579,6 +580,8 @@ const LINE_FRAG = `
   uniform float uTime;
   uniform float uLineFade;
   uniform float uActivity;
+  uniform float uFlow;
+  uniform float uSurge;
   varying float vEnd;
   varying float vEdgePhase;
   varying float vVital;
@@ -593,21 +596,23 @@ const LINE_FRAG = `
       return;
     }
     float breathe = (0.07 + 0.06 * (0.5 + 0.5 * sin(uTime * 1.4 + vEdgePhase * 6.2831853))) * (1.0 - uActivity * 0.55);
-    float cycle = uTime * 0.45 + vEdgePhase;
+    // uFlow is a clock that runs faster while uSurge is up (see drawFrame).
+    float cycle = uFlow + vEdgePhase;
     float head = fract(cycle);
     // uActivity (the star field) fires more edges; a few pulses are "strong"
     // (wider and brighter) and a few golden — electricity crossing the field.
+    // uSurge (scrolling, and now and then a burst) fires more, and thicker.
     float seed = floor(cycle) * 12.9898 + vEdgePhase * 78.233;
-    float gate = step(0.6 - uActivity * 0.22, fract(sin(seed) * 43758.5453));
-    float strong = step(0.9, fract(sin(seed * 1.7 + 3.1) * 24634.6345));
+    float gate = step(0.6 - uActivity * 0.22 - uSurge * 0.25, fract(sin(seed) * 43758.5453));
+    float strong = step(0.9 - uSurge * 0.3, fract(sin(seed * 1.7 + 3.1) * 24634.6345));
     float gold = step(0.8, fract(sin(seed * 2.3 + 7.7) * 15731.743)) * uActivity;
     float width = mix(8.0, 3.5, strong);
     float pulse = exp(-pow((vEnd - head) * width, 2.0)) * gate;
-    // #3B82F6 royal blue → #00F0FF electric cyan as a pulse passes; golden ones
-    // in the brand gold #D99921.
-    vec3 col = mix(vec3(0.231, 0.51, 0.965), vec3(0.0, 0.941, 1.0), 0.4 + pulse * 0.6);
-    col = mix(col, vec3(1.0, 0.72, 0.2), gold * pulse);
-    float lift = 1.0 + strong * 0.8 + uActivity * 0.6;
+    // Logo teal #00A8B4 → logo bright blue #00A8E4 as a pulse passes; golden
+    // ones in the logo's gold #DB9B1D (the circuit around its brain).
+    vec3 col = mix(vec3(0.0, 0.659, 0.706), vec3(0.0, 0.659, 0.894), 0.4 + pulse * 0.6);
+    col = mix(col, vec3(0.859, 0.608, 0.114), gold * pulse);
+    float lift = 1.0 + strong * (0.8 + uSurge * 0.8) + uActivity * 0.6 + uSurge * 0.5;
     gl_FragColor = vec4(col, (breathe + pulse * 0.75 * lift) * uLineFade);
   }
 `;
@@ -814,6 +819,8 @@ export default function BrainHero({
         uBeatPhase: pointMat.uniforms.uBeatPhase!,
         uLineFade: { value: 1 },
         uActivity: { value: 0 },
+        uFlow: { value: 0 },
+        uSurge: { value: 0 },
       },
       vertexShader: LINE_VERT,
       fragmentShader: LINE_FRAG,
@@ -941,6 +948,12 @@ export default function BrainHero({
     if (heroRef?.current) heroResize?.observe(heroRef.current);
     // Viewport heights scrolled past the Hero, smoothed like the narrative.
     let travel = 0;
+    // "Electricity" on the star field: scrolling (text passing) speeds the
+    // pulses up, and now and then a heavier burst fires on its own.
+    let flow = 0;
+    let surge = 0;
+    let lastT = 0;
+    let lastTravel = 0;
 
     const drawFrame = () => {
       timer.update();
@@ -968,6 +981,15 @@ export default function BrainHero({
       pointMat.uniforms.uBloom!.value = act2 * (1 - act4);
       pointMat.uniforms.uDissolve!.value = continuous ? act4 * STAR_DISSOLVE : act4;
       lineMat.uniforms.uActivity!.value = field;
+      const dt = Math.min(t - lastT, 0.1);
+      lastT = t;
+      const scrollSpeed = Math.abs(travel - lastTravel) / Math.max(dt, 0.001); // viewports per second
+      lastTravel = travel;
+      surge = Math.max(surge * Math.exp(-dt * 1.6), Math.min(scrollSpeed * 0.9, 0.85) * field);
+      if (field > 0.5 && Math.random() < dt * 0.12) surge = 1; // ~1 burst every 8 s
+      flow += dt * (0.45 + surge * 1.4);
+      lineMat.uniforms.uFlow!.value = flow;
+      lineMat.uniforms.uSurge!.value = surge;
       pointMat.uniforms.uField!.value = field;
       pointMat.uniforms.uDisplace!.value = isMobile ? 0 : act3 * 0.04;
       pointMat.uniforms.uHemisphereSplit!.value = hemisphereOpen * HEMISPHERE_SPLIT_MAX;
